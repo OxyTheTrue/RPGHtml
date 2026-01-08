@@ -35,15 +35,54 @@
             margin: 0; padding: 20px; 
             display: flex; justify-content: center; align-items: flex-start;
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- TELAS --- */
+        #start-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 80vh;
+            text-align: center;
+            z-index: 100;
+        }
+
+        .game-title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(255, 165, 2, 0.4);
+            margin-bottom: 40px;
+            letter-spacing: -1px;
         }
 
         .main-wrapper {
-            display: flex;
+            display: none; /* Escondido por padrão */
             gap: 20px;
             width: 100%;
             max-width: 1000px;
             flex-wrap: wrap;
             justify-content: center;
+        }
+
+        /* --- ESTILO DOS BOTÕES (MENU E AÇÃO) --- */
+        .btn-menu {
+            width: 280px;
+            margin: 10px;
+            font-size: 1.1rem;
+        }
+
+        /* Reutilizando estilo das ações para o botão Sair */
+        .btn-exit {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            padding: 8px 15px !important;
+            font-size: 12px !important;
+            background: #441111 !important;
+            min-height: auto !important;
         }
 
         #hero-sidebar {
@@ -207,7 +246,17 @@
 </head>
 <body>
 
-<div class="main-wrapper">
+<div id="start-menu">
+    <div class="game-title">MASTERY RPG</div>
+    <button class="action-btn btn-atk btn-menu" onclick="startNewGame()">
+        <i class="fa-solid fa-play"></i> NOVO JOGO
+    </button>
+    <button id="continue-btn" class="action-btn btn-heal btn-menu" onclick="loadGame()" style="display: none;">
+        <i class="fa-solid fa-forward"></i> CONTINUAR
+    </button>
+</div>
+
+<div class="main-wrapper" id="game-ui">
     <aside id="hero-sidebar">
         <div class="hero-header">
             <small>NÍVEL <span id="p-lv">1</span></small>
@@ -256,6 +305,10 @@
     </aside>
 
     <main id="game-container">
+        <button class="action-btn btn-atk btn-exit" onclick="saveAndExit()">
+            <i class="fa-solid fa-door-open"></i> SAIR
+        </button>
+
         <div class="enemy-card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h3 id="enemy-name" style="margin:0">BUSCANDO...</h3>
@@ -332,7 +385,6 @@
     let isDefending = false;
     const types = ['fogo', 'agua', 'terra'];
     
-    // Configurações de Vantagem: Água > Fogo > Terra > Água
     const elems = { 
         fogo: { cor: '#ff9f43', fraqueza: 'agua', resiste: 'terra' }, 
         agua: { cor: '#54a0ff', fraqueza: 'terra', resiste: 'fogo' }, 
@@ -345,6 +397,47 @@
         { name: "Ogro", hpMultMin: 1.0, hpMultMax: 1.2, strMultMin: 0.9, strMultMax: 1.1, minLv: 5, type: 'proportional', img: "ogro.png" },
         { name: "Vampiro", hpMultMin: 1.1, hpMultMax: 1.3, strMultMin: 0.8, strMultMax: 1.0, minLv: 10, type: 'proportional', img: "vampiro.png" }
     ];
+
+    // Checa se existe save ao carregar a página
+    window.onload = () => {
+        if(localStorage.getItem('rpg_save')) {
+            document.getElementById('continue-btn').style.display = 'flex';
+        }
+    };
+
+    function startNewGame() {
+        p = { 
+            lv: 1, hp: 10, maxHp: 10, mana: 20, maxMana: 20, 
+            str: 4, int: 5, luk: 3, spd: 3, vit: 1, xp: 0, nextXp: 50, furia: 0,
+            pendingPoints: 0,
+            levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 }
+        };
+        showGame();
+        spawnMonster();
+    }
+
+    function saveAndExit() {
+        const saveData = { p, e };
+        localStorage.setItem('rpg_save', JSON.stringify(saveData));
+        location.reload(); // Recarrega para voltar ao menu
+    }
+
+    function loadGame() {
+        const saved = JSON.parse(localStorage.getItem('rpg_save'));
+        if(saved) {
+            p = saved.p;
+            e = saved.e;
+            showGame();
+            updateUI();
+            typeLog("Progresso carregado!", "#2ed573");
+            toggleButtons(false);
+        }
+    }
+
+    function showGame() {
+        document.getElementById('start-menu').style.display = 'none';
+        document.getElementById('game-ui').style.display = 'flex';
+    }
 
     function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
     function getRandomFloat(min, max) { return Math.random() * (max - min) + min; }
@@ -363,16 +456,6 @@
         }
         isTyping = false;
         await new Promise(r => setTimeout(r, 400));
-    }
-
-    function startNewGame() {
-        p = { 
-            lv: 1, hp: 10, maxHp: 10, mana: 20, maxMana: 20, 
-            str: 4, int: 5, luk: 3, spd: 3, vit: 1, xp: 0, nextXp: 50, furia: 0,
-            pendingPoints: 0,
-            levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 }
-        };
-        spawnMonster();
     }
 
     async function spawnMonster() {
@@ -420,8 +503,8 @@
         document.getElementById('enemy-name').innerText = e.name;
         document.getElementById('enemy-hp').innerText = Math.ceil(e.hp);
         document.getElementById('enemy-max-hp').innerText = e.maxHp;
+        document.getElementById('enemy-img').src = e.img;
         
-        // Badge do monstro com cor dinâmica do elemento
         const badgeColor = elems[e.elem].cor;
         document.getElementById('enemy-badges').innerHTML = `<span class="badge" style="background: ${badgeColor}">${e.elem.toUpperCase()}</span>`;
 
@@ -430,7 +513,6 @@
         document.getElementById('val-rest').innerText = `+${Math.floor(p.int/2)}-${p.int} MP`;
         document.getElementById('val-ult').innerText = `Dano: ${Math.ceil(p.str * 2.5)}`;
 
-        // Labels de eficiência elemental baseados no novo triângulo
         types.forEach(t => {
             let label = document.getElementById(`eff-${t}`);
             if (elems[e.elem].fraqueza === t) label.innerText = "EFET.";
@@ -444,17 +526,10 @@
     function spendPoint(stat) {
         p.levels[stat]++;
         let gain = getRandom(1, 3);
-        if(stat === 'vit') {
-            p.maxHp += (gain * 5);
-        } else {
-            p[stat] += gain;
-        }
-
-        p.lv++; 
-        p.xp = 0; 
+        if(stat === 'vit') { p.maxHp += (gain * 5); } else { p[stat] += gain; }
+        p.lv++; p.xp = 0; 
         p.nextXp = Math.floor(p.nextXp * 1.4);
-        p.hp = p.maxHp; 
-        p.mana = p.maxMana; 
+        p.hp = p.maxHp; p.mana = p.maxMana; 
         p.pendingPoints = 0;
         updateUI(); 
         spawnMonster();
@@ -469,11 +544,9 @@
         if (tipo === 'fisico') {
             dmg = getRandomFloat(p.str * 0.5, p.str);
         } else {
-            // Magias escalam com INT e custam 10 de mana
-            if (p.mana < 10) { await typeLog("Sem mana suficiente (10 MP)!"); toggleButtons(false); return; }
+            if (p.mana < 10) { await typeLog("Sem mana suficiente!"); toggleButtons(false); return; }
             p.mana -= 10;
-            dmg = getRandomFloat(p.int * 0.8, p.int * 1.2); // Escalonamento com inteligência
-            
+            dmg = getRandomFloat(p.int * 0.8, p.int * 1.2);
             if (elems[e.elem].fraqueza === tipo) dmg *= 1.5;
             if (elems[e.elem].resiste === tipo) dmg *= 0.6;
         }
@@ -499,7 +572,6 @@
     async function useUltimate() {
         if(p.furia < 100) return;
         toggleButtons(true);
-        isDefending = false;
         let dmg = Math.ceil(p.str * 2.5);
         applyDamageEffect();
         e.hp -= dmg; p.furia = 0;
@@ -513,16 +585,17 @@
             await typeLog("Você esquivou!", "#3498db");
         } else {
             let dmg = Math.ceil(getRandomFloat(e.str * 0.7, e.str));
-            if(isDefending) {
-                dmg = Math.ceil(dmg * 0.5);
-                await typeLog("Defesa: Dano reduzido!", "#1e90ff");
-            }
+            if(isDefending) { dmg = Math.ceil(dmg * 0.5); await typeLog("Defesa: Dano reduzido!", "#1e90ff"); }
             p.hp -= dmg; p.furia = Math.min(100, p.furia + 25);
             await typeLog(`${e.name} atacou: -${dmg} HP`, "#ff4757");
         }
         isDefending = false;
         updateUI();
-        if(p.hp <= 0) { await typeLog("VOCÊ CAIU EM COMBATE..."); setTimeout(startNewGame, 3000); }
+        if(p.hp <= 0) { 
+            await typeLog("VOCÊ CAIU EM COMBATE..."); 
+            localStorage.removeItem('rpg_save'); // Deleta save se morrer
+            setTimeout(() => location.reload(), 3000); 
+        }
         else toggleButtons(false);
     }
 
@@ -532,14 +605,13 @@
         await typeLog(`VITÓRIA! Ganhou ${xpGanha} XP`, "#2ecc71");
         if(p.xp >= p.nextXp) {
             p.pendingPoints++;
-            await typeLog("LEVEL UP! Melhore um atributo no painel ao lado.", "#ffa502");
+            await typeLog("LEVEL UP! Melhore um atributo.", "#ffa502");
         }
         if(p.pendingPoints === 0) spawnMonster(); else updateUI();
     }
 
     function playerRest() {
         toggleButtons(true);
-        isDefending = false;
         let ganho = Math.floor(p.int/2 + Math.random() * p.int);
         p.mana = Math.min(p.maxMana, p.mana + ganho);
         updateUI();
@@ -549,7 +621,6 @@
     function playerHeal() {
         if (p.mana < 8) { typeLog("Sem mana!"); return; }
         toggleButtons(true); p.mana -= 8;
-        isDefending = false;
         let cura = Math.floor(p.int * 1.5);
         p.hp = Math.min(p.maxHp, p.hp + cura);
         updateUI();
@@ -568,8 +639,6 @@
         const actionBtns = document.querySelectorAll('#action-buttons button');
         actionBtns.forEach(b => b.disabled = state);
     }
-
-    startNewGame();
 </script>
 </body>
 </html>
