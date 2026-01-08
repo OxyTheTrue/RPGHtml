@@ -186,7 +186,6 @@
 
         .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         
-        /* NOVO: Linha de Skills */
         .skill-row { 
             grid-column: span 2; 
             display: grid; 
@@ -290,8 +289,8 @@
             font-size: 20px;
             transition: 0.2s;
         }
+        .slot:hover:not(:empty) { border-color: var(--accent); background: #252545; }
 
-        /* Modal da Loja, Morte e Skills */
         #shop-modal, #death-modal, #skill-modal {
             display: none;
             position: fixed;
@@ -324,7 +323,6 @@
             margin-top: 15px;
         }
 
-        /* Botão da Árvore de Skills no Sidebar */
         .btn-open-tree {
             width: 100%;
             margin-top: 15px;
@@ -350,13 +348,11 @@
 <div id="skill-modal">
     <h3 style="color: var(--mana); margin-top: 0;">ÁRVORE DE HABILIDADES</h3>
     <p style="font-size: 12px; opacity: 0.7;">Pontos Disponíveis: <span id="p-skill-points">0</span></p>
-    
     <div class="skill-tree-grid">
         <div style="grid-column: span 2; padding: 20px; border: 1px dashed #444; border-radius: 15px; font-size: 11px;">
             Habilidades serão desbloqueadas conforme você sobe de nível.
         </div>
     </div>
-    
     <button class="action-btn btn-def" style="width: 100%; margin-top: 15px;" onclick="closeAllModals()">VOLTAR</button>
 </div>
 
@@ -370,13 +366,13 @@
             <i class="fa-solid fa-flask-vial"></i> POÇÃO MP (12G)<div class="skill-info">+20 MANA</div>
         </button>
         <button class="action-btn btn-mag fogo shop-item-btn" onclick="buyItem('boots', this)">
-            <i class="fa-solid fa-boot-heeled"></i> BOTAS (25G)<div class="skill-info">+SPD (5 rod)</div>
+            <i class="fa-solid fa-boot-heeled"></i> BOTAS (25G)<div class="skill-info">+SPD (Ativo)</div>
         </button>
         <button class="action-btn btn-def shop-item-btn" onclick="buyItem('shield', this)">
-            <i class="fa-solid fa-shield-halved"></i> ESCUDO (30G)<div class="skill-info">-Dano (2 rod)</div>
+            <i class="fa-solid fa-shield-halved"></i> ESCUDO (30G)<div class="skill-info">-Dano (Ativo)</div>
         </button>
         <button class="action-btn btn-ult shop-item-btn" onclick="buyItem('coin', this)" style="grid-column: span 2;">
-            <i class="fa-solid fa-coins"></i> MOEDA DA SORTE (40G)<div class="skill-info">+Esq (3 rod)</div>
+            <i class="fa-solid fa-coins"></i> MOEDA DA SORTE (40G)<div class="skill-info">+Sorte (Ativo)</div>
         </button>
     </div>
     <button class="action-btn btn-def" style="width: 100%; margin-top: 15px;" onclick="closeAllModals()">FECHAR</button>
@@ -484,15 +480,12 @@
             <div class="skill-row">
                 <button id="skill-slot-0" class="action-btn btn-skill" onclick="useSkill(0)" disabled>
                     <i class="fa-solid fa-lock"></i>
-                    <div class="skill-info">BLOQUEADO</div>
                 </button>
                 <button id="skill-slot-1" class="action-btn btn-skill" onclick="useSkill(1)" disabled>
                     <i class="fa-solid fa-lock"></i>
-                    <div class="skill-info">BLOQUEADO</div>
                 </button>
                 <button id="skill-slot-2" class="action-btn btn-skill" onclick="useSkill(2)" disabled>
                     <i class="fa-solid fa-lock"></i>
-                    <div class="skill-info">BLOQUEADO</div>
                 </button>
             </div>
         </div>
@@ -538,8 +531,8 @@
             lv: 1, hp: 10, maxHp: 10, mana: 20, maxMana: 20, 
             str: 4, int: 5, luk: 3, spd: 3, vit: 1, xp: 0, nextXp: 50, furia: 0,
             gold: 0, inventory: [], 
-            skills: [], // Habilidades desbloqueadas
-            skillPoints: 0, // Pontos para a árvore
+            skills: [],
+            skillPoints: 0,
             pendingPoints: 0,
             levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 },
             buffs: { boots: 0, shield: 0, coin: 0 }
@@ -553,7 +546,6 @@
         if(saved) {
             p = saved.p; e = saved.e;
             if(!p.skills) p.skills = [];
-            if(!p.skillPoints) p.skillPoints = 0;
             showGame();
             if (e && e.img) document.getElementById('enemy-img').src = e.img;
             updateUI();
@@ -562,9 +554,11 @@
         }
     }
 
-    function showGame() { document.getElementById('start-menu').style.display = 'none'; document.getElementById('game-ui').style.display = 'flex'; }
+    function showGame() { 
+        document.getElementById('start-menu').style.display = 'none'; 
+        document.getElementById('game-ui').style.display = 'flex'; 
+    }
     
-    // Controle de Modais
     function openShop() { if(p.hp <= 0) return; document.getElementById('overlay').style.display = 'block'; document.getElementById('shop-modal').style.display = 'block'; }
     function openSkillTree() { if(p.hp <= 0) return; document.getElementById('overlay').style.display = 'block'; document.getElementById('skill-modal').style.display = 'block'; }
     function closeAllModals() { 
@@ -583,21 +577,45 @@
         };
         const item = items[type];
         if(p.gold >= item.cost && p.inventory.length < 5) {
-            p.gold -= item.cost; p.inventory.push(item); updateUI();
+            p.gold -= item.cost; 
+            p.inventory.push({...item}); // Adiciona cópia do item
+            updateUI();
             typeLog(`Comprou ${item.name}!`, "#2ed573");
         } else {
             if(btn) {
                 btn.classList.add('error-blink');
-                btn.addEventListener('animationend', () => btn.classList.remove('error-blink'), { once: true });
+                setTimeout(() => btn.classList.remove('error-blink'), 400);
             }
             typeLog(p.inventory.length >= 5 ? "Mochila cheia!" : "Ouro insuficiente!", "#ff4757");
         }
     }
 
-    // Mecânica de Skill (Placeholder)
+    // --- NOVA FUNÇÃO: USAR ITEM ---
+    async function useItem(index) {
+        if(isTyping || !p.inventory[index] || p.hp <= 0) return;
+        
+        const item = p.inventory[index];
+        let message = `Usou ${item.name}!`;
+
+        if(item.heal) {
+            p.hp = Math.min(p.maxHp, p.hp + item.heal);
+            message += ` (+${item.heal} HP)`;
+        } else if(item.manaGain) {
+            p.mana = Math.min(p.maxMana, p.mana + item.manaGain);
+            message += ` (+${item.manaGain} Mana)`;
+        } else if(item.type) {
+            p.buffs[item.type] = item.dur;
+            message += ` (Efeito Ativado!)`;
+        }
+
+        // Remove item do array
+        p.inventory.splice(index, 1);
+        updateUI();
+        await typeLog(message, "#54a0ff");
+    }
+
     function useSkill(index) {
         if(isTyping || !p.skills[index]) return;
-        // Lógica será adicionada no próximo passo
         typeLog(`Usou habilidade do slot ${index+1}`);
     }
 
@@ -613,7 +631,7 @@
         document.getElementById('p-max-hp').innerText = p.maxHp;
         document.getElementById('p-mana').innerText = Math.ceil(p.mana);
         document.getElementById('p-gold').innerText = p.gold;
-        document.getElementById('p-skill-points').innerText = p.skillPoints;
+        document.getElementById('p-skill-points').innerText = p.skillPoints || 0;
 
         document.getElementById('stat-str').innerText = p.levels.str;
         document.getElementById('stat-spd').innerText = p.levels.spd;
@@ -632,30 +650,20 @@
         document.getElementById('val-rest').innerText = `+${Math.floor(p.int/2)}-${p.int} MP`;
         document.getElementById('val-ult').innerText = `Dano: ${Math.ceil(p.str * 2.5)}`;
 
-        // Atualiza Slots de Skill
-        for(let i=0; i<3; i++) {
-            const btn = document.getElementById(`skill-slot-${i}`);
-            if(p.skills[i]) {
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid ${p.skills[i].icon}"></i><div>${p.skills[i].name}</div>`;
-                btn.style.boxShadow = `inset 0 -4px 0 0 ${p.skills[i].color}`;
-            } else {
-                btn.disabled = true;
-                btn.innerHTML = `<i class="fa-solid fa-lock"></i><div class="skill-info">BLOQUEADO</div>`;
-                btn.style.boxShadow = `inset 0 -4px 0 0 #444`;
-            }
-        }
-
-        document.querySelectorAll('.slot').forEach((s, i) => {
+        // Atualiza Inventário
+        const slots = document.querySelectorAll('.slot');
+        slots.forEach((s, i) => {
             if(p.inventory[i]) {
                 let color = p.inventory[i].heal ? '#2ed573' : (p.inventory[i].manaGain ? '#1e90ff' : '#ffa502');
                 s.innerHTML = `<i class="fa-solid ${p.inventory[i].icon}" style="color: ${color}"></i>`;
-            } else { s.innerHTML = ""; }
+            } else { 
+                s.innerHTML = ""; 
+            }
         });
+
         document.getElementById('ult-btn').style.display = p.furia >= 100 ? 'flex' : 'none';
     }
 
-    // Funções de Combate e Lógica mantidas do original...
     async function typeLog(text, color = "#00ff9d") {
         isTyping = true;
         const log = document.getElementById('game-log');
@@ -689,7 +697,7 @@
         let gain = getRandom(1, 3);
         if(stat === 'vit') p.maxHp += (gain * 5); else p[stat] += gain;
         p.lv++; p.xp = 0; p.nextXp = Math.floor(p.nextXp * 1.4);
-        p.skillPoints++; // Ganha ponto para a árvore ao upar
+        p.skillPoints = (p.skillPoints || 0) + 1;
         p.hp = p.maxHp; p.mana = p.maxMana; p.pendingPoints = 0;
         updateUI(); spawnMonster();
     }
@@ -702,10 +710,9 @@
         if(p.pendingPoints === 0) spawnMonster(); else updateUI();
     }
 
-    // Funções auxiliares...
     function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
     function getRandomFloat(min, max) { return Math.random() * (max - min) + min; }
-    function toggleButtons(state) { document.querySelectorAll('#action-buttons button').forEach(b => { if(!b.id.includes('slot') || p.skills[b.id.split('-').pop()]) b.disabled = state; }); }
+    function toggleButtons(state) { document.querySelectorAll('#action-buttons button').forEach(b => { if(!b.id.includes('slot')) b.disabled = state; }); }
     function restartGame() { location.reload(); }
     function exitToMenu() { localStorage.removeItem('rpg_save'); location.reload(); }
     function saveAndExit() { localStorage.setItem('rpg_save', JSON.stringify({p, e})); location.reload(); }
@@ -725,19 +732,45 @@
         if(isDefending) dmg = Math.ceil(dmg * 0.5);
         p.hp -= dmg; p.furia = Math.min(100, p.furia + 25);
         updateUI(); await typeLog(`${e.name} atacou: -${dmg} HP`, "#ff4757");
-        if(p.hp <= 0) { document.getElementById('overlay').style.display = 'block'; document.getElementById('death-modal').style.display = 'block'; }
-        else toggleButtons(false);
+        if(p.hp <= 0) { 
+            document.getElementById('overlay').style.display = 'block'; 
+            document.getElementById('death-modal').style.display = 'block'; 
+        } else {
+            toggleButtons(false);
+        }
     }
 
     function playerHeal() {
-        if (p.mana < 8) return; toggleButtons(true); p.mana -= 8;
-        let cura = Math.floor(p.int * 1.5); p.hp = Math.min(p.maxHp, p.hp + cura);
-        updateUI(); typeLog(`Curar: +${cura} HP`).then(() => enemyTurn());
+        if (p.mana < 8) return; 
+        toggleButtons(true); 
+        p.mana -= 8;
+        let cura = Math.floor(p.int * 1.5); 
+        p.hp = Math.min(p.maxHp, p.hp + cura);
+        updateUI(); 
+        typeLog(`Curar: +${cura} HP`).then(() => enemyTurn());
     }
     function playerDefend() { toggleButtons(true); isDefending = true; typeLog("Defendendo...").then(() => enemyTurn()); }
-    function playerRest() { toggleButtons(true); let ganho = Math.floor(p.int/2 + Math.random() * p.int); p.mana = Math.min(p.maxMana, p.mana + ganho); updateUI(); typeLog(`Descansou: +${ganho} Mana`).then(() => enemyTurn()); }
-    function useUltimate() { if(p.furia < 100) return; toggleButtons(true); let dmg = Math.ceil(p.str * 2.5); e.hp -= dmg; p.furia = 0; updateUI(); typeLog("ULTIMATE!"); if(e.hp <= 0) win(); else enemyTurn(); }
-    function applyDamageEffect() { const img = document.getElementById('enemy-img'); img.classList.add('take-damage'); setTimeout(() => img.classList.remove('take-damage'), 400); }
+    function playerRest() { 
+        toggleButtons(true); 
+        let ganho = Math.floor(p.int/2 + Math.random() * p.int); 
+        p.mana = Math.min(p.maxMana, p.mana + ganho); 
+        updateUI(); 
+        typeLog(`Descansou: +${ganho} Mana`).then(() => enemyTurn()); 
+    }
+    function useUltimate() { 
+        if(p.furia < 100) return; 
+        toggleButtons(true); 
+        let dmg = Math.ceil(p.str * 2.5); 
+        e.hp -= dmg; p.furia = 0; 
+        updateUI(); 
+        typeLog("ULTIMATE!"); 
+        if(e.hp <= 0) win(); else enemyTurn(); 
+    }
+    function applyDamageEffect() { 
+        const img = document.getElementById('enemy-img'); 
+        img.classList.add('take-damage'); 
+        setTimeout(() => img.classList.remove('take-damage'), 400); 
+    }
 </script>
 </body>
 </html>
