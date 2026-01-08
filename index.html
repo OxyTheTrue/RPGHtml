@@ -19,11 +19,11 @@
             --text: #ffffff;
             --border: rgba(255, 255, 255, 0.1);
             
-            /* Cores das habilidades */
             --skill-fogo: #ff9f43;
             --skill-agua: #54a0ff;
             --skill-terra: #1dd1a1;
             --skill-rest: #5352ed;
+            --skill-def: #1e90ff;
         }
 
         * { box-sizing: border-box; touch-action: manipulation; }
@@ -82,11 +82,12 @@
             justify-content: space-between;
             align-items: center;
             border-left: 4px solid var(--accent);
+            transition: all 0.3s ease;
         }
 
-        .attr-info i { color: var(--accent); margin-right: 8px; font-size: 14px; }
-        .attr-info span { font-weight: 800; font-size: 18px; color: #fff; }
-        .attr-label { font-size: 12px; color: #aaa; text-transform: uppercase; display: block; }
+        .attr-info i { color: var(--accent); margin-right: 10px; width: 20px; text-align: center; }
+        .attr-info { font-weight: 700; font-size: 14px; text-transform: uppercase; color: #ccc; }
+        .attr-value { color: #fff; font-size: 16px; margin-left: 5px; }
 
         .lvl-up-btn {
             width: 35px; height: 35px;
@@ -161,7 +162,6 @@
 
         button.action-btn i { margin-bottom: 5px; font-size: 18px; }
 
-        /* Icones de fundo redimensionados para os botões elementais */
         .btn-mag .bg-icon {
             position: absolute;
             font-size: 50px;
@@ -178,6 +178,7 @@
 
         .btn-atk { box-shadow: inset 0 -4px 0 0 var(--primary), 0 4px 12px rgba(255, 71, 87, 0.4); }
         .btn-heal { box-shadow: inset 0 -4px 0 0 var(--secondary), 0 4px 12px rgba(46, 213, 115, 0.4); }
+        .btn-def { box-shadow: inset 0 -4px 0 0 var(--skill-def), 0 4px 12px rgba(30, 144, 255, 0.4); }
         .btn-rest { box-shadow: inset 0 -4px 0 0 var(--skill-rest), 0 4px 12px rgba(83, 82, 237, 0.4); }
         
         .btn-ult { 
@@ -215,42 +216,37 @@
 
         <div class="attribute-card">
             <div class="attr-info">
-                <span class="attr-label"><i class="fa-solid fa-hand-fist"></i> Força (FOR)</span>
-                <span id="stat-str">0</span>
+                <i class="fa-solid fa-hand-fist"></i> FORÇA NVL <span class="attr-value" id="stat-str">1</span>
             </div>
             <button class="lvl-up-btn" onclick="spendPoint('str')">+</button>
         </div>
 
         <div class="attribute-card">
             <div class="attr-info">
-                <span class="attr-label"><i class="fa-solid fa-bolt"></i> Velocidade (VEL)</span>
-                <span id="stat-spd">0</span>
+                <i class="fa-solid fa-bolt"></i> VELOCIDADE NVL <span class="attr-value" id="stat-spd">1</span>
             </div>
             <button class="lvl-up-btn" onclick="spendPoint('spd')">+</button>
         </div>
 
         <div class="attribute-card">
             <div class="attr-info">
-                <span class="attr-label"><i class="fa-solid fa-brain"></i> Inteligência (INT)</span>
-                <span id="stat-int">0</span>
+                <i class="fa-solid fa-brain"></i> INTELIGÊNCIA NVL <span class="attr-value" id="stat-int">1</span>
             </div>
             <button class="lvl-up-btn" onclick="spendPoint('int')">+</button>
         </div>
 
         <div class="attribute-card">
             <div class="attr-info">
-                <span class="attr-label"><i class="fa-solid fa-clover"></i> Sorte (SOR)</span>
-                <span id="stat-luk">0</span>
+                <i class="fa-solid fa-clover"></i> SORTE NVL <span class="attr-value" id="stat-luk">1</span>
             </div>
             <button class="lvl-up-btn" onclick="spendPoint('luk')">+</button>
         </div>
 
         <div class="attribute-card">
             <div class="attr-info">
-                <span class="attr-label"><i class="fa-solid fa-heart-pulse"></i> Vitalidade (VIT)</span>
-                <span id="stat-vit">0</span>
+                <i class="fa-solid fa-heart-pulse"></i> VITALIDADE NVL <span class="attr-value" id="stat-vit">1</span>
             </div>
-            <button class="lvl-up-btn" onclick="spendPoint('maxHp')">+</button>
+            <button class="lvl-up-btn" onclick="spendPoint('vit')">+</button>
         </div>
 
         <div style="margin-top: 20px;">
@@ -300,6 +296,10 @@
                 <i class="fa-solid fa-hand-holding-medical"></i>
                 CURAR <div class="skill-info" id="val-heal">-</div>
             </button>
+            <button class="action-btn btn-def" onclick="playerDefend()">
+                <i class="fa-solid fa-shield-halved"></i>
+                DEFENDER <div class="skill-info">REDUZ DANO</div>
+            </button>
             <button class="action-btn btn-rest" onclick="playerRest()">
                 <i class="fa-solid fa-bed"></i>
                 DESCANSAR <div class="skill-info" id="val-rest">-</div>
@@ -328,8 +328,8 @@
 </div>
 
 <script>
-    /* O SCRIPT PERMANECE IGUAL PARA MANTER TODA A LÓGICA ORIGINAL */
     let p, e, isTyping = false;
+    let isDefending = false;
     const types = ['fogo', 'agua', 'terra'];
     const elems = { 
         fogo: { cor: '#e67e22', fraqueza: 'agua', resiste: 'fogo' }, 
@@ -338,10 +338,10 @@
     };
 
     const monsterTemplates = [
-        { name: "Ratazana", hpMin: 6, hpMax: 8, strMin: 1.5, strMax: 3, minLv: 1, type: 'basic', img: "ratazana gigante.png" },
-        { name: "Esqueleto", hpMin: 9, hpMax: 11, strMin: 2, strMax: 4, minLv: 1, type: 'basic', img: "esqueleto.png" },
-        { name: "Ogro", hpMultMin: 1.10, hpMultMax: 1.30, strMultMin: 1.0, strMultMax: 1.2, minLv: 5, type: 'proportional', img: "ogro.png" },
-        { name: "Vampiro", hpMultMin: 1.15, hpMultMax: 1.40, strMultMin: 0.9, strMultMax: 1.1, minLv: 10, type: 'proportional', img: "vampiro.png" }
+        { name: "Ratazana", hpMin: 5, hpMax: 8, strMin: 1.2, strMax: 2.5, minLv: 1, type: 'basic', img: "ratazana gigante.png" },
+        { name: "Esqueleto", hpMin: 8, hpMax: 12, strMin: 2, strMax: 3.5, minLv: 1, type: 'basic', img: "esqueleto.png" },
+        { name: "Ogro", hpMultMin: 1.0, hpMultMax: 1.2, strMultMin: 0.9, strMultMax: 1.1, minLv: 5, type: 'proportional', img: "ogro.png" },
+        { name: "Vampiro", hpMultMin: 1.1, hpMultMax: 1.3, strMultMin: 0.8, strMultMax: 1.0, minLv: 10, type: 'proportional', img: "vampiro.png" }
     ];
 
     function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
@@ -365,9 +365,11 @@
 
     function startNewGame() {
         p = { 
-            lv: 1, hp: 15, maxHp: 15, mana: 20, maxMana: 20, 
-            str: 4, int: 5, luk: 3, spd: 3, xp: 0, nextXp: 50, furia: 0,
-            pendingPoints: 0
+            lv: 1, hp: 10, maxHp: 10, mana: 20, maxMana: 20, 
+            str: 4, int: 5, luk: 3, spd: 3, vit: 1, xp: 0, nextXp: 50, furia: 0,
+            pendingPoints: 0,
+            // Níveis visuais dos status
+            levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 }
         };
         spawnMonster();
     }
@@ -382,8 +384,8 @@
             finalHp = Math.ceil(p.maxHp * getRandomFloat(data.hpMultMin, data.hpMultMax));
             finalStr = p.str * getRandomFloat(data.strMultMin, data.strMultMax);
         } else {
-            finalHp = getRandom(data.hpMin, data.hpMax) + ((p.lv - 1) * 6);
-            finalStr = getRandomFloat(data.strMin, data.strMax) + ((p.lv - 1) * 0.6);
+            finalHp = getRandom(data.hpMin, data.hpMax) + (p.lv * getRandom(1, 3));
+            finalStr = getRandomFloat(data.strMin, data.strMax) + (p.lv * 0.3);
         }
 
         e = { ...data, elem: randomElem, maxHp: finalHp, hp: finalHp, str: finalStr };
@@ -404,11 +406,13 @@
         document.getElementById('p-hp').innerText = Math.ceil(p.hp);
         document.getElementById('p-max-hp').innerText = p.maxHp;
         document.getElementById('p-mana').innerText = Math.ceil(p.mana);
-        document.getElementById('stat-str').innerText = p.str;
-        document.getElementById('stat-spd').innerText = p.spd;
-        document.getElementById('stat-int').innerText = p.int;
-        document.getElementById('stat-luk').innerText = p.luk;
-        document.getElementById('stat-vit').innerText = p.maxHp;
+        
+        // Atualiza os níveis visuais
+        document.getElementById('stat-str').innerText = p.levels.str;
+        document.getElementById('stat-spd').innerText = p.levels.spd;
+        document.getElementById('stat-int').innerText = p.levels.int;
+        document.getElementById('stat-luk').innerText = p.levels.luk;
+        document.getElementById('stat-vit').innerText = p.levels.vit;
 
         const lvlBtns = document.querySelectorAll('.lvl-up-btn');
         lvlBtns.forEach(btn => btn.style.display = p.pendingPoints > 0 ? 'block' : 'none');
@@ -433,9 +437,33 @@
         document.getElementById('ult-btn').style.display = p.furia >= 100 ? 'flex' : 'none';
     }
 
+    function spendPoint(stat) {
+        // Aumenta o nível visual
+        p.levels[stat]++;
+        
+        // Aumenta os atributos reais do sistema
+        let gain = getRandom(1, 3);
+        if(stat === 'vit') {
+            p.maxHp += (gain * 5);
+        } else {
+            p[stat] += gain;
+        }
+
+        p.lv++; 
+        p.xp = 0; 
+        p.nextXp = Math.floor(p.nextXp * 1.4);
+        p.hp = p.maxHp; 
+        p.mana = p.maxMana; 
+        p.pendingPoints = 0;
+        updateUI(); 
+        spawnMonster();
+    }
+
+    // Funções de ação (Action Functions)
     async function playerAction(tipo) {
         if(isTyping || p.hp <= 0 || p.pendingPoints > 0) return;
         toggleButtons(true);
+        isDefending = false;
         let dmg = getRandomFloat(p.str * 0.5, p.str);
         if (tipo !== 'fisico') {
             if (p.mana < 6) { await typeLog("Sem mana!"); toggleButtons(false); return; }
@@ -453,9 +481,18 @@
         if(e.hp <= 0) await win(); else await enemyTurn();
     }
 
+    async function playerDefend() {
+        if(isTyping || p.hp <= 0) return;
+        toggleButtons(true);
+        isDefending = true;
+        await typeLog("Você se prepara para o impacto!", "#1e90ff");
+        await enemyTurn();
+    }
+
     async function useUltimate() {
         if(p.furia < 100) return;
         toggleButtons(true);
+        isDefending = false;
         let dmg = Math.ceil(p.str * 2.5);
         applyDamageEffect();
         e.hp -= dmg; p.furia = 0;
@@ -469,9 +506,14 @@
             await typeLog("Você esquivou!", "#3498db");
         } else {
             let dmg = Math.ceil(getRandomFloat(e.str * 0.7, e.str));
+            if(isDefending) {
+                dmg = Math.ceil(dmg * 0.5);
+                await typeLog("Defesa: Dano reduzido!", "#1e90ff");
+            }
             p.hp -= dmg; p.furia = Math.min(100, p.furia + 25);
             await typeLog(`${e.name} atacou: -${dmg} HP`, "#ff4757");
         }
+        isDefending = false;
         updateUI();
         if(p.hp <= 0) { await typeLog("VOCÊ CAIU EM COMBATE..."); setTimeout(startNewGame, 3000); }
         else toggleButtons(false);
@@ -488,15 +530,9 @@
         if(p.pendingPoints === 0) spawnMonster(); else updateUI();
     }
 
-    function spendPoint(stat) {
-        if(stat === 'maxHp') p.maxHp += 15; else p[stat] += 2;
-        p.lv++; p.xp = 0; p.nextXp = Math.floor(p.nextXp * 1.5);
-        p.hp = p.maxHp; p.mana = p.maxMana; p.pendingPoints = 0;
-        updateUI(); spawnMonster();
-    }
-
     function playerRest() {
         toggleButtons(true);
+        isDefending = false;
         let ganho = Math.floor(p.int/2 + Math.random() * p.int);
         p.mana = Math.min(p.maxMana, p.mana + ganho);
         updateUI();
@@ -506,6 +542,7 @@
     function playerHeal() {
         if (p.mana < 8) { typeLog("Sem mana!"); return; }
         toggleButtons(true); p.mana -= 8;
+        isDefending = false;
         let cura = Math.floor(p.int * 1.5);
         p.hp = Math.min(p.maxHp, p.hp + cura);
         updateUI();
@@ -515,12 +552,9 @@
     function applyDamageEffect() {
         const img = document.getElementById('enemy-img');
         img.classList.remove('take-damage');
-        void img.offsetWidth; // Trigger reflow
+        void img.offsetWidth;
         img.classList.add('take-damage');
-        
-        setTimeout(() => {
-            img.classList.remove('take-damage');
-        }, 400);
+        setTimeout(() => img.classList.remove('take-damage'), 400);
     }
 
     function toggleButtons(state) {
