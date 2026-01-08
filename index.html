@@ -590,11 +590,23 @@
         }
     };
 
+    // FUNÇÃO DE SALVAMENTO AUTOMÁTICO
+    function autoSave() {
+        if (p && p.hp > 0) {
+            localStorage.setItem('rpg_save', JSON.stringify({p, e}));
+            console.log("Jogo salvo automaticamente.");
+        }
+    }
+
+    // Salvar ao fechar/recarregar a página
+    window.addEventListener('beforeunload', () => {
+        autoSave();
+    });
+
     function startNewGame() {
         const inputName = document.getElementById('player-name-input').value.trim();
         const finalName = inputName || "GUERREIRO";
         
-        // Inicializa o personagem apenas aqui
         p = { 
             name: finalName,
             lv: 1, hp: 10, maxHp: 10, mana: 20, maxMana: 20, 
@@ -639,7 +651,6 @@
         renderSkillTree();
     }
 
-    // --- LOGICA DA ÁRVORE DE SKILLS ATUALIZADA ---
     function renderSkillTree() {
         const container = document.getElementById('skill-tree-content');
         container.innerHTML = "";
@@ -690,6 +701,7 @@
             closeDetailModal();
             renderSkillTree();
             typeLog(`Aprendeu ${skillData.name}!`, "#54a0ff");
+            autoSave();
         }
     }
 
@@ -701,7 +713,6 @@
         document.getElementById('death-modal').style.display = 'none';
     }
 
-    // --- LOGICA DE COMPRA ---
     function buyItem(type, btn) {
         const items = {
             potion: { cost: 10, name: "Poção Vida", heal: 15, icon: "fa-flask" },
@@ -716,6 +727,7 @@
             p.inventory.push({...item});
             updateUI();
             typeLog(`Comprou ${item.name}!`, "#2ed573");
+            autoSave();
         } else {
             if(btn) {
                 btn.classList.add('error-blink');
@@ -735,6 +747,7 @@
         p.inventory.splice(index, 1);
         updateUI();
         await typeLog(message, "#54a0ff");
+        autoSave();
     }
 
     function getElementalMultiplier(skillId, enemyElement) {
@@ -808,7 +821,7 @@
         document.getElementById('p-mana-bar').style.width = (p.mana/p.maxMana*100) + "%";
         document.getElementById('p-furia-bar').style.width = p.furia + "%";
         document.getElementById('p-xp-bar').style.width = (p.xp/p.nextXp*100) + "%";
-        document.getElementById('enemy-bar').style.width = (e.hp/e.maxHp*100) + "%";
+        if(e) document.getElementById('enemy-bar').style.width = (e.hp/e.maxHp*100) + "%";
         
         document.getElementById('p-lv').innerText = p.lv;
         document.getElementById('p-hp').innerText = Math.ceil(p.hp);
@@ -826,13 +839,14 @@
 
         document.querySelectorAll('.lvl-up-btn').forEach(btn => btn.style.display = p.pendingPoints > 0 ? 'block' : 'none');
         
-        document.getElementById('enemy-name').innerText = e.name;
-        document.getElementById('enemy-hp').innerText = Math.ceil(e.hp);
-        document.getElementById('enemy-max-hp').innerText = e.maxHp;
-
-        const badgeContainer = document.getElementById('enemy-badges');
-        const colors = { fogo: 'var(--skill-fogo)', agua: 'var(--skill-agua)', terra: 'var(--skill-terra)' };
-        badgeContainer.innerHTML = `<span class="badge" style="background: ${colors[e.element]}">${e.element}</span>`;
+        if(e) {
+            document.getElementById('enemy-name').innerText = e.name;
+            document.getElementById('enemy-hp').innerText = Math.ceil(e.hp);
+            document.getElementById('enemy-max-hp').innerText = e.maxHp;
+            const badgeContainer = document.getElementById('enemy-badges');
+            const colors = { fogo: 'var(--skill-fogo)', agua: 'var(--skill-agua)', terra: 'var(--skill-terra)' };
+            badgeContainer.innerHTML = `<span class="badge" style="background: ${colors[e.element]}">${e.element}</span>`;
+        }
 
         document.getElementById('val-atk').innerText = `${Math.floor(p.str*0.5)}-${Math.ceil(p.str)} Dano`;
         document.getElementById('val-heal').innerText = `8 MP | +${Math.floor(p.int * 1.5)}`;
@@ -892,6 +906,7 @@
         updateUI();
         await typeLog(`${e.name} (${e.element}) apareceu!`, "#f1c40f");
         toggleButtons(false);
+        autoSave();
     }
 
     function spendPoint(stat) {
@@ -909,14 +924,13 @@
         p.xp += xpGanha; p.gold += goldGanho;
         await typeLog(`VITÓRIA! +${xpGanha} XP | +${goldGanho} Gold`, "#2ecc71");
         if(p.xp >= p.nextXp) { p.pendingPoints++; await typeLog("LEVEL UP!", "#ffa502"); }
-        if(p.pendingPoints === 0) spawnMonster(); else updateUI();
+        if(p.pendingPoints === 0) spawnMonster(); else { updateUI(); autoSave(); }
     }
 
     function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
     function getRandomFloat(min, max) { return Math.random() * (max - min) + min; }
     function toggleButtons(state) { document.querySelectorAll('#action-buttons button').forEach(b => { if(!b.id.includes('slot') || (b.id.includes('slot') && state)) b.disabled = state; }); }
     
-    // --- FUNÇÕES DE MORTE E REINÍCIO ---
     function restartGame() {
         p.hp = p.maxHp;
         p.mana = p.maxMana;
@@ -928,15 +942,16 @@
         updateUI();
         spawnMonster();
         typeLog("Você retornou, mas suas posses se foram...", "#ff4757");
+        autoSave();
     }
 
     function exitToMenu() { 
-        localStorage.removeItem('rpg_save'); 
+        autoSave();
         location.reload(); 
     }
 
     function saveAndExit() { 
-        localStorage.setItem('rpg_save', JSON.stringify({p, e})); 
+        autoSave();
         location.reload(); 
     }
 
@@ -965,8 +980,10 @@
         if(p.hp <= 0) { 
             document.getElementById('overlay').style.display = 'block'; 
             document.getElementById('death-modal').style.display = 'block'; 
+            localStorage.removeItem('rpg_save'); // Remove save ao morrer definitivamente se desejar, ou mantenha se quiser salvar o estado de morte.
         } else {
             toggleButtons(false);
+            autoSave(); // Salva após o turno do inimigo
         }
     }
 
@@ -994,8 +1011,10 @@
     }
     function applyDamageEffect() { 
         const img = document.getElementById('enemy-img'); 
-        img.classList.add('take-damage'); 
-        setTimeout(() => img.classList.remove('take-damage'), 400); 
+        if(img) {
+            img.classList.add('take-damage'); 
+            setTimeout(() => img.classList.remove('take-damage'), 400); 
+        }
     }
 </script>
 </body>
