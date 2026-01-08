@@ -58,6 +58,23 @@
             letter-spacing: -1px;
         }
 
+        /* INPUT DE NOME */
+        .name-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 20px;
+            color: white;
+            font-family: 'Poppins';
+            font-size: 1rem;
+            margin-bottom: 20px;
+            width: 280px;
+            text-align: center;
+            outline: none;
+            transition: 0.3s;
+        }
+        .name-input:focus { border-color: var(--accent); background: rgba(255, 255, 255, 0.1); }
+
         .main-wrapper {
             display: none;
             gap: 20px;
@@ -366,6 +383,7 @@
 
 <div id="start-menu">
     <div class="game-title">MASTERY RPG</div>
+    <input type="text" id="player-name-input" class="name-input" placeholder="Digite seu nome..." maxlength="12">
     <button class="action-btn btn-atk btn-menu" onclick="startNewGame()">
         <i class="fa-solid fa-play"></i> NOVO JOGO
     </button>
@@ -432,7 +450,7 @@
     <aside id="hero-sidebar">
         <div class="hero-header">
             <small>NÍVEL <span id="p-lv">1</span></small>
-            <h2>GUERREIRO</h2>
+            <h2 id="p-display-name">GUERREIRO</h2>
         </div>
 
         <div class="attribute-card">
@@ -573,7 +591,11 @@
     };
 
     function startNewGame() {
+        const inputName = document.getElementById('player-name-input').value.trim();
+        const finalName = inputName || "GUERREIRO";
+        
         p = { 
+            name: finalName,
             lv: 1, hp: 10, maxHp: 10, mana: 20, maxMana: 20, 
             str: 4, int: 5, luk: 3, spd: 3, vit: 1, xp: 0, nextXp: 50, furia: 0,
             gold: 0, inventory: [], 
@@ -603,6 +625,7 @@
     function showGame() { 
         document.getElementById('start-menu').style.display = 'none'; 
         document.getElementById('game-ui').style.display = 'flex'; 
+        document.getElementById('p-display-name').innerText = p.name;
     }
     
     function openShop() { if(p.hp <= 0) return; document.getElementById('overlay').style.display = 'block'; document.getElementById('shop-modal').style.display = 'block'; }
@@ -790,6 +813,7 @@
         document.getElementById('p-mana').innerText = Math.ceil(p.mana);
         document.getElementById('p-gold').innerText = p.gold;
         document.getElementById('p-skill-points').innerText = p.skillPoints || 0;
+        document.getElementById('p-display-name').innerText = p.name || "GUERREIRO";
 
         document.getElementById('stat-str').innerText = p.levels.str;
         document.getElementById('stat-spd').innerText = p.levels.spd;
