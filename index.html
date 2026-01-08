@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RPG Visual Mastery Pro - Balanced Edition</title>
+    <title>RPG Visual Mastery Pro - Bleeding Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Poppins:wght@400;600;800&display=swap');
@@ -221,7 +221,6 @@
         }
 
         button.action-btn i { margin-bottom: 5px; font-size: 18px; }
-
         .action-btn span, .action-btn div { z-index: 1; }
 
         button.action-btn:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.3); }
@@ -608,7 +607,7 @@
             pendingPoints: 0,
             levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 },
             buffs: { boots: 0, shield: 0, coin: 0 },
-            bleeding: false 
+            bleeding: false // REINTRODUZIDO
         };
         
         document.getElementById('p-display-name').innerText = p.name;
@@ -620,6 +619,7 @@
         const saved = JSON.parse(localStorage.getItem('rpg_save'));
         if(saved) {
             p = saved.p; e = saved.e;
+            if (p.bleeding === undefined) p.bleeding = false; // Garante retrocompatibilidade
             document.getElementById('p-display-name').innerText = p.name;
             showGame();
             if (e && e.img) document.getElementById('enemy-img').src = e.img;
@@ -697,11 +697,8 @@
         if(p.skillPoints > 0 && p.lv >= reqLv) {
             p.skillPoints--;
             let playerSkill = p.skills.find(s => s.id === skillData.id);
-            if(playerSkill) {
-                playerSkill.level++;
-            } else {
-                p.skills.push({ id: skillData.id, level: 1 });
-            }
+            if(playerSkill) playerSkill.level++;
+            else p.skills.push({ id: skillData.id, level: 1 });
             updateUI();
             closeDetailModal();
             renderSkillTree();
@@ -811,6 +808,10 @@
         document.getElementById('stat-luk').innerText = p.levels.luk;
         document.getElementById('stat-vit').innerText = p.levels.vit;
 
+        // ÍCONE DE STATUS (SANGRAMENTO)
+        const pStatusIcons = document.getElementById('p-status-icons');
+        pStatusIcons.innerHTML = p.bleeding ? '<i class="fa-solid fa-droplet effect-icon" style="color: #ff4757" title="Sangrando"></i>' : '';
+
         document.querySelectorAll('.lvl-up-btn').forEach(btn => btn.style.display = p.pendingPoints > 0 ? 'block' : 'none');
         
         if(e) {
@@ -890,6 +891,12 @@
         p.xp += xpGanha; p.gold += goldGanho;
         await typeLog(`VITÓRIA! +${xpGanha} XP | +${goldGanho} Gold`, "#2ecc71");
         
+        // CHANCE DE PARAR SANGRAMENTO APÓS LUTA
+        if(p.bleeding && Math.random() > 0.4) {
+            p.bleeding = false;
+            await typeLog("As feridas pararam de sangrar.", "#2ed573");
+        }
+
         if(p.xp >= p.nextXp) { p.pendingPoints++; await typeLog("LEVEL UP!", "#ffa502"); }
         if(p.pendingPoints === 0) spawnMonster(); else { updateUI(); }
     }
@@ -915,6 +922,7 @@
     }
 
     async function enemyTurn() {
+        // DANO DE QUEIMADURA NO INIMIGO
         if(e.burning && e.hp > 0) {
             let burnDmg = Math.ceil(e.maxHp * 0.1);
             e.hp -= burnDmg;
@@ -922,6 +930,15 @@
             if(e.hp <= 0) { await win(); return; }
         }
 
+        // DANO DE SANGRAMENTO NO JOGADOR (REINTRODUZIDO)
+        if(p.bleeding && p.hp > 0) {
+            let bleedDmg = Math.ceil(p.maxHp * 0.05); // 5% do HP máximo
+            p.hp -= bleedDmg;
+            await typeLog(`Você perde sangue: -${bleedDmg} HP`, "#ff4757");
+            updateUI();
+        }
+
+        // CEGUEIRA NO INIMIGO
         if(e.blinded && Math.random() > 0.5) {
             e.blinded = false;
             await typeLog(`${e.name} errou o golpe!`, "var(--skill-terra)");
@@ -930,6 +947,12 @@
             if(isDefending) dmg = Math.ceil(dmg * 0.5);
             p.hp -= dmg; p.furia = Math.min(100, p.furia + 20);
             updateUI(); await typeLog(`${e.name} atacou: -${dmg} HP`, "#ff4757");
+
+            // ESQUELETO OU VAMPIRO PODEM CAUSAR SANGRAMENTO
+            if((e.name === "Esqueleto" || e.name === "Vampiro") && Math.random() < 0.3 && !p.bleeding) {
+                p.bleeding = true;
+                await typeLog("As garras abriram uma ferida! SANGRAMENTO!", "#ff4757");
+            }
         }
 
         if(p.hp <= 0) { 
@@ -949,12 +972,21 @@
         updateUI(); typeLog(`Curar: +${cura} HP`).then(() => enemyTurn());
     }
     function playerDefend() { toggleButtons(true); isDefending = true; typeLog("Defendendo...").then(() => enemyTurn()); }
+    
     function playerRest() { 
         toggleButtons(true); 
         let ganho = p.int; 
         p.mana = Math.min(p.maxMana, p.mana + ganho); 
+        
+        // DESCANSAR CURA O SANGRAMENTO (REINTRODUZIDO)
+        if(p.bleeding) {
+            p.bleeding = false;
+            typeLog("Você cuidou das feridas enquanto descansava.", "#2ed573");
+        }
+        
         updateUI(); typeLog(`Descansou: +${ganho} Mana`).then(() => enemyTurn()); 
     }
+
     function useUltimate() { 
         if(p.furia < 100) return; 
         toggleButtons(true); 
