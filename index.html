@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RPG Visual Mastery Pro - Edição Luxo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Poppins:wght@400;600;800&display=swap');
 
@@ -83,6 +84,7 @@
             border-left: 4px solid var(--accent);
         }
 
+        .attr-info i { color: var(--accent); margin-right: 8px; font-size: 14px; }
         .attr-info span { font-weight: 800; font-size: 18px; color: #fff; }
         .attr-label { font-size: 12px; color: #aaa; text-transform: uppercase; display: block; }
 
@@ -147,31 +149,42 @@
         .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .magic-row { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 5px; }
         
-        /* --- ESTILO PADRONIZADO DARK PARA TODOS OS BOTÕES --- */
         button.action-btn { 
             padding: 15px 10px; font-family: 'Poppins'; font-weight: 700; border: none; 
             border-radius: 16px; color: white; cursor: pointer; transition: 0.2s;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-transform: uppercase;
-            background: #2a2a35; /* Fundo escuro padrão */
+            background: #2a2a35;
+            position: relative;
+            overflow: hidden;
         }
+
+        button.action-btn i { margin-bottom: 5px; font-size: 18px; }
+
+        /* Icones de fundo redimensionados para os botões elementais */
+        .btn-mag .bg-icon {
+            position: absolute;
+            font-size: 50px;
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .action-btn span, .action-btn div { z-index: 1; }
 
         button.action-btn:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.3); }
         button.action-btn:active:not(:disabled) { transform: translateY(1px); }
         button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* Ajustes de Cores dos Detalhes Inferiores e Brilho (Glow) */
         .btn-atk { box-shadow: inset 0 -4px 0 0 var(--primary), 0 4px 12px rgba(255, 71, 87, 0.4); }
         .btn-heal { box-shadow: inset 0 -4px 0 0 var(--secondary), 0 4px 12px rgba(46, 213, 115, 0.4); }
         .btn-rest { box-shadow: inset 0 -4px 0 0 var(--skill-rest), 0 4px 12px rgba(83, 82, 237, 0.4); }
         
-        /* Botão Ultimate Especial */
         .btn-ult { 
             grid-column: span 2; 
             box-shadow: inset 0 -4px 0 0 var(--accent), 0 6px 15px rgba(255, 165, 2, 0.5); 
         }
 
-        /* Botões Elementais */
         .btn-mag { min-height: 70px; }
         .btn-mag.fogo { box-shadow: inset 0 -4px 0 0 var(--skill-fogo), 0 4px 12px rgba(255, 159, 67, 0.4); }
         .btn-mag.agua { box-shadow: inset 0 -4px 0 0 var(--skill-agua), 0 4px 12px rgba(84, 160, 255, 0.4); }
@@ -202,7 +215,7 @@
 
         <div class="attribute-card">
             <div class="attr-info">
-                <span class="attr-label">Força (FOR)</span>
+                <span class="attr-label"><i class="fa-solid fa-hand-fist"></i> Força (FOR)</span>
                 <span id="stat-str">0</span>
             </div>
             <button class="lvl-up-btn" onclick="spendPoint('str')">+</button>
@@ -210,7 +223,7 @@
 
         <div class="attribute-card">
             <div class="attr-info">
-                <span class="attr-label">Velocidade (VEL)</span>
+                <span class="attr-label"><i class="fa-solid fa-bolt"></i> Velocidade (VEL)</span>
                 <span id="stat-spd">0</span>
             </div>
             <button class="lvl-up-btn" onclick="spendPoint('spd')">+</button>
@@ -218,7 +231,7 @@
 
         <div class="attribute-card">
             <div class="attr-info">
-                <span class="attr-label">Inteligência (INT)</span>
+                <span class="attr-label"><i class="fa-solid fa-brain"></i> Inteligência (INT)</span>
                 <span id="stat-int">0</span>
             </div>
             <button class="lvl-up-btn" onclick="spendPoint('int')">+</button>
@@ -226,7 +239,7 @@
 
         <div class="attribute-card">
             <div class="attr-info">
-                <span class="attr-label">Sorte (SOR)</span>
+                <span class="attr-label"><i class="fa-solid fa-clover"></i> Sorte (SOR)</span>
                 <span id="stat-luk">0</span>
             </div>
             <button class="lvl-up-btn" onclick="spendPoint('luk')">+</button>
@@ -234,14 +247,14 @@
 
         <div class="attribute-card">
             <div class="attr-info">
-                <span class="attr-label">Vitalidade (VIT)</span>
+                <span class="attr-label"><i class="fa-solid fa-heart-pulse"></i> Vitalidade (VIT)</span>
                 <span id="stat-vit">0</span>
             </div>
             <button class="lvl-up-btn" onclick="spendPoint('maxHp')">+</button>
         </div>
 
         <div style="margin-top: 20px;">
-            <small>EXPERIÊNCIA</small>
+            <small><i class="fa-solid fa-star"></i> EXPERIÊNCIA</small>
             <div class="status-bar"><div id="p-xp-bar" class="bar-fill xp-fill"></div></div>
         </div>
     </aside>
@@ -263,15 +276,15 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
             <div>
-                <small>❤️ VIDA: <span id="p-hp">0</span>/<span id="p-max-hp">0</span></small>
+                <small><i class="fa-solid fa-heart"></i> VIDA: <span id="p-hp">0</span>/<span id="p-max-hp">0</span></small>
                 <div class="status-bar"><div id="p-hp-bar" class="bar-fill hp-fill"></div></div>
             </div>
             <div>
-                <small>✨ MANA: <span id="p-mana">0</span></small>
+                <small><i class="fa-solid fa-wand-sparkles"></i> MANA: <span id="p-mana">0</span></small>
                 <div class="status-bar"><div id="p-mana-bar" class="bar-fill mana-fill"></div></div>
             </div>
             <div style="grid-column: span 2;">
-                <small>🔥 FÚRIA ESPECIAL</small>
+                <small><i class="fa-solid fa-fire-glow"></i> FÚRIA ESPECIAL</small>
                 <div class="status-bar" style="height: 6px;"><div id="p-furia-bar" class="bar-fill furia-fill"></div></div>
             </div>
         </div>
@@ -280,26 +293,33 @@
 
         <div class="actions" id="action-buttons">
             <button class="action-btn btn-atk" onclick="playerAction('fisico')">
+                <i class="fa-solid fa-sword"></i>
                 ESPADADA <div class="skill-info" id="val-atk">-</div>
             </button>
             <button class="action-btn btn-heal" onclick="playerHeal()">
+                <i class="fa-solid fa-hand-holding-medical"></i>
                 CURAR <div class="skill-info" id="val-heal">-</div>
             </button>
             <button class="action-btn btn-rest" onclick="playerRest()">
+                <i class="fa-solid fa-bed"></i>
                 DESCANSAR <div class="skill-info" id="val-rest">-</div>
             </button>
             <button id="ult-btn" class="action-btn btn-ult" onclick="useUltimate()">
+                <i class="fa-solid fa-sun"></i>
                 GOLPE SUPREMO <div class="skill-info" id="val-ult">LIBERADO!</div>
             </button>
             
             <div class="magic-row">
                 <button class="action-btn btn-mag fogo" onclick="playerAction('fogo')">
+                    <i class="fa-solid fa-fire-flame-curved bg-icon"></i>
                     FOGO <div class="skill-info">6 MP | <span id="eff-fogo">-</span></div>
                 </button>
                 <button class="action-btn btn-mag agua" onclick="playerAction('agua')">
+                    <i class="fa-solid fa-droplet bg-icon"></i>
                     ÁGUA <div class="skill-info">6 MP | <span id="eff-agua">-</span></div>
                 </button>
                 <button class="action-btn btn-mag terra" onclick="playerAction('terra')">
+                    <i class="fa-solid fa-mountain bg-icon"></i>
                     TERRA <div class="skill-info">6 MP | <span id="eff-terra">-</span></div>
                 </button>
             </div>
