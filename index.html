@@ -33,7 +33,7 @@
             font-family: 'Poppins', sans-serif; 
             background: radial-gradient(circle at center, #1a1a2e 0%, #050508 100%); 
             color: var(--text); 
-            margin: 0; padding: 10px; 
+            margin: 0; padding: 20px; 
             display: flex; justify-content: center; align-items: flex-start;
             min-height: 100vh;
             overflow-x: hidden;
@@ -41,62 +41,49 @@
 
         /* --- TELAS --- */
         #start-menu {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; height: 80vh; text-align: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 80vh; text-align: center; z-index: 100;
         }
 
         .game-title {
-            font-size: clamp(2rem, 8vw, 3rem); font-weight: 800; color: var(--accent);
+            font-size: 3rem; font-weight: 800; color: var(--accent);
             text-shadow: 0 0 20px rgba(255, 165, 2, 0.4); margin-bottom: 40px;
         }
 
         .main-wrapper { display: none; gap: 20px; width: 100%; max-width: 1000px; flex-wrap: wrap; justify-content: center; }
 
-        /* OVERLAYS */
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 1000;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 20px;
-        }
-
         /* --- SIDEBAR & CONTAINER --- */
         #hero-sidebar {
-            flex: 1; min-width: 300px; max-width: 320px;
-            background: var(--panel); backdrop-filter: blur(10px);
-            padding: 25px; border-radius: 24px; border: 1px solid var(--border);
+            flex: 1; min-width: 280px; max-width: 320px; background: var(--panel);
+            backdrop-filter: blur(10px); padding: 25px; border-radius: 24px; border: 1px solid var(--border);
         }
 
         #game-container { 
-            flex: 2; min-width: 320px; max-width: 550px; 
-            background: var(--card); padding: 20px; border-radius: 32px; 
-            border: 1px solid rgba(255,255,255,0.15); position: relative;
+            flex: 2; min-width: 350px; max-width: 550px; background: var(--card); 
+            padding: 25px; border-radius: 32px; border: 1px solid rgba(255,255,255,0.15);
+            position: relative;
         }
 
-        /* INVENTÁRIO */
-        .inventory-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; }
-        .inv-slot {
-            aspect-ratio: 1; background: rgba(0,0,0,0.4); border: 1px solid var(--border);
-            border-radius: 8px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; position: relative; font-size: 1.2rem;
+        /* --- BADGE DE ELEMENTO (NOVO DESIGN) --- */
+        .element-pill {
+            display: flex; align-items: center; gap: 8px; padding: 5px 12px;
+            border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase;
+            border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
-        .inv-slot:hover { border-color: var(--accent); }
-        .slot-count {
-            position: absolute; bottom: 2px; right: 4px; font-size: 10px;
-            background: var(--accent); color: #000; padding: 0 4px; border-radius: 4px; font-weight: 800;
-        }
+        .el-fogo { background: linear-gradient(45deg, #d35400, #ff9f43); color: white; }
+        .el-agua { background: linear-gradient(45deg, #2980b9, #54a0ff); color: white; }
+        .el-terra { background: linear-gradient(45deg, #27ae60, #1dd1a1); color: white; }
 
-        /* --- COMPONENTES --- */
+        /* --- ATRIBUTOS --- */
         .attribute-card {
-            background: rgba(0,0,0,0.3); margin-bottom: 8px; padding: 10px 15px;
+            background: rgba(0,0,0,0.3); margin-bottom: 10px; padding: 12px 15px;
             border-radius: 12px; display: flex; justify-content: space-between;
             align-items: center; border-left: 4px solid var(--accent);
         }
-
-        .gold-card { border-left-color: var(--gold); background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), transparent); }
+        .gold-card { border-left-color: var(--gold); }
 
         .lvl-up-btn {
-            width: 30px; height: 30px; background: var(--accent); color: #000;
+            width: 35px; height: 35px; background: var(--accent); color: #000;
             border-radius: 50%; border: none; font-weight: 900; cursor: pointer; display: none;
         }
 
@@ -105,10 +92,14 @@
             text-align: center; margin-bottom: 20px; border: 1px solid var(--border);
         }
         
-        .enemy-sprite-container { width: 160px; height: 160px; margin: 10px auto; display: flex; align-items: center; justify-content: center; }
-        .enemy-sprite { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+        .enemy-sprite-container {
+            width: 160px; height: 160px; margin: 15px auto;
+            display: flex; align-items: center; justify-content: center;
+        }
 
-        .status-bar { background: #000; height: 12px; border-radius: 6px; margin: 5px 0; overflow: hidden; border: 1px solid var(--border); }
+        .enemy-sprite { width: 100%; height: 100%; object-fit: contain; }
+
+        .status-bar { background: #000; height: 14px; border-radius: 7px; margin: 8px 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
         .bar-fill { height: 100%; transition: width 0.4s ease-out; }
         .hp-fill { background: linear-gradient(90deg, #ff4757, #ff6b81); }
         .mana-fill { background: linear-gradient(90deg, #1e90ff, #70a1ff); }
@@ -116,100 +107,88 @@
         .furia-fill { background: #ffa502; }
 
         .log { 
-            height: 100px; overflow-y: auto; background: rgba(0,0,0,0.8); padding: 12px; 
-            border-radius: 16px; font-family: 'Fira Code', monospace; font-size: 11px; 
-            margin-bottom: 15px; border: 1px solid var(--border);
+            height: 120px; overflow-y: auto; background: rgba(0,0,0,0.8); padding: 15px; 
+            border-radius: 16px; font-family: 'Fira Code', monospace; font-size: 11px; margin-bottom: 20px;
         }
 
-        /* BOTÕES */
-        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .magic-row { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        /* --- BOTÕES DE AÇÃO --- */
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .magic-row { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
         
         button.action-btn { 
-            padding: 12px 5px; font-family: 'Poppins'; font-weight: 700; border: none; 
-            border-radius: 14px; color: white; cursor: pointer; transition: 0.2s;
+            padding: 12px; font-family: 'Poppins'; font-weight: 700; border: none; 
+            border-radius: 16px; color: white; cursor: pointer; transition: 0.2s;
             display: flex; flex-direction: column; align-items: center; background: #2a2a35;
         }
-        button.action-btn i { margin-bottom: 4px; font-size: 16px; }
-        .skill-info { font-size: 9px; opacity: 0.8; font-weight: 400; }
-        
-        .btn-atk { box-shadow: inset 0 -3px 0 0 var(--primary); }
-        .btn-heal { box-shadow: inset 0 -3px 0 0 var(--secondary); }
-        .btn-def { box-shadow: inset 0 -3px 0 0 var(--skill-def); }
-        .btn-rest { box-shadow: inset 0 -3px 0 0 var(--skill-rest); }
-        .btn-ult { grid-column: span 2; box-shadow: inset 0 -3px 0 0 var(--accent); background: #3d2b00; }
+        button.action-btn i { margin-bottom: 5px; font-size: 18px; }
 
-        .btn-mag.fogo { box-shadow: inset 0 -3px 0 0 var(--skill-fogo); }
-        .btn-mag.agua { box-shadow: inset 0 -3px 0 0 var(--skill-agua); }
-        .btn-mag.terra { box-shadow: inset 0 -3px 0 0 var(--skill-terra); }
+        .btn-atk { box-shadow: inset 0 -4px 0 0 var(--primary); }
+        .btn-heal { box-shadow: inset 0 -4px 0 0 var(--secondary); }
+        .btn-def { box-shadow: inset 0 -4px 0 0 var(--skill-def); }
+        .btn-rest { box-shadow: inset 0 -4px 0 0 var(--skill-rest); }
+        .btn-ult { grid-column: span 2; box-shadow: inset 0 -4px 0 0 var(--accent); background: #3d2b00; }
+        .btn-mag.fogo { box-shadow: inset 0 -4px 0 0 var(--skill-fogo); }
+        .btn-mag.agua { box-shadow: inset 0 -4px 0 0 var(--skill-agua); }
+        .btn-mag.terra { box-shadow: inset 0 -4px 0 0 var(--skill-terra); }
 
-        .btn-exit { position: absolute; top: 15px; right: 15px; font-size: 10px !important; padding: 5px 10px !important; background: #441111 !important; }
+        .skill-info { font-size: 10px; font-weight: 400; opacity: 0.8; margin-top: 2px; }
+        .eff-tag { font-weight: 800; font-size: 9px; padding: 2px 5px; border-radius: 4px; background: rgba(0,0,0,0.3); }
+
+        /* --- LOJA --- */
+        #shop-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 1000; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
 
         .take-damage { animation: damage-pulse 0.4s; }
         @keyframes damage-pulse {
-            0% { transform: translateX(0); filter: brightness(2) red; }
-            25% { transform: translateX(-8px); }
-            75% { transform: translateX(8px); }
+            0% { transform: translateX(0); filter: brightness(2) contrast(2); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
             100% { transform: translateX(0); filter: none; }
         }
+        .btn-exit { position: absolute; top: 20px; right: 25px; padding: 8px 15px !important; font-size: 12px !important; background: #441111 !important; }
     </style>
 </head>
 <body>
 
-<div id="death-screen" class="overlay">
-    <h1 style="color: var(--primary); font-size: 3.5rem; margin-bottom: 10px;">VOCÊ MORREU</h1>
-    <p style="margin-bottom: 30px; opacity: 0.7;">Sua jornada foi interrompida...</p>
-    <button class="action-btn btn-heal" style="width: 250px; margin-bottom: 15px;" onclick="tryAgain()">
-        <i class="fa-solid fa-rotate-right"></i> TENTAR NOVAMENTE
-    </button>
-    <button class="action-btn btn-atk" style="width: 250px;" onclick="exitToMenu()">
-        <i class="fa-solid fa-door-open"></i> SAIR
-    </button>
-</div>
-
-<div id="shop-screen" class="overlay">
-    <div style="background: var(--card); padding: 30px; border-radius: 24px; border: 2px solid var(--accent); max-width: 350px; width: 90%;">
-        <h2 style="color: var(--gold); margin-top: 0;"><i class="fa-solid fa-shop"></i> LOJA</h2>
-        <p>Seu Ouro: <span id="shop-gold-val">0</span> G</p>
-        <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-        <div class="attribute-card" style="cursor: pointer;" onclick="buyPotion()">
-            <div class="attr-info"><i class="fa-solid fa-flask" style="color: var(--secondary)"></i> Poção de Vida</div>
-            <div class="attr-value">50 G</div>
+<div id="shop-overlay">
+    <div style="background: var(--card); padding: 30px; border-radius: 24px; border: 2px solid var(--accent); width: 320px; text-align: center;">
+        <h2 style="color: var(--gold); margin-top: 0;"><i class="fa-solid fa-shop"></i> ALQUIMISTA</h2>
+        <p>Seu Ouro: <span id="shop-gold" style="color:var(--gold); font-weight:800">0</span>G</p>
+        <div class="attribute-card" style="cursor: pointer;" onclick="buyItem('hp')">
+            <div class="attr-info"><i class="fa-solid fa-flask" style="color:var(--secondary)"></i> Poção de Vida</div>
+            <div class="attr-value">30G</div>
         </div>
-        <button class="action-btn btn-atk" style="width: 100%; margin-top: 20px;" onclick="toggleShop(false)">FECHAR</button>
+        <button class="action-btn btn-atk" style="width: 100%; margin-top: 20px;" onclick="closeShop()">FECHAR LOJA</button>
     </div>
 </div>
 
 <div id="start-menu">
     <div class="game-title">MASTERY RPG</div>
-    <button class="action-btn btn-atk" style="width: 280px; margin-bottom: 15px;" onclick="startNewGame()">NOVO JOGO</button>
-    <button id="continue-btn" class="action-btn btn-heal" style="width: 280px; display: none;" onclick="loadGame()">CONTINUAR</button>
+    <button class="action-btn btn-atk btn-menu" onclick="startNewGame()">NOVO JOGO</button>
+    <button id="continue-btn" class="action-btn btn-heal btn-menu" onclick="loadGame()" style="display: none;">CONTINUAR</button>
 </div>
 
 <div class="main-wrapper" id="game-ui">
     <aside id="hero-sidebar">
         <div class="hero-header">
             <small>NÍVEL <span id="p-lv">1</span></small>
-            <h2>GUERREIRO</h2>
+            <h2 id="p-name">GUERREIRO</h2>
         </div>
 
-        <div id="stats-container">
+        <div id="stats-area">
             </div>
 
-        <div class="attribute-card gold-card" onclick="toggleShop(true)" style="cursor: pointer;">
-            <div class="attr-info"><i class="fa-solid fa-coins"></i> OURO / LOJA</div>
-            <div class="attr-value"><span id="p-gold">0</span> G</div>
+        <div class="attribute-card gold-card">
+            <div class="attr-info"><i class="fa-solid fa-coins" style="color: var(--gold)"></i> OURO</div>
+            <div class="attr-value"><span id="p-gold">0</span>G</div>
         </div>
 
-        <div style="margin-top: 15px;">
-            <small><i class="fa-solid fa-box"></i> INVENTÁRIO (5 SLOTS)</small>
-            <div class="inventory-grid" id="inventory">
-                <div class="inv-slot" onclick="usePotion()"><i class="fa-solid fa-flask" style="opacity: 0.2;"></i></div>
-                <div class="inv-slot"></div>
-                <div class="inv-slot"></div>
-                <div class="inv-slot"></div>
-                <div class="inv-slot"></div>
-            </div>
+        <div class="attribute-card" style="border-left-color: var(--secondary); cursor: pointer;" onclick="openShop()">
+            <div class="attr-info"><i class="fa-solid fa-bag-shopping"></i> LOJA / MOCHILA</div>
+            <div class="attr-value"><i class="fa-solid fa-flask"></i> x<span id="p-pot-hp">0</span></div>
         </div>
 
         <div style="margin-top: 20px;">
@@ -223,7 +202,7 @@
 
         <div class="enemy-card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3 id="enemy-name" style="margin:0">INIMIGO</h3>
+                <h3 id="enemy-name" style="margin:0">BUSCANDO...</h3>
                 <div id="enemy-badges"></div>
             </div>
             <div class="enemy-sprite-container"><img id="enemy-img" src="" class="enemy-sprite"></div>
@@ -231,7 +210,7 @@
             <small><span id="enemy-hp">0</span> / <span id="enemy-max-hp">0</span> HP</small>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
             <div>
                 <small>VIDA: <span id="p-hp">0</span>/<span id="p-max-hp">0</span></small>
                 <div class="status-bar"><div id="p-hp-bar" class="bar-fill hp-fill"></div></div>
@@ -248,23 +227,23 @@
             <button class="action-btn btn-atk" onclick="playerAction('fisico')">
                 <i class="fa-solid fa-sword"></i> ESPADADA <div class="skill-info" id="val-atk">-</div>
             </button>
-            <button class="action-btn btn-heal" onclick="playerHeal()">
-                <i class="fa-solid fa-hand-holding-medical"></i> CURAR <div class="skill-info" id="val-heal">-</div>
+            <button class="action-btn btn-heal" onclick="usePotion()">
+                <i class="fa-solid fa-flask"></i> POÇÃO <div class="skill-info">CURA 40%</div>
             </button>
             <button class="action-btn btn-def" onclick="playerDefend()">
-                <i class="fa-solid fa-shield-halved"></i> DEFENDER <div class="skill-info">REDUZ DANO</div>
+                <i class="fa-solid fa-shield-halved"></i> DEFENDER
             </button>
             <button class="action-btn btn-rest" onclick="playerRest()">
                 <i class="fa-solid fa-bed"></i> DESCANSAR <div class="skill-info" id="val-rest">-</div>
             </button>
             <button id="ult-btn" class="action-btn btn-ult" onclick="useUltimate()">
-                <i class="fa-solid fa-sun"></i> GOLPE SUPREMO <div class="skill-info">DANO MASSIVO</div>
+                <i class="fa-solid fa-sun"></i> GOLPE SUPREMO
             </button>
             
             <div class="magic-row">
-                <button class="action-btn btn-mag fogo" onclick="playerAction('fogo')">FOGO <div class="skill-info" id="eff-fogo">-</div></button>
-                <button class="action-btn btn-mag agua" onclick="playerAction('agua')">ÁGUA <div class="skill-info" id="eff-agua">-</div></button>
-                <button class="action-btn btn-mag terra" onclick="playerAction('terra')">TERRA <div class="skill-info" id="eff-terra">-</div></button>
+                <button class="action-btn btn-mag fogo" onclick="playerAction('fogo')">FOGO <div class="skill-info">10 MP | <span class="eff-tag" id="eff-fogo">-</span></div></button>
+                <button class="action-btn btn-mag agua" onclick="playerAction('agua')">ÁGUA <div class="skill-info">10 MP | <span class="eff-tag" id="eff-agua">-</span></div></button>
+                <button class="action-btn btn-mag terra" onclick="playerAction('terra')">TERRA <div class="skill-info">10 MP | <span class="eff-tag" id="eff-terra">-</span></div></button>
             </div>
         </div>
     </main>
@@ -274,106 +253,41 @@
     let p, e, isTyping = false, isDefending = false;
     const types = ['fogo', 'agua', 'terra'];
     const elems = { 
-        fogo: { cor: '#ff9f43', fraqueza: 'agua', resiste: 'terra' }, 
-        agua: { cor: '#54a0ff', fraqueza: 'terra', resiste: 'fogo' }, 
-        terra: { cor: '#1dd1a1', fraqueza: 'fogo', resiste: 'agua' } 
+        fogo: { class: 'el-fogo', icon: 'fa-fire', fraqueza: 'agua', resiste: 'terra' }, 
+        agua: { class: 'el-agua', icon: 'fa-droplet', fraqueza: 'terra', resiste: 'fogo' }, 
+        terra: { class: 'el-terra', icon: 'fa-mountain', fraqueza: 'fogo', resiste: 'agua' } 
     };
 
     const monsterTemplates = [
-        { name: "Ratazana", hpMin: 5, hpMax: 8, strMin: 1.2, strMax: 2.5, minLv: 1, type: 'basic', img: "ratazana gigante.png" },
-        { name: "Esqueleto", hpMin: 8, hpMax: 12, strMin: 2, strMax: 3.5, minLv: 1, type: 'basic', img: "esqueleto.png" },
-        { name: "Ogro", hpMultMin: 1.0, hpMultMax: 1.2, strMultMin: 0.9, strMultMax: 1.1, minLv: 5, type: 'proportional', img: "ogro.png" },
-        { name: "Vampiro", hpMultMin: 1.1, hpMultMax: 1.3, strMultMin: 0.8, strMultMax: 1.0, minLv: 10, type: 'proportional', img: "vampiro.png" }
+        { name: "Slime", hpBase: 10, strBase: 2, minLv: 1, img: "https://cdn-icons-png.flaticon.com/512/1000/1000966.png" },
+        { name: "Esqueleto", hpBase: 15, strBase: 4, minLv: 1, img: "https://cdn-icons-png.flaticon.com/512/1000/1000985.png" },
+        { name: "Ogro", hpBase: 50, strBase: 8, minLv: 5, img: "https://cdn-icons-png.flaticon.com/512/1000/1000977.png" }
     ];
-
-    window.onload = () => {
-        renderStats();
-        if(localStorage.getItem('rpg_save')) document.getElementById('continue-btn').style.display = 'block';
-    };
-
-    function renderStats() {
-        const stats = [
-            { id: 'str', name: 'Força', icon: 'fa-hand-fist' },
-            { id: 'spd', name: 'Velocidade', icon: 'fa-bolt' },
-            { id: 'int', name: 'Inteligência', icon: 'fa-brain' },
-            { id: 'luk', name: 'Sorte', icon: 'fa-clover' },
-            { id: 'vit', name: 'Vitalidade', icon: 'fa-heart-pulse' }
-        ];
-        document.getElementById('stats-container').innerHTML = stats.map(s => `
-            <div class="attribute-card">
-                <div class="attr-info"><i class="fa-solid ${s.icon}"></i> ${s.name} NVL <span id="stat-${s.id}">1</span></div>
-                <button class="lvl-up-btn" onclick="spendPoint('${s.id}')">+</button>
-            </div>
-        `).join('');
-    }
 
     function startNewGame() {
         p = { 
             lv: 1, hp: 20, maxHp: 20, mana: 20, maxMana: 20, 
-            str: 5, int: 5, luk: 3, spd: 3, vit: 1, xp: 0, nextXp: 50, furia: 0, gold: 50,
-            potions: 1, pendingPoints: 0,
+            str: 5, int: 5, luk: 3, spd: 3, vit: 1, xp: 0, nextXp: 50, furia: 0, gold: 50, potHp: 1,
+            pendingPoints: 0,
             levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 }
         };
-        document.getElementById('start-menu').style.display = 'none';
-        document.getElementById('game-ui').style.display = 'flex';
-        spawnMonster();
+        showGame(); spawnMonster();
     }
-
-    function saveAndExit() {
-        localStorage.setItem('rpg_save', JSON.stringify({p, e}));
-        location.reload();
-    }
-
-    function loadGame() {
-        const saved = JSON.parse(localStorage.getItem('rpg_save'));
-        p = saved.p; e = saved.e;
-        document.getElementById('start-menu').style.display = 'none';
-        document.getElementById('game-ui').style.display = 'flex';
-        updateUI();
-        typeLog("Bem-vindo de volta!", "#2ed573");
-    }
-
-    // --- SISTEMA DE LOJA ---
-    function toggleShop(show) {
-        document.getElementById('shop-screen').style.display = show ? 'flex' : 'none';
-        document.getElementById('shop-gold-val').innerText = p.gold;
-    }
-
-    function buyPotion() {
-        if (p.gold >= 50) {
-            p.gold -= 50; p.potions++;
-            updateUI(); toggleShop(true);
-            typeLog("Comprou Poção de Vida!", "#2ed573");
-        } else {
-            alert("Ouro insuficiente!");
-        }
-    }
-
-    async function usePotion() {
-        if (p.potions > 0 && p.hp > 0 && !isTyping) {
-            p.potions--;
-            const heal = Math.ceil(p.maxHp * 0.4);
-            p.hp = Math.min(p.maxHp, p.hp + heal);
-            updateUI();
-            await typeLog(`Usou Poção: +${heal} HP`, "#2ed573");
-        }
-    }
-
-    // --- COMBATE ---
-    function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-    function getRandomFloat(min, max) { return Math.random() * (max - min) + min; }
 
     async function spawnMonster() {
         let avail = monsterTemplates.filter(m => p.lv >= m.minLv);
         let data = avail[Math.floor(Math.random() * avail.length)];
         const randomElem = types[Math.floor(Math.random() * types.length)];
         
-        let hp = data.type === 'proportional' ? p.maxHp * getRandomFloat(data.hpMultMin, data.hpMultMax) : getRandom(data.hpMin, data.hpMax) + (p.lv * 2);
-        let str = data.type === 'proportional' ? p.str * getRandomFloat(data.strMultMin, data.strMultMax) : getRandomFloat(data.strMin, data.strMax) + (p.lv * 0.3);
+        // --- ESCALONAMENTO --- 
+        // Aumenta vida e dano em 20% por nível do player
+        let scale = 1 + (p.lv - 1) * 0.25; 
+        let finalHp = Math.ceil(data.hpBase * scale);
+        let finalStr = data.strBase * scale;
 
-        e = { ...data, elem: randomElem, maxHp: Math.ceil(hp), hp: Math.ceil(hp), str: str };
+        e = { ...data, elem: randomElem, maxHp: finalHp, hp: finalHp, str: finalStr };
         updateUI();
-        await typeLog(`${e.name} apareceu!`, "#f1c40f");
+        await typeLog(`${e.name} nível ${p.lv} apareceu!`, "#f1c40f");
         toggleButtons(false);
     }
 
@@ -384,45 +298,60 @@
         document.getElementById('enemy-bar').style.width = (e.hp/e.maxHp*100) + "%";
         document.getElementById('p-xp-bar').style.width = (p.xp/p.nextXp*100) + "%";
 
-        // Textos
+        // Stats
+        document.getElementById('p-lv').innerText = p.lv;
         document.getElementById('p-hp').innerText = Math.ceil(p.hp);
         document.getElementById('p-max-hp').innerText = p.maxHp;
-        document.getElementById('p-mana').innerText = Math.ceil(p.mana);
         document.getElementById('p-gold').innerText = p.gold;
-        document.getElementById('p-lv').innerText = p.lv;
+        document.getElementById('p-pot-hp').innerText = p.potHp;
+
+        // Atributos Sidebar
+        const statsArea = document.getElementById('stats-area');
+        statsArea.innerHTML = '';
+        const statConf = [
+            {id:'str', n:'FOR', i:'fa-hand-fist'}, {id:'spd', n:'VEL', i:'fa-bolt'},
+            {id:'int', n:'INT', i:'fa-brain'}, {id:'luk', n:'SOR', i:'fa-clover'}, {id:'vit', n:'VIT', i:'fa-heart-pulse'}
+        ];
+        statConf.forEach(s => {
+            statsArea.innerHTML += `
+                <div class="attribute-card">
+                    <div class="attr-info"><i class="fa-solid ${s.i}"></i> ${s.n} NVL <span class="attr-value">${p.levels[s.id]}</span></div>
+                    <button class="lvl-up-btn" style="display:${p.pendingPoints>0?'block':'none'}" onclick="spendPoint('${s.id}')">+</button>
+                </div>
+            `;
+        });
+
+        // Inimigo
         document.getElementById('enemy-name').innerText = e.name;
         document.getElementById('enemy-hp').innerText = Math.ceil(e.hp);
         document.getElementById('enemy-max-hp').innerText = e.maxHp;
         document.getElementById('enemy-img').src = e.img;
-
-        // Inventário
-        const slot = document.querySelector('.inv-slot');
-        slot.innerHTML = p.potions > 0 ? `<i class="fa-solid fa-flask" style="color:var(--secondary)"></i><span class="slot-count">${p.potions}</span>` : `<i class="fa-solid fa-flask" style="opacity:0.2"></i>`;
-
-        // Atributos
-        for(let s in p.levels) document.getElementById(`stat-${s}`).innerText = p.levels[s];
-        document.querySelectorAll('.lvl-up-btn').forEach(b => b.style.display = p.pendingPoints > 0 ? 'block' : 'none');
+        
+        // Elemento Badge
+        const el = elems[e.elem];
+        document.getElementById('enemy-badges').innerHTML = `
+            <div class="element-pill ${el.class}">
+                <i class="fa-solid ${el.icon}"></i> ${e.elem}
+            </div>
+        `;
 
         // Botões info
         document.getElementById('val-atk').innerText = `${Math.floor(p.str*0.5)}-${Math.ceil(p.str)} Dano`;
-        document.getElementById('val-heal').innerText = `8 MP | +${Math.floor(p.int * 1.5)}`;
         document.getElementById('val-rest').innerText = `+${p.int} MP`;
-        document.getElementById('ult-btn').style.display = p.furia >= 100 ? 'flex' : 'none';
-
-        // Efetividade
-        types.forEach(t => {
-            let label = document.getElementById(`eff-${t}`);
-            if (elems[e.elem].fraqueza === t) label.innerText = "EFET.";
-            else if (elems[e.elem].resiste === t) label.innerText = "FRACO";
-            else label.innerText = "NEUTRO";
-        });
         
-        const badgeColor = elems[e.elem].cor;
-        document.getElementById('enemy-badges').innerHTML = `<span class="badge" style="background: ${badgeColor}">${e.elem.toUpperCase()}</span>`;
+        types.forEach(t => {
+            let tag = document.getElementById(`eff-${t}`);
+            if (el.fraqueza === t) { tag.innerText = "EFETIVO"; tag.style.color = "#2ed573"; }
+            else if (el.resiste === t) { tag.innerText = "FRACO"; tag.style.color = "#ff4757"; }
+            else { tag.innerText = "NEUTRO"; tag.style.color = "#ccc"; }
+        });
+
+        document.getElementById('ult-btn').style.display = p.furia >= 100 ? 'flex' : 'none';
     }
 
+    // --- SISTEMA DE COMBATE ---
     async function playerAction(tipo) {
-        if(isTyping || p.hp <= 0) return;
+        if(isTyping || p.hp <= 0 || p.pendingPoints > 0) return;
         toggleButtons(true);
         isDefending = false;
         
@@ -441,87 +370,71 @@
         
         dmg = Math.ceil(dmg);
         applyDamageEffect();
-        e.hp -= dmg; updateUI();
-        await typeLog(`Atacou ${tipo.toUpperCase()}: ${dmg} dano`);
-        
+        e.hp -= dmg;
+        updateUI();
+        await typeLog(`Você causou ${dmg} de dano!`);
         if(e.hp <= 0) await win(); else await enemyTurn();
     }
 
     async function enemyTurn() {
-        if (Math.random() * 100 < p.spd * 2) {
+        if (Math.random() * 100 < p.spd * 1.5) {
             await typeLog("Você esquivou!", "#3498db");
         } else {
             let dmg = Math.ceil(getRandomFloat(e.str * 0.7, e.str));
-            if(isDefending) { dmg = Math.ceil(dmg * 0.5); await typeLog("Defesa bloqueou dano!", "#1e90ff"); }
-            p.hp -= dmg; p.furia = Math.min(100, p.furia + 25);
+            if(isDefending) { dmg = Math.ceil(dmg * 0.4); await typeLog("Defesa sólida!", "#1e90ff"); }
+            p.hp -= dmg; p.furia = Math.min(100, p.furia + 20);
             await typeLog(`${e.name} atacou: -${dmg} HP`, "#ff4757");
         }
         updateUI();
-        if(p.hp <= 0) showDeathScreen(); else toggleButtons(false);
-    }
-
-    function showDeathScreen() {
-        document.getElementById('death-screen').style.display = 'flex';
-    }
-
-    function tryAgain() {
-        p.hp = p.maxHp; p.mana = p.maxMana; p.furia = 0;
-        document.getElementById('death-screen').style.display = 'none';
-        spawnMonster();
-    }
-
-    function exitToMenu() {
-        localStorage.removeItem('rpg_save');
-        location.reload();
+        if(p.hp <= 0) { await typeLog("DERROTADO..."); setTimeout(() => location.reload(), 2000); }
+        else toggleButtons(false);
     }
 
     async function win() {
-        let xp = 25 + (p.lv * 15);
-        let gold = getRandom(15, 30) + (p.lv * 5);
-        p.xp += xp; p.gold += gold;
-        await typeLog(`VITÓRIA! +${xp} XP | +${gold} G`, "#2ecc71");
+        let xp = 20 + (p.lv * 10);
+        let g = getRandom(10, 25);
+        p.xp += xp; p.gold += g;
+        await typeLog(`VITÓRIA! +${xp}XP e +${g}G`, "#2ecc71");
         if(p.xp >= p.nextXp) { p.pendingPoints++; await typeLog("LEVEL UP!", "#ffa502"); }
         if(p.pendingPoints === 0) spawnMonster(); else updateUI();
     }
 
+    // --- LOJA E POÇÕES ---
+    function openShop() { document.getElementById('shop-overlay').style.display = 'flex'; document.getElementById('shop-gold').innerText = p.gold; }
+    function closeShop() { document.getElementById('shop-overlay').style.display = 'none'; }
+    function buyItem(type) {
+        if (p.gold >= 30) { p.gold -= 30; p.potHp++; updateUI(); document.getElementById('shop-gold').innerText = p.gold; }
+    }
+    async function usePotion() {
+        if (p.potHp > 0 && p.hp < p.maxHp) {
+            p.potHp--; let cura = Math.ceil(p.maxHp * 0.4);
+            p.hp = Math.min(p.maxHp, p.hp + cura);
+            updateUI(); await typeLog(`Curou ${cura} HP!`, "#2ed573");
+            enemyTurn();
+        }
+    }
+
+    // --- AUXILIARES ---
     function spendPoint(stat) {
         p.levels[stat]++;
         if(stat === 'vit') p.maxHp += 15; else p[stat] += 2;
-        p.lv++; p.pendingPoints = 0; p.hp = p.maxHp; p.xp = 0; p.nextXp = Math.ceil(p.nextXp * 1.5);
-        updateUI(); spawnMonster();
+        p.lv++; p.pendingPoints = 0; p.xp = 0; p.nextXp = Math.floor(p.nextXp * 1.4);
+        p.hp = p.maxHp; p.mana = p.maxMana; updateUI(); spawnMonster();
     }
 
-    async function playerHeal() {
-        if (p.mana < 8) return; p.mana -= 8;
-        let heal = Math.ceil(p.int * 1.5);
-        p.hp = Math.min(p.maxHp, p.hp + heal);
-        updateUI(); await typeLog(`Curou ${heal} HP`); await enemyTurn();
+    function showGame() { document.getElementById('start-menu').style.display = 'none'; document.getElementById('game-ui').style.display = 'flex'; }
+    function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    function getRandomFloat(min, max) { return Math.random() * (max - min) + min; }
+    function toggleButtons(s) { document.querySelectorAll('#action-buttons button').forEach(b => b.disabled = s); }
+    function applyDamageEffect() { const i = document.getElementById('enemy-img'); i.classList.add('take-damage'); setTimeout(()=>i.classList.remove('take-damage'), 400); }
+    async function typeLog(t, c) {
+        isTyping = true; const l = document.getElementById('game-log'); const d = document.createElement('div');
+        d.style.color = c || "#00ff9d"; d.innerHTML = "> "; l.appendChild(d);
+        for (let x of t) { d.innerHTML += x; l.scrollTop = l.scrollHeight; await new Promise(r => setTimeout(r, 10)); }
+        isTyping = false; await new Promise(r => setTimeout(r, 300));
     }
-
-    async function playerRest() { p.mana = Math.min(p.maxMana, p.mana + p.int); updateUI(); await typeLog("Descansou..."); await enemyTurn(); }
-    function playerDefend() { isDefending = true; typeLog("Em guarda!").then(() => enemyTurn()); }
-
-    async function useUltimate() {
-        p.furia = 0; let dmg = p.str * 3; e.hp -= dmg; updateUI();
-        await typeLog("ULTIMATE ATIVADA!", "#ffa502");
-        if(e.hp <= 0) await win(); else await enemyTurn();
-    }
-
-    async function typeLog(text, color = "#00ff9d") {
-        isTyping = true; const log = document.getElementById('game-log');
-        const line = document.createElement('div'); line.style.color = color;
-        line.innerHTML = "> "; log.appendChild(line);
-        for (let char of text) { line.innerHTML += char; log.scrollTop = log.scrollHeight; await new Promise(r => setTimeout(r, 15)); }
-        isTyping = false; await new Promise(r => setTimeout(r, 400));
-    }
-
-    function applyDamageEffect() {
-        const img = document.getElementById('enemy-img');
-        img.classList.add('take-damage');
-        setTimeout(() => img.classList.remove('take-damage'), 400);
-    }
-
-    function toggleButtons(state) { document.querySelectorAll('#action-buttons button').forEach(b => b.disabled = state); }
+    function playerRest() { p.mana = Math.min(p.maxMana, p.mana + p.int); updateUI(); typeLog("Recuperando mana...").then(() => enemyTurn()); }
+    function playerDefend() { isDefending = true; typeLog("Postura defensiva!").then(() => enemyTurn()); }
 </script>
 </body>
 </html>
