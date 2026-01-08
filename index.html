@@ -41,177 +41,115 @@
 
         /* --- TELAS --- */
         #start-menu {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 80vh;
-            text-align: center;
-            z-index: 100;
-            width: 100%;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; height: 80vh; text-align: center;
         }
 
         .game-title {
-            font-size: clamp(2rem, 8vw, 3rem);
-            font-weight: 800;
-            color: var(--accent);
-            text-shadow: 0 0 20px rgba(255, 165, 2, 0.4);
-            margin-bottom: 40px;
-            letter-spacing: -1px;
+            font-size: clamp(2rem, 8vw, 3rem); font-weight: 800; color: var(--accent);
+            text-shadow: 0 0 20px rgba(255, 165, 2, 0.4); margin-bottom: 40px;
         }
 
-        .main-wrapper {
-            display: none; 
-            gap: 20px;
-            width: 100%;
-            max-width: 1000px;
-            flex-wrap: wrap;
-            justify-content: center;
-            padding-bottom: 40px;
-        }
+        .main-wrapper { display: none; gap: 20px; width: 100%; max-width: 1000px; flex-wrap: wrap; justify-content: center; }
 
-        /* --- OVERLAYS (MORTE E LOJA) --- */
+        /* OVERLAYS */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: none; flex-direction: column;
-            align-items: center; justify-content: center;
-            z-index: 9999; text-align: center;
+            background: rgba(0,0,0,0.95); z-index: 1000;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 20px;
         }
 
-        .death-title { font-size: 4rem; color: var(--primary); font-weight: 800; margin-bottom: 20px; }
-        
-        .shop-container {
-            background: var(--card); border: 2px solid var(--accent);
-            padding: 30px; border-radius: 24px; width: 90%; max-width: 400px;
-        }
-
-        /* --- ESTILO DOS BOTÕES --- */
-        .btn-menu { width: 100%; max-width: 280px; margin: 10px; font-size: 1.1rem; }
-        .btn-exit {
-            position: absolute; top: 20px; right: 20px;
-            padding: 8px 15px !important; font-size: 12px !important;
-            background: #441111 !important; min-height: auto !important; z-index: 10;
-        }
-
+        /* --- SIDEBAR & CONTAINER --- */
         #hero-sidebar {
             flex: 1; min-width: 300px; max-width: 320px;
             background: var(--panel); backdrop-filter: blur(10px);
             padding: 25px; border-radius: 24px; border: 1px solid var(--border);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); order: 1; 
-        }
-
-        /* --- INVENTÁRIO --- */
-        .inventory-grid {
-            display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px;
-        }
-        .inv-slot {
-            aspect-ratio: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border);
-            border-radius: 8px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 18px; position: relative;
-        }
-        .inv-slot:hover { border-color: var(--accent); }
-        .inv-slot .count { 
-            position: absolute; bottom: 2px; right: 4px; font-size: 10px; 
-            background: var(--accent); color: black; padding: 0 4px; border-radius: 4px; font-weight: 800;
         }
 
         #game-container { 
-            flex: 2; min-width: 300px; max-width: 550px; 
+            flex: 2; min-width: 320px; max-width: 550px; 
             background: var(--card); padding: 20px; border-radius: 32px; 
-            border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 25px 50px rgba(0,0,0,0.6);
-            position: relative; order: 2; 
+            border: 1px solid rgba(255,255,255,0.15); position: relative;
         }
 
-        @media (max-width: 768px) {
-            .main-wrapper { flex-direction: column; align-items: center; }
-            #game-container { order: 1; width: 100%; }
-            #hero-sidebar { order: 2; width: 100%; max-width: 100%; }
-            .game-title { margin-top: 20px; }
+        /* INVENTÁRIO */
+        .inventory-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; }
+        .inv-slot {
+            aspect-ratio: 1; background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; position: relative; font-size: 1.2rem;
+        }
+        .inv-slot:hover { border-color: var(--accent); }
+        .slot-count {
+            position: absolute; bottom: 2px; right: 4px; font-size: 10px;
+            background: var(--accent); color: #000; padding: 0 4px; border-radius: 4px; font-weight: 800;
         }
 
-        .hero-header { border-bottom: 2px solid var(--border); margin-bottom: 20px; padding-bottom: 10px; }
-        .hero-header h2 { margin: 0; color: var(--accent); font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
-
+        /* --- COMPONENTES --- */
         .attribute-card {
-            background: rgba(0,0,0,0.3); margin-bottom: 10px; padding: 12px 15px;
+            background: rgba(0,0,0,0.3); margin-bottom: 8px; padding: 10px 15px;
             border-radius: 12px; display: flex; justify-content: space-between;
-            align-items: center; border-left: 4px solid var(--accent); transition: all 0.3s ease;
+            align-items: center; border-left: 4px solid var(--accent);
         }
 
-        .gold-card { border-left-color: var(--gold); background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), transparent); margin-top: 15px; }
-        .gold-card i { color: var(--gold) !important; animation: coin-spin 3s infinite linear; }
-        
-        @keyframes coin-spin { 0% { transform: rotateY(0deg); } 50% { transform: rotateY(180deg); } 100% { transform: rotateY(360deg); } }
-
-        .attr-info i { color: var(--accent); margin-right: 10px; width: 20px; text-align: center; }
-        .attr-info { font-weight: 700; font-size: 14px; text-transform: uppercase; color: #ccc; }
-        .attr-value { color: #fff; font-size: 16px; margin-left: 5px; }
+        .gold-card { border-left-color: var(--gold); background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), transparent); }
 
         .lvl-up-btn {
-            width: 35px; height: 35px; background: var(--accent); color: #000;
-            border-radius: 50%; border: none; font-weight: 900; font-size: 20px;
-            cursor: pointer; box-shadow: 0 0 15px var(--accent); animation: pulse 1.5s infinite; display: none;
+            width: 30px; height: 30px; background: var(--accent); color: #000;
+            border-radius: 50%; border: none; font-weight: 900; cursor: pointer; display: none;
         }
-
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
         .enemy-card { 
-            background: rgba(0,0,0,0.5); padding: 20px; border-radius: 24px; text-align: center; 
-            margin-bottom: 20px; border: 1px solid var(--border); margin-top: 30px;
+            background: rgba(0,0,0,0.5); padding: 20px; border-radius: 24px; 
+            text-align: center; margin-bottom: 20px; border: 1px solid var(--border);
         }
         
-        .enemy-sprite-container {
-            width: 100%; max-width: 180px; height: 180px;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            margin: 15px auto; display: flex; align-items: center; justify-content: center;
-        }
-
+        .enemy-sprite-container { width: 160px; height: 160px; margin: 10px auto; display: flex; align-items: center; justify-content: center; }
         .enemy-sprite { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
 
-        .status-bar { background: #000; height: 14px; border-radius: 7px; margin: 8px 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .status-bar { background: #000; height: 12px; border-radius: 6px; margin: 5px 0; overflow: hidden; border: 1px solid var(--border); }
         .bar-fill { height: 100%; transition: width 0.4s ease-out; }
-        .hp-fill { background: linear-gradient(90deg, #ff4757, #ff6b81); box-shadow: 0 0 10px rgba(255,71,87,0.5); }
-        .mana-fill { background: linear-gradient(90deg, #1e90ff, #70a1ff); box-shadow: 0 0 10px rgba(30,144,255,0.5); }
+        .hp-fill { background: linear-gradient(90deg, #ff4757, #ff6b81); }
+        .mana-fill { background: linear-gradient(90deg, #1e90ff, #70a1ff); }
         .xp-fill { background: #a29bfe; }
         .furia-fill { background: #ffa502; }
 
         .log { 
-            height: 120px; overflow-y: auto; background: rgba(0,0,0,0.8); padding: 15px; 
-            border-radius: 16px; font-family: 'Fira Code', monospace; font-size: 12px; 
-            margin-bottom: 20px; border: 1px solid var(--border); line-height: 1.5;
+            height: 100px; overflow-y: auto; background: rgba(0,0,0,0.8); padding: 12px; 
+            border-radius: 16px; font-family: 'Fira Code', monospace; font-size: 11px; 
+            margin-bottom: 15px; border: 1px solid var(--border);
         }
 
-        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .magic-row { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 5px; }
+        /* BOTÕES */
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .magic-row { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
         
         button.action-btn { 
-            padding: 15px 10px; font-family: 'Poppins'; font-weight: 700; border: none; 
-            border-radius: 16px; color: white; cursor: pointer; transition: 0.2s;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-transform: uppercase; background: #2a2a35; position: relative; overflow: hidden;
+            padding: 12px 5px; font-family: 'Poppins'; font-weight: 700; border: none; 
+            border-radius: 14px; color: white; cursor: pointer; transition: 0.2s;
+            display: flex; flex-direction: column; align-items: center; background: #2a2a35;
         }
-        button.action-btn i { margin-bottom: 5px; font-size: 18px; }
-        .btn-mag .bg-icon { position: absolute; font-size: 50px; opacity: 0.15; z-index: 0; pointer-events: none; }
-        button.action-btn:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.3); }
-        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        button.action-btn i { margin-bottom: 4px; font-size: 16px; }
+        .skill-info { font-size: 9px; opacity: 0.8; font-weight: 400; }
+        
+        .btn-atk { box-shadow: inset 0 -3px 0 0 var(--primary); }
+        .btn-heal { box-shadow: inset 0 -3px 0 0 var(--secondary); }
+        .btn-def { box-shadow: inset 0 -3px 0 0 var(--skill-def); }
+        .btn-rest { box-shadow: inset 0 -3px 0 0 var(--skill-rest); }
+        .btn-ult { grid-column: span 2; box-shadow: inset 0 -3px 0 0 var(--accent); background: #3d2b00; }
 
-        .btn-atk { box-shadow: inset 0 -4px 0 0 var(--primary), 0 4px 12px rgba(255, 71, 87, 0.4); }
-        .btn-heal { box-shadow: inset 0 -4px 0 0 var(--secondary), 0 4px 12px rgba(46, 213, 115, 0.4); }
-        .btn-def { box-shadow: inset 0 -4px 0 0 var(--skill-def), 0 4px 12px rgba(30, 144, 255, 0.4); }
-        .btn-rest { box-shadow: inset 0 -4px 0 0 var(--skill-rest), 0 4px 12px rgba(83, 82, 237, 0.4); }
-        .btn-ult { grid-column: span 2; box-shadow: inset 0 -4px 0 0 var(--accent), 0 6px 15px rgba(255, 165, 2, 0.5); }
-        .btn-mag.fogo { box-shadow: inset 0 -4px 0 0 var(--skill-fogo); }
-        .btn-mag.agua { box-shadow: inset 0 -4px 0 0 var(--skill-agua); }
-        .btn-mag.terra { box-shadow: inset 0 -4px 0 0 var(--skill-terra); }
+        .btn-mag.fogo { box-shadow: inset 0 -3px 0 0 var(--skill-fogo); }
+        .btn-mag.agua { box-shadow: inset 0 -3px 0 0 var(--skill-agua); }
+        .btn-mag.terra { box-shadow: inset 0 -3px 0 0 var(--skill-terra); }
 
-        .skill-info { font-size: 10px; font-weight: 400; opacity: 0.8; margin-top: 2px; }
-        .take-damage { animation: damage-pulse 0.4s ease-in-out; }
+        .btn-exit { position: absolute; top: 15px; right: 15px; font-size: 10px !important; padding: 5px 10px !important; background: #441111 !important; }
 
+        .take-damage { animation: damage-pulse 0.4s; }
         @keyframes damage-pulse {
-            0% { transform: translateX(0); filter: brightness(2) sepia(1) saturate(20) hue-rotate(-50deg); }
-            25% { transform: translateX(-10px); }
-            50% { transform: translateX(10px); }
+            0% { transform: translateX(0); filter: brightness(2) red; }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
             100% { transform: translateX(0); filter: none; }
         }
     </style>
@@ -219,35 +157,33 @@
 <body>
 
 <div id="death-screen" class="overlay">
-    <div class="death-title">VOCÊ MORREU</div>
-    <button class="action-btn btn-heal btn-menu" onclick="restartBattle()">
-        <i class="fa-solid fa-rotate-left"></i> TENTAR NOVAMENTE
+    <h1 style="color: var(--primary); font-size: 3.5rem; margin-bottom: 10px;">VOCÊ MORREU</h1>
+    <p style="margin-bottom: 30px; opacity: 0.7;">Sua jornada foi interrompida...</p>
+    <button class="action-btn btn-heal" style="width: 250px; margin-bottom: 15px;" onclick="tryAgain()">
+        <i class="fa-solid fa-rotate-right"></i> TENTAR NOVAMENTE
     </button>
-    <button class="action-btn btn-atk btn-menu" onclick="exitToMenu()">
+    <button class="action-btn btn-atk" style="width: 250px;" onclick="exitToMenu()">
         <i class="fa-solid fa-door-open"></i> SAIR
     </button>
 </div>
 
 <div id="shop-screen" class="overlay">
-    <div class="shop-container">
-        <h3>MERCADOR MÍSTICO</h3>
-        <p>Seu Gold: <span id="shop-gold">0</span> G</p>
-        <div class="attribute-card" style="cursor: pointer; border-left-color: var(--secondary);" onclick="buyPotion()">
-            <div class="attr-info"><i class="fa-solid fa-flask"></i> Poção de Vida</div>
+    <div style="background: var(--card); padding: 30px; border-radius: 24px; border: 2px solid var(--accent); max-width: 350px; width: 90%;">
+        <h2 style="color: var(--gold); margin-top: 0;"><i class="fa-solid fa-shop"></i> LOJA</h2>
+        <p>Seu Ouro: <span id="shop-gold-val">0</span> G</p>
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+        <div class="attribute-card" style="cursor: pointer;" onclick="buyPotion()">
+            <div class="attr-info"><i class="fa-solid fa-flask" style="color: var(--secondary)"></i> Poção de Vida</div>
             <div class="attr-value">50 G</div>
         </div>
-        <button class="action-btn btn-atk btn-menu" style="max-width: 100%;" onclick="toggleShop(false)">FECHAR</button>
+        <button class="action-btn btn-atk" style="width: 100%; margin-top: 20px;" onclick="toggleShop(false)">FECHAR</button>
     </div>
 </div>
 
 <div id="start-menu">
     <div class="game-title">MASTERY RPG</div>
-    <button class="action-btn btn-atk btn-menu" onclick="startNewGame()">
-        <i class="fa-solid fa-play"></i> NOVO JOGO
-    </button>
-    <button id="continue-btn" class="action-btn btn-heal btn-menu" onclick="loadGame()" style="display: none;">
-        <i class="fa-solid fa-forward"></i> CONTINUAR
-    </button>
+    <button class="action-btn btn-atk" style="width: 280px; margin-bottom: 15px;" onclick="startNewGame()">NOVO JOGO</button>
+    <button id="continue-btn" class="action-btn btn-heal" style="width: 280px; display: none;" onclick="loadGame()">CONTINUAR</button>
 </div>
 
 <div class="main-wrapper" id="game-ui">
@@ -257,20 +193,18 @@
             <h2>GUERREIRO</h2>
         </div>
 
-        <div id="stats-list">
+        <div id="stats-container">
             </div>
 
         <div class="attribute-card gold-card" onclick="toggleShop(true)" style="cursor: pointer;">
-            <div class="attr-info">
-                <i class="fa-solid fa-coins"></i> LOJA / OURO
-            </div>
+            <div class="attr-info"><i class="fa-solid fa-coins"></i> OURO / LOJA</div>
             <div class="attr-value"><span id="p-gold">0</span> G</div>
         </div>
 
         <div style="margin-top: 15px;">
-            <small><i class="fa-solid fa-bag-shopping"></i> INVENTÁRIO (5 SLOTS)</small>
+            <small><i class="fa-solid fa-box"></i> INVENTÁRIO (5 SLOTS)</small>
             <div class="inventory-grid" id="inventory">
-                <div class="inv-slot" onclick="usePotion(0)"><i class="fa-solid fa-flask" style="color:var(--secondary); opacity:0.3"></i></div>
+                <div class="inv-slot" onclick="usePotion()"><i class="fa-solid fa-flask" style="opacity: 0.2;"></i></div>
                 <div class="inv-slot"></div>
                 <div class="inv-slot"></div>
                 <div class="inv-slot"></div>
@@ -279,40 +213,32 @@
         </div>
 
         <div style="margin-top: 20px;">
-            <small><i class="fa-solid fa-star"></i> EXPERIÊNCIA</small>
+            <small>EXPERIÊNCIA</small>
             <div class="status-bar"><div id="p-xp-bar" class="bar-fill xp-fill"></div></div>
         </div>
     </aside>
 
     <main id="game-container">
-        <button class="action-btn btn-atk btn-exit" onclick="saveAndExit()">
-            <i class="fa-solid fa-door-open"></i> SAIR
-        </button>
+        <button class="action-btn btn-exit" onclick="saveAndExit()">SAIR</button>
 
         <div class="enemy-card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3 id="enemy-name" style="margin:0">BUSCANDO...</h3>
+                <h3 id="enemy-name" style="margin:0">INIMIGO</h3>
                 <div id="enemy-badges"></div>
             </div>
-            <div class="enemy-sprite-container">
-                <img id="enemy-img" src="" alt="" class="enemy-sprite">
-            </div>
+            <div class="enemy-sprite-container"><img id="enemy-img" src="" class="enemy-sprite"></div>
             <div class="status-bar"><div id="enemy-bar" class="bar-fill hp-fill"></div></div>
             <small><span id="enemy-hp">0</span> / <span id="enemy-max-hp">0</span> HP</small>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
             <div>
-                <small><i class="fa-solid fa-heart"></i> VIDA: <span id="p-hp">0</span>/<span id="p-max-hp">0</span></small>
+                <small>VIDA: <span id="p-hp">0</span>/<span id="p-max-hp">0</span></small>
                 <div class="status-bar"><div id="p-hp-bar" class="bar-fill hp-fill"></div></div>
             </div>
             <div>
-                <small><i class="fa-solid fa-wand-sparkles"></i> MANA: <span id="p-mana">0</span></small>
+                <small>MANA: <span id="p-mana">0</span></small>
                 <div class="status-bar"><div id="p-mana-bar" class="bar-fill mana-fill"></div></div>
-            </div>
-            <div style="grid-column: span 2;">
-                <small><i class="fa-solid fa-fire-glow"></i> FÚRIA ESPECIAL</small>
-                <div class="status-bar" style="height: 6px;"><div id="p-furia-bar" class="bar-fill furia-fill"></div></div>
             </div>
         </div>
 
@@ -332,19 +258,13 @@
                 <i class="fa-solid fa-bed"></i> DESCANSAR <div class="skill-info" id="val-rest">-</div>
             </button>
             <button id="ult-btn" class="action-btn btn-ult" onclick="useUltimate()">
-                <i class="fa-solid fa-sun"></i> GOLPE SUPREMO <div class="skill-info" id="val-ult">LIBERADO!</div>
+                <i class="fa-solid fa-sun"></i> GOLPE SUPREMO <div class="skill-info">DANO MASSIVO</div>
             </button>
             
             <div class="magic-row">
-                <button class="action-btn btn-mag fogo" onclick="playerAction('fogo')">
-                    <i class="fa-solid fa-fire-flame-curved bg-icon"></i> FOGO
-                </button>
-                <button class="action-btn btn-mag agua" onclick="playerAction('agua')">
-                    <i class="fa-solid fa-droplet bg-icon"></i> ÁGUA
-                </button>
-                <button class="action-btn btn-mag terra" onclick="playerAction('terra')">
-                    <i class="fa-solid fa-mountain bg-icon"></i> TERRA
-                </button>
+                <button class="action-btn btn-mag fogo" onclick="playerAction('fogo')">FOGO <div class="skill-info" id="eff-fogo">-</div></button>
+                <button class="action-btn btn-mag agua" onclick="playerAction('agua')">ÁGUA <div class="skill-info" id="eff-agua">-</div></button>
+                <button class="action-btn btn-mag terra" onclick="playerAction('terra')">TERRA <div class="skill-info" id="eff-terra">-</div></button>
             </div>
         </div>
     </main>
@@ -366,39 +286,36 @@
         { name: "Vampiro", hpMultMin: 1.1, hpMultMax: 1.3, strMultMin: 0.8, strMultMax: 1.0, minLv: 10, type: 'proportional', img: "vampiro.png" }
     ];
 
-    // Inicialização de Stats na Barra Lateral
-    const statsCfg = [
-        {id: 'str', label: 'FORÇA', icon: 'fa-hand-fist'},
-        {id: 'spd', label: 'VELOCIDADE', icon: 'fa-bolt'},
-        {id: 'int', label: 'INTELIGÊNCIA', icon: 'fa-brain'},
-        {id: 'luk', label: 'SORTE', icon: 'fa-clover'},
-        {id: 'vit', label: 'VITALIDADE', icon: 'fa-heart-pulse'}
-    ];
+    window.onload = () => {
+        renderStats();
+        if(localStorage.getItem('rpg_save')) document.getElementById('continue-btn').style.display = 'block';
+    };
 
-    function initStatsUI() {
-        const container = document.getElementById('stats-list');
-        container.innerHTML = statsCfg.map(s => `
+    function renderStats() {
+        const stats = [
+            { id: 'str', name: 'Força', icon: 'fa-hand-fist' },
+            { id: 'spd', name: 'Velocidade', icon: 'fa-bolt' },
+            { id: 'int', name: 'Inteligência', icon: 'fa-brain' },
+            { id: 'luk', name: 'Sorte', icon: 'fa-clover' },
+            { id: 'vit', name: 'Vitalidade', icon: 'fa-heart-pulse' }
+        ];
+        document.getElementById('stats-container').innerHTML = stats.map(s => `
             <div class="attribute-card">
-                <div class="attr-info"><i class="fa-solid ${s.icon}"></i> ${s.label} NVL <span class="attr-value" id="stat-${s.id}">1</span></div>
+                <div class="attr-info"><i class="fa-solid ${s.icon}"></i> ${s.name} NVL <span id="stat-${s.id}">1</span></div>
                 <button class="lvl-up-btn" onclick="spendPoint('${s.id}')">+</button>
             </div>
         `).join('');
     }
 
-    window.onload = () => {
-        initStatsUI();
-        if(localStorage.getItem('rpg_save')) document.getElementById('continue-btn').style.display = 'flex';
-    };
-
     function startNewGame() {
         p = { 
             lv: 1, hp: 20, maxHp: 20, mana: 20, maxMana: 20, 
-            str: 4, int: 5, luk: 3, spd: 3, vit: 1, xp: 0, nextXp: 50, furia: 0, gold: 100,
-            inventory: { potions: 1 },
-            pendingPoints: 0,
+            str: 5, int: 5, luk: 3, spd: 3, vit: 1, xp: 0, nextXp: 50, furia: 0, gold: 50,
+            potions: 1, pendingPoints: 0,
             levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 }
         };
-        showGame();
+        document.getElementById('start-menu').style.display = 'none';
+        document.getElementById('game-ui').style.display = 'flex';
         spawnMonster();
     }
 
@@ -409,67 +326,52 @@
 
     function loadGame() {
         const saved = JSON.parse(localStorage.getItem('rpg_save'));
-        if(saved) { p = saved.p; e = saved.e; showGame(); updateUI(); toggleButtons(false); }
-    }
-
-    function showGame() {
+        p = saved.p; e = saved.e;
         document.getElementById('start-menu').style.display = 'none';
         document.getElementById('game-ui').style.display = 'flex';
+        updateUI();
+        typeLog("Bem-vindo de volta!", "#2ed573");
     }
 
-    // --- LOJA E INVENTÁRIO ---
+    // --- SISTEMA DE LOJA ---
     function toggleShop(show) {
         document.getElementById('shop-screen').style.display = show ? 'flex' : 'none';
-        document.getElementById('shop-gold').innerText = p.gold;
+        document.getElementById('shop-gold-val').innerText = p.gold;
     }
 
     function buyPotion() {
         if (p.gold >= 50) {
-            p.gold -= 50;
-            p.inventory.potions++;
-            updateUI();
-            document.getElementById('shop-gold').innerText = p.gold;
+            p.gold -= 50; p.potions++;
+            updateUI(); toggleShop(true);
+            typeLog("Comprou Poção de Vida!", "#2ed573");
         } else {
             alert("Ouro insuficiente!");
         }
     }
 
-    async function usePotion(slot) {
-        if (slot === 0 && p.inventory.potions > 0 && p.hp > 0 && !isTyping) {
-            p.inventory.potions--;
-            const heal = Math.ceil(p.maxHp * 0.5);
+    async function usePotion() {
+        if (p.potions > 0 && p.hp > 0 && !isTyping) {
+            p.potions--;
+            const heal = Math.ceil(p.maxHp * 0.4);
             p.hp = Math.min(p.maxHp, p.hp + heal);
             updateUI();
-            await typeLog(`Você usou poção: +${heal} HP!`, "#2ed573");
+            await typeLog(`Usou Poção: +${heal} HP`, "#2ed573");
         }
     }
 
-    // --- LÓGICA DE JOGO ---
+    // --- COMBATE ---
     function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
     function getRandomFloat(min, max) { return Math.random() * (max - min) + min; }
-
-    async function typeLog(text, color = "#00ff9d") {
-        isTyping = true;
-        const log = document.getElementById('game-log');
-        const line = document.createElement('div');
-        line.style.color = color; line.innerHTML = "> ";
-        log.appendChild(line);
-        for (let char of text) {
-            line.innerHTML += char; log.scrollTop = log.scrollHeight;
-            await new Promise(r => setTimeout(r, 15));
-        }
-        isTyping = false;
-        await new Promise(r => setTimeout(r, 400));
-    }
 
     async function spawnMonster() {
         let avail = monsterTemplates.filter(m => p.lv >= m.minLv);
         let data = avail[Math.floor(Math.random() * avail.length)];
         const randomElem = types[Math.floor(Math.random() * types.length)];
-        let finalHp = data.type === 'proportional' ? Math.ceil(p.maxHp * getRandomFloat(data.hpMultMin, data.hpMultMax)) : getRandom(data.hpMin, data.hpMax) + (p.lv * 2);
-        let finalStr = data.type === 'proportional' ? p.str * getRandomFloat(data.strMultMin, data.strMultMax) : getRandomFloat(data.strMin, data.strMax) + (p.lv * 0.3);
+        
+        let hp = data.type === 'proportional' ? p.maxHp * getRandomFloat(data.hpMultMin, data.hpMultMax) : getRandom(data.hpMin, data.hpMax) + (p.lv * 2);
+        let str = data.type === 'proportional' ? p.str * getRandomFloat(data.strMultMin, data.strMultMax) : getRandomFloat(data.strMin, data.strMax) + (p.lv * 0.3);
 
-        e = { ...data, elem: randomElem, maxHp: finalHp, hp: finalHp, str: finalStr };
+        e = { ...data, elem: randomElem, maxHp: Math.ceil(hp), hp: Math.ceil(hp), str: str };
         updateUI();
         await typeLog(`${e.name} apareceu!`, "#f1c40f");
         toggleButtons(false);
@@ -479,74 +381,90 @@
         // Barras
         document.getElementById('p-hp-bar').style.width = (p.hp/p.maxHp*100) + "%";
         document.getElementById('p-mana-bar').style.width = (p.mana/p.maxMana*100) + "%";
-        document.getElementById('p-furia-bar').style.width = p.furia + "%";
-        document.getElementById('p-xp-bar').style.width = (p.xp/p.nextXp*100) + "%";
         document.getElementById('enemy-bar').style.width = (e.hp/e.maxHp*100) + "%";
+        document.getElementById('p-xp-bar').style.width = (p.xp/p.nextXp*100) + "%";
 
         // Textos
-        document.getElementById('p-lv').innerText = p.lv;
         document.getElementById('p-hp').innerText = Math.ceil(p.hp);
         document.getElementById('p-max-hp').innerText = p.maxHp;
         document.getElementById('p-mana').innerText = Math.ceil(p.mana);
         document.getElementById('p-gold').innerText = p.gold;
+        document.getElementById('p-lv').innerText = p.lv;
         document.getElementById('enemy-name').innerText = e.name;
         document.getElementById('enemy-hp').innerText = Math.ceil(e.hp);
         document.getElementById('enemy-max-hp').innerText = e.maxHp;
         document.getElementById('enemy-img').src = e.img;
 
-        // Stats
-        statsCfg.forEach(s => {
-            document.getElementById(`stat-${s.id}`).innerText = p.levels[s.id];
-            document.querySelectorAll('.lvl-up-btn').forEach(btn => btn.style.display = p.pendingPoints > 0 ? 'block' : 'none');
-        });
-
         // Inventário
-        const firstSlot = document.querySelector('.inv-slot');
-        firstSlot.innerHTML = p.inventory.potions > 0 ? 
-            `<i class="fa-solid fa-flask" style="color:var(--secondary)"></i><span class="count">${p.inventory.potions}</span>` : 
-            `<i class="fa-solid fa-flask" style="color:var(--secondary); opacity:0.3"></i>`;
+        const slot = document.querySelector('.inv-slot');
+        slot.innerHTML = p.potions > 0 ? `<i class="fa-solid fa-flask" style="color:var(--secondary)"></i><span class="slot-count">${p.potions}</span>` : `<i class="fa-solid fa-flask" style="opacity:0.2"></i>`;
 
-        // Tooltips
+        // Atributos
+        for(let s in p.levels) document.getElementById(`stat-${s}`).innerText = p.levels[s];
+        document.querySelectorAll('.lvl-up-btn').forEach(b => b.style.display = p.pendingPoints > 0 ? 'block' : 'none');
+
+        // Botões info
         document.getElementById('val-atk').innerText = `${Math.floor(p.str*0.5)}-${Math.ceil(p.str)} Dano`;
         document.getElementById('val-heal').innerText = `8 MP | +${Math.floor(p.int * 1.5)}`;
+        document.getElementById('val-rest').innerText = `+${p.int} MP`;
         document.getElementById('ult-btn').style.display = p.furia >= 100 ? 'flex' : 'none';
+
+        // Efetividade
+        types.forEach(t => {
+            let label = document.getElementById(`eff-${t}`);
+            if (elems[e.elem].fraqueza === t) label.innerText = "EFET.";
+            else if (elems[e.elem].resiste === t) label.innerText = "FRACO";
+            else label.innerText = "NEUTRO";
+        });
         
         const badgeColor = elems[e.elem].cor;
         document.getElementById('enemy-badges').innerHTML = `<span class="badge" style="background: ${badgeColor}">${e.elem.toUpperCase()}</span>`;
     }
 
     async function playerAction(tipo) {
-        if(isTyping || p.hp <= 0 || p.pendingPoints > 0) return;
-        toggleButtons(true); isDefending = false;
-        let dmg = tipo === 'fisico' ? getRandomFloat(p.str * 0.6, p.str) : (p.mana < 10 ? 0 : getRandomFloat(p.int * 0.8, p.int * 1.2));
+        if(isTyping || p.hp <= 0) return;
+        toggleButtons(true);
+        isDefending = false;
         
-        if (tipo !== 'fisico') { 
+        let dmg;
+        if (tipo === 'fisico') {
+            dmg = getRandomFloat(p.str * 0.5, p.str);
+        } else {
             if (p.mana < 10) { await typeLog("Sem mana!"); toggleButtons(false); return; }
             p.mana -= 10;
+            dmg = getRandomFloat(p.int * 0.8, p.int * 1.2);
             if (elems[e.elem].fraqueza === tipo) dmg *= 1.5;
             if (elems[e.elem].resiste === tipo) dmg *= 0.6;
         }
 
-        dmg = Math.ceil(dmg); applyDamageEffect(); e.hp -= dmg; updateUI();
-        await typeLog(`Dano causado: ${dmg}!`);
+        if (Math.random() * 100 < p.luk) { dmg *= 2; await typeLog("CRÍTICO!", "#ffa502"); }
+        
+        dmg = Math.ceil(dmg);
+        applyDamageEffect();
+        e.hp -= dmg; updateUI();
+        await typeLog(`Atacou ${tipo.toUpperCase()}: ${dmg} dano`);
+        
         if(e.hp <= 0) await win(); else await enemyTurn();
     }
 
     async function enemyTurn() {
-        let dmg = Math.ceil(getRandomFloat(e.str * 0.7, e.str));
-        if(isDefending) dmg = Math.ceil(dmg * 0.4);
-        p.hp -= dmg; p.furia = Math.min(100, p.furia + 20);
+        if (Math.random() * 100 < p.spd * 2) {
+            await typeLog("Você esquivou!", "#3498db");
+        } else {
+            let dmg = Math.ceil(getRandomFloat(e.str * 0.7, e.str));
+            if(isDefending) { dmg = Math.ceil(dmg * 0.5); await typeLog("Defesa bloqueou dano!", "#1e90ff"); }
+            p.hp -= dmg; p.furia = Math.min(100, p.furia + 25);
+            await typeLog(`${e.name} atacou: -${dmg} HP`, "#ff4757");
+        }
         updateUI();
-        await typeLog(`${e.name} atacou: -${dmg} HP`, "#ff4757");
         if(p.hp <= 0) showDeathScreen(); else toggleButtons(false);
-        isDefending = false;
     }
 
     function showDeathScreen() {
         document.getElementById('death-screen').style.display = 'flex';
     }
 
-    function restartBattle() {
+    function tryAgain() {
         p.hp = p.maxHp; p.mana = p.maxMana; p.furia = 0;
         document.getElementById('death-screen').style.display = 'none';
         spawnMonster();
@@ -558,28 +476,43 @@
     }
 
     async function win() {
-        let xp = 25 + (p.lv * 10);
-        let gold = getRandom(10, 20) + (p.lv * 5);
+        let xp = 25 + (p.lv * 15);
+        let gold = getRandom(15, 30) + (p.lv * 5);
         p.xp += xp; p.gold += gold;
-        await typeLog(`Vitória! +${xp} XP e +${gold} Gold`, "#ffd700");
-        if(p.xp >= p.nextXp) { p.pendingPoints++; await typeLog("Level UP!"); }
+        await typeLog(`VITÓRIA! +${xp} XP | +${gold} G`, "#2ecc71");
+        if(p.xp >= p.nextXp) { p.pendingPoints++; await typeLog("LEVEL UP!", "#ffa502"); }
         if(p.pendingPoints === 0) spawnMonster(); else updateUI();
     }
 
-    function playerHeal() {
-        if (p.mana < 8) return; p.mana -= 8;
-        p.hp = Math.min(p.maxHp, p.hp + Math.floor(p.int * 1.5));
-        updateUI(); typeLog("Você se curou!").then(() => enemyTurn());
+    function spendPoint(stat) {
+        p.levels[stat]++;
+        if(stat === 'vit') p.maxHp += 15; else p[stat] += 2;
+        p.lv++; p.pendingPoints = 0; p.hp = p.maxHp; p.xp = 0; p.nextXp = Math.ceil(p.nextXp * 1.5);
+        updateUI(); spawnMonster();
     }
 
-    function playerDefend() { toggleButtons(true); isDefending = true; typeLog("Defesa ativa!").then(() => enemyTurn()); }
-    function playerRest() { p.mana = Math.min(p.maxMana, p.mana + p.int); updateUI(); typeLog("Recuperou Mana").then(() => enemyTurn()); }
+    async function playerHeal() {
+        if (p.mana < 8) return; p.mana -= 8;
+        let heal = Math.ceil(p.int * 1.5);
+        p.hp = Math.min(p.maxHp, p.hp + heal);
+        updateUI(); await typeLog(`Curou ${heal} HP`); await enemyTurn();
+    }
 
-    function spendPoint(stat) {
-        p.levels[stat]++; p[stat] += 2;
-        if(stat === 'vit') p.maxHp += 15;
-        p.lv++; p.pendingPoints = 0; p.hp = p.maxHp; p.xp = 0; p.nextXp *= 1.4;
-        updateUI(); spawnMonster();
+    async function playerRest() { p.mana = Math.min(p.maxMana, p.mana + p.int); updateUI(); await typeLog("Descansou..."); await enemyTurn(); }
+    function playerDefend() { isDefending = true; typeLog("Em guarda!").then(() => enemyTurn()); }
+
+    async function useUltimate() {
+        p.furia = 0; let dmg = p.str * 3; e.hp -= dmg; updateUI();
+        await typeLog("ULTIMATE ATIVADA!", "#ffa502");
+        if(e.hp <= 0) await win(); else await enemyTurn();
+    }
+
+    async function typeLog(text, color = "#00ff9d") {
+        isTyping = true; const log = document.getElementById('game-log');
+        const line = document.createElement('div'); line.style.color = color;
+        line.innerHTML = "> "; log.appendChild(line);
+        for (let char of text) { line.innerHTML += char; log.scrollTop = log.scrollHeight; await new Promise(r => setTimeout(r, 15)); }
+        isTyping = false; await new Promise(r => setTimeout(r, 400));
     }
 
     function applyDamageEffect() {
@@ -588,9 +521,7 @@
         setTimeout(() => img.classList.remove('take-damage'), 400);
     }
 
-    function toggleButtons(state) {
-        document.querySelectorAll('#action-buttons button').forEach(b => b.disabled = state);
-    }
+    function toggleButtons(state) { document.querySelectorAll('#action-buttons button').forEach(b => b.disabled = state); }
 </script>
 </body>
 </html>
