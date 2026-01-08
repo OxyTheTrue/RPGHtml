@@ -594,6 +594,7 @@
         const inputName = document.getElementById('player-name-input').value.trim();
         const finalName = inputName || "GUERREIRO";
         
+        // Inicializa o personagem apenas aqui
         p = { 
             name: finalName,
             lv: 1, hp: 10, maxHp: 10, mana: 20, maxMana: 20, 
@@ -605,6 +606,7 @@
             levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 },
             buffs: { boots: 0, shield: 0, coin: 0 }
         };
+        
         showGame();
         spawnMonster();
     }
@@ -801,6 +803,7 @@
     }
 
     function updateUI() {
+        if(!p) return;
         document.getElementById('p-hp-bar').style.width = (p.hp/p.maxHp*100) + "%";
         document.getElementById('p-mana-bar').style.width = (p.mana/p.maxMana*100) + "%";
         document.getElementById('p-furia-bar').style.width = p.furia + "%";
