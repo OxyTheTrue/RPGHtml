@@ -241,7 +241,14 @@
             100% { transform: translateX(0); filter: none; }
         }
 
-        /* --- NOVOS ESTILOS: GOLD, LOJA E INVENTÁRIO --- */
+        /* --- ANIMAÇÃO PISCAR VERMELHO --- */
+        @keyframes blink-red {
+            0% { background-color: #2a2a35; }
+            50% { background-color: #ff4757; }
+            100% { background-color: #2a2a35; }
+        }
+        .blink-error { animation: blink-red 0.3s ease 2; }
+
         .gold-container {
             background: rgba(255, 165, 2, 0.15);
             padding: 8px 15px;
@@ -338,19 +345,19 @@
 <div id="shop-modal">
     <h3 style="color: var(--accent); margin-top: 0;">LOJA DO ALQUIMISTA</h3>
     <div class="shop-grid">
-        <button class="action-btn btn-heal shop-item-btn" onclick="buyItem('potion')">
+        <button class="action-btn btn-heal shop-item-btn" onclick="buyItem('potion', this)">
             <i class="fa-solid fa-flask"></i> POÇÃO HP (10G)<div class="skill-info">+15 HP</div>
         </button>
-        <button class="action-btn btn-mag agua shop-item-btn" onclick="buyItem('mana_potion')">
+        <button class="action-btn btn-mag agua shop-item-btn" onclick="buyItem('mana_potion', this)">
             <i class="fa-solid fa-flask-vial"></i> POÇÃO MP (12G)<div class="skill-info">+20 MANA</div>
         </button>
-        <button class="action-btn btn-mag fogo shop-item-btn" onclick="buyItem('boots')">
+        <button class="action-btn btn-mag fogo shop-item-btn" onclick="buyItem('boots', this)">
             <i class="fa-solid fa-boot-heeled"></i> BOTAS (25G)<div class="skill-info">+SPD (5 rod)</div>
         </button>
-        <button class="action-btn btn-def shop-item-btn" onclick="buyItem('shield')">
+        <button class="action-btn btn-def shop-item-btn" onclick="buyItem('shield', this)">
             <i class="fa-solid fa-shield-halved"></i> ESCUDO (30G)<div class="skill-info">-Dano (2 rod)</div>
         </button>
-        <button class="action-btn btn-ult shop-item-btn" onclick="buyItem('coin')" style="grid-column: span 2;">
+        <button class="action-btn btn-ult shop-item-btn" onclick="buyItem('coin', this)" style="grid-column: span 2;">
             <i class="fa-solid fa-coins"></i> MOEDA DA SORTE (40G)<div class="skill-info">+Esq (3 rod)</div>
         </button>
     </div>
@@ -577,10 +584,11 @@
     function openShop() { if(p.hp <= 0) return; document.getElementById('overlay').style.display = 'block'; document.getElementById('shop-modal').style.display = 'block'; }
     function closeShop() { document.getElementById('overlay').style.display = 'none'; document.getElementById('shop-modal').style.display = 'none'; }
 
-    function buyItem(type) {
+    // ATUALIZADO: Adicionado efeito visual de piscar ao falhar na compra
+    function buyItem(type, btnElement) {
         const items = {
             potion: { cost: 10, name: "Poção Vida", heal: 15, icon: "fa-flask" },
-            mana_potion: { cost: 12, name: "Poção Mana", manaGain: 20, icon: "fa-flask-vial" }, // NOVA POÇÃO
+            mana_potion: { cost: 12, name: "Poção Mana", manaGain: 20, icon: "fa-flask-vial" },
             boots: { cost: 25, name: "Bota Agilidade", type: "boots", dur: 5, icon: "fa-boot-heeled" },
             shield: { cost: 30, name: "Escudo Prata", type: "shield", dur: 2, icon: "fa-shield-halved" },
             coin: { cost: 40, name: "Moeda Sorte", type: "coin", dur: 3, icon: "fa-coins" }
@@ -592,6 +600,12 @@
             updateUI();
             typeLog(`Comprou ${item.name}!`, "#2ed573");
         } else {
+            // Efeito de piscar vermelho
+            if(btnElement) {
+                btnElement.classList.remove('blink-error');
+                void btnElement.offsetWidth; // Trigger reflow para reiniciar animação
+                btnElement.classList.add('blink-error');
+            }
             typeLog(p.inventory.length >= 5 ? "Mochila cheia!" : "Ouro insuficiente!", "#ff4757");
         }
     }
