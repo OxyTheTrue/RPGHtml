@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Poppins:wght@400;600;800&display=swap');
-
         :root {
             --bg: #050508;
             --card: rgba(26, 26, 36, 0.95);
@@ -18,26 +17,24 @@
             --mana: #1e90ff;
             --text: #ffffff;
             --border: rgba(255, 255, 255, 0.1);
-            
+           
             --skill-fogo: #ff9f43;
             --skill-agua: #54a0ff;
             --skill-terra: #1dd1a1;
             --skill-rest: #5352ed;
             --skill-def: #1e90ff;
         }
-
         * { box-sizing: border-box; touch-action: manipulation; }
-        
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            background: radial-gradient(circle at center, #1a1a2e 0%, #050508 100%); 
-            color: var(--text); 
-            margin: 0; padding: 20px; 
+       
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #050508 100%);
+            color: var(--text);
+            margin: 0; padding: 20px;
             display: flex; justify-content: center; align-items: flex-start;
             min-height: 100vh;
             overflow-x: hidden;
         }
-
         /* --- TELAS --- */
         #start-menu {
             display: flex;
@@ -48,7 +45,6 @@
             text-align: center;
             z-index: 100;
         }
-
         .game-title {
             font-size: 3rem;
             font-weight: 800;
@@ -57,7 +53,6 @@
             margin-bottom: 40px;
             letter-spacing: -1px;
         }
-
         .name-input {
             background: rgba(255, 255, 255, 0.05);
             border: 2px solid var(--border);
@@ -73,7 +68,6 @@
             transition: 0.3s;
         }
         .name-input:focus { border-color: var(--accent); background: rgba(255, 255, 255, 0.1); }
-
         .main-wrapper {
             display: none;
             gap: 20px;
@@ -82,13 +76,11 @@
             flex-wrap: wrap;
             justify-content: center;
         }
-
         .btn-menu {
             width: 280px;
             margin: 10px;
             font-size: 1.1rem;
         }
-
         .btn-exit {
             position: absolute;
             top: 20px;
@@ -98,7 +90,6 @@
             background: #441111 !important;
             min-height: auto !important;
         }
-
         #hero-sidebar {
             flex: 1;
             min-width: 280px;
@@ -110,22 +101,19 @@
             border: 1px solid var(--border);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-
-        #game-container { 
+        #game-container {
             flex: 2;
             min-width: 350px;
-            max-width: 550px; 
-            background: var(--card); 
-            padding: 25px; 
-            border-radius: 32px; 
+            max-width: 550px;
+            background: var(--card);
+            padding: 25px;
+            border-radius: 32px;
             border: 1px solid rgba(255,255,255,0.15);
             box-shadow: 0 25px 50px rgba(0,0,0,0.6);
             position: relative;
         }
-
         .hero-header { border-bottom: 2px solid var(--border); margin-bottom: 20px; padding-bottom: 10px; }
         .hero-header h2 { margin: 0; color: var(--accent); font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
-
         .attribute-card {
             background: rgba(0,0,0,0.3);
             margin-bottom: 10px;
@@ -137,11 +125,9 @@
             border-left: 4px solid var(--accent);
             transition: all 0.3s ease;
         }
-
         .attr-info i { color: var(--accent); margin-right: 10px; width: 20px; text-align: center; }
         .attr-info { font-weight: 700; font-size: 14px; text-transform: uppercase; color: #ccc; }
         .attr-value { color: #fff; font-size: 16px; margin-left: 5px; }
-
         .lvl-up-btn {
             width: 35px; height: 35px;
             background: var(--accent);
@@ -155,63 +141,57 @@
             animation: pulse 1.5s infinite;
             display: none;
         }
-
         @keyframes pulse {
             0% { transform: scale(1); box-shadow: 0 0 5px var(--accent); }
             50% { transform: scale(1.1); box-shadow: 0 0 20px var(--accent); }
             100% { transform: scale(1); box-shadow: 0 0 5px var(--accent); }
         }
-
-        .enemy-card { 
-            background: rgba(0,0,0,0.5); 
-            padding: 20px; 
-            border-radius: 24px; 
-            text-align: center; 
+        .enemy-card {
+            background: rgba(0,0,0,0.5);
+            padding: 20px;
+            border-radius: 24px;
+            text-align: center;
             margin-bottom: 20px;
             border: 1px solid var(--border);
         }
-        
+       
         .enemy-sprite-container {
             width: 180px; height: 180px;
             background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
             margin: 15px auto;
             display: flex; align-items: center; justify-content: center;
         }
-
         .enemy-sprite {
             width: 100%; height: 100%; object-fit: contain;
             image-rendering: pixelated;
         }
-
-        .status-bar { 
-            background: #000; height: 14px; border-radius: 7px; margin: 8px 0; 
-            overflow: hidden; border: 1px solid rgba(255,255,255,0.1); 
+        .status-bar {
+            background: #000; height: 14px; border-radius: 7px; margin: 8px 0;
+            overflow: hidden; border: 1px solid rgba(255,255,255,0.1);
         }
         .bar-fill { height: 100%; transition: width 0.4s ease-out; }
         .hp-fill { background: linear-gradient(90deg, #ff4757, #ff6b81); box-shadow: 0 0 10px rgba(255,71,87,0.5); }
         .mana-fill { background: linear-gradient(90deg, #1e90ff, #70a1ff); box-shadow: 0 0 10px rgba(30,144,255,0.5); }
         .xp-fill { background: #a29bfe; }
         .furia-fill { background: #ffa502; }
-
-        .log { 
-            height: 120px; overflow-y: auto; background: rgba(0,0,0,0.8); padding: 15px; 
-            border-radius: 16px; font-family: 'Fira Code', monospace; font-size: 12px; 
+        .log {
+            height: 120px; overflow-y: auto; background: rgba(0,0,0,0.8); padding: 15px;
+            border-radius: 16px; font-family: 'Fira Code', monospace; font-size: 12px;
             margin-bottom: 20px; border: 1px solid var(--border);
             line-height: 1.5;
         }
-
         .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        
-        .skill-row { 
-            grid-column: span 2; 
-            display: grid; 
-            grid-template-columns: 1fr 1fr 1fr; 
-            gap: 10px; 
-            margin-top: 5px; 
+       
+        .skill-row {
+            grid-column: span 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 5px;
         }
-        
-        button.action-btn { 
-            padding: 15px 10px; font-family: 'Poppins'; font-weight: 700; border: none; 
+       
+        button.action-btn {
+            padding: 15px 10px; font-family: 'Poppins'; font-weight: 700; border: none;
             border-radius: 16px; color: white; cursor: pointer; transition: 0.2s;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-transform: uppercase;
@@ -219,36 +199,29 @@
             position: relative;
             overflow: hidden;
         }
-
         button.action-btn i { margin-bottom: 5px; font-size: 18px; }
         .action-btn span, .action-btn div { z-index: 1; }
-
         button.action-btn:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.3); }
         button.action-btn:active:not(:disabled) { transform: translateY(1px); filter: brightness(0.8); }
         button:disabled { opacity: 0.4; cursor: not-allowed; }
-
         .btn-atk { box-shadow: inset 0 -4px 0 0 var(--primary), 0 4px 12px rgba(255, 71, 87, 0.4); }
         .btn-heal { box-shadow: inset 0 -4px 0 0 var(--secondary), 0 4px 12px rgba(46, 213, 115, 0.4); }
         .btn-def { box-shadow: inset 0 -4px 0 0 var(--skill-def), 0 4px 12px rgba(30, 144, 255, 0.4); }
         .btn-rest { box-shadow: inset 0 -4px 0 0 var(--skill-rest), 0 4px 12px rgba(83, 82, 237, 0.4); }
-        
-        .btn-ult { 
-            grid-column: span 2; 
-            box-shadow: inset 0 -4px 0 0 var(--accent), 0 6px 15px rgba(255, 165, 2, 0.5); 
+       
+        .btn-ult {
+            grid-column: span 2;
+            box-shadow: inset 0 -4px 0 0 var(--accent), 0 6px 15px rgba(255, 165, 2, 0.5);
         }
-
-        .btn-skill { 
-            min-height: 75px; 
+        .btn-skill {
+            min-height: 75px;
             background: #1e1e2a;
             border: 1px solid rgba(255,255,255,0.05);
             box-shadow: inset 0 -4px 0 0 #444;
         }
-
         .skill-info { font-size: 10px; font-weight: 400; opacity: 0.8; margin-top: 2px; letter-spacing: 0.5px; }
         .badge { font-size: 10px; padding: 4px 10px; border-radius: 8px; font-weight: 700; color: #fff; text-transform: uppercase; }
-
         .take-damage { animation: damage-pulse 0.4s ease-in-out; }
-
         @keyframes damage-pulse {
             0% { transform: translateX(0); filter: brightness(2) sepia(1) saturate(20) hue-rotate(-50deg); }
             25% { transform: translateX(-10px); }
@@ -256,7 +229,6 @@
             75% { transform: translateX(-5px); }
             100% { transform: translateX(0); filter: none; }
         }
-
         @keyframes blink-red {
             0% { background: #2a2a35; }
             50% { background: #ff4757; }
@@ -265,7 +237,6 @@
         .error-blink {
             animation: blink-red 0.4s ease;
         }
-
         .gold-container {
             background: rgba(255, 165, 2, 0.15);
             padding: 8px 15px;
@@ -278,7 +249,6 @@
             transition: 0.3s;
         }
         .gold-container:hover { background: rgba(255, 165, 2, 0.3); }
-
         #inventory-container {
             margin-top: 20px;
             padding: 15px;
@@ -305,7 +275,6 @@
             transition: 0.2s;
         }
         .slot:hover:not(:empty) { border-color: var(--accent); background: #252545; }
-
         #shop-modal, #death-modal, #skill-modal, #skill-detail-modal {
             display: none;
             position: fixed;
@@ -323,7 +292,7 @@
         #skill-modal { border-color: var(--mana); width: 90%; max-width: 500px; }
         #skill-detail-modal { z-index: 1001; border-color: #fff; background: #0f0f1b; }
         #death-modal { border-color: var(--primary); }
-        
+       
         .overlay {
             display: none;
             position: fixed;
@@ -331,14 +300,12 @@
             background: rgba(0,0,0,0.85);
             z-index: 999;
         }
-
         .shop-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-top: 15px;
         }
-
         .skill-tree-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -346,7 +313,6 @@
             margin-top: 20px;
             padding: 10px;
         }
-
         .skill-node {
             background: rgba(255,255,255,0.05);
             border-radius: 15px;
@@ -359,28 +325,24 @@
             align-items: center;
             gap: 8px;
         }
-
         .skill-node:hover { background: rgba(255,255,255,0.1); transform: scale(1.05); }
         .skill-node.learned { border-color: var(--secondary); background: rgba(46, 213, 115, 0.1); }
         .skill-node i { font-size: 2rem; }
         .skill-node .skill-name { font-size: 12px; font-weight: bold; text-transform: uppercase; }
-
         .btn-open-tree {
             width: 100%;
             margin-top: 15px;
             background: var(--mana) !important;
             box-shadow: inset 0 -4px 0 0 #0056b3, 0 4px 12px rgba(30, 144, 255, 0.3);
         }
-
         .detail-icon { font-size: 4rem; margin-bottom: 15px; display: block; }
         .stat-badge { background: #000; padding: 5px 12px; border-radius: 20px; font-size: 12px; margin: 5px; border: 1px solid var(--border); display: inline-block; }
-        
+       
         .effect-icon { margin-left: 5px; font-size: 14px; animation: bounce 0.5s infinite alternate; }
         @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-3px); } }
     </style>
 </head>
 <body>
-
 <div id="start-menu">
     <div class="game-title">MASTERY RPG</div>
     <input type="text" id="player-name-input" class="name-input" placeholder="Digite seu nome..." maxlength="12">
@@ -391,9 +353,7 @@
         <i class="fa-solid fa-forward"></i> CONTINUAR
     </button>
 </div>
-
 <div class="overlay" id="overlay" onclick="closeAllModals()"></div>
-
 <div id="skill-detail-modal">
     <div id="skill-detail-content"></div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
@@ -401,7 +361,6 @@
         <button class="action-btn btn-atk" onclick="closeDetailModal()">VOLTAR</button>
     </div>
 </div>
-
 <div id="skill-modal">
     <h3 style="color: var(--mana); margin-top: 0; letter-spacing: 2px;">ÁRVORE DE HABILIDADES</h3>
     <div style="background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 20px; display: inline-block; margin-bottom: 10px;">
@@ -410,7 +369,6 @@
     <div class="skill-tree-grid" id="skill-tree-content"></div>
     <button class="action-btn btn-def" style="width: 100%; margin-top: 20px;" onclick="closeAllModals()">SAIR</button>
 </div>
-
 <div id="shop-modal">
     <h3 style="color: var(--accent); margin-top: 0;">LOJA DO ALQUIMISTA</h3>
     <div class="shop-grid">
@@ -432,7 +390,6 @@
     </div>
     <button class="action-btn btn-def" style="width: 100%; margin-top: 15px;" onclick="closeAllModals()">FECHAR</button>
 </div>
-
 <div id="death-modal">
     <h2 style="color: var(--primary); margin-top: 0;">VOCÊ MORREU!</h2>
     <p style="font-size: 0.9rem; opacity: 0.8; line-height: 1.4;">
@@ -445,14 +402,12 @@
         <i class="fa-solid fa-door-open"></i> DESISTIR
     </button>
 </div>
-
 <div class="main-wrapper" id="game-ui">
     <aside id="hero-sidebar">
         <div class="hero-header">
             <small>NÍVEL <span id="p-lv">1</span></small>
             <h2 id="p-display-name">GUERREIRO</h2>
         </div>
-
         <div class="attribute-card">
             <div class="attr-info"><i class="fa-solid fa-hand-fist"></i> FORÇA NVL <span class="attr-value" id="stat-str">1</span></div>
             <button class="lvl-up-btn" onclick="spendPoint('str')">+</button>
@@ -473,22 +428,18 @@
             <div class="attr-info"><i class="fa-solid fa-heart-pulse"></i> VITALIDADE NVL <span class="attr-value" id="stat-vit">1</span></div>
             <button class="lvl-up-btn" onclick="spendPoint('vit')">+</button>
         </div>
-
         <button class="action-btn btn-open-tree" onclick="openSkillTree()">
             <i class="fa-solid fa-diagram-project"></i> ÁRVORE DE SKILLS
         </button>
-
         <div style="margin-top: 20px;">
             <small><i class="fa-solid fa-star"></i> EXPERIÊNCIA</small>
             <div class="status-bar"><div id="p-xp-bar" class="bar-fill xp-fill"></div></div>
         </div>
     </aside>
-
     <main id="game-container">
         <button class="action-btn btn-atk btn-exit" onclick="saveAndExit()">
             <i class="fa-solid fa-door-open"></i> SAIR
         </button>
-
         <div class="enemy-card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h3 id="enemy-name" style="margin:0">BUSCANDO...</h3>
@@ -498,7 +449,6 @@
             <div class="status-bar"><div id="enemy-bar" class="bar-fill hp-fill"></div></div>
             <small><span id="enemy-hp">0</span> / <span id="enemy-max-hp">0</span> HP</small>
         </div>
-
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
             <div>
                 <small><i class="fa-solid fa-heart"></i> VIDA: <span id="p-hp">0</span>/<span id="p-max-hp">0</span> <span id="p-status-icons"></span></small>
@@ -513,9 +463,7 @@
                 <div class="status-bar" style="height: 6px;"><div id="p-furia-bar" class="bar-fill furia-fill"></div></div>
             </div>
         </div>
-
         <div class="log" id="game-log"></div>
-
         <div class="actions" id="action-buttons">
             <button class="action-btn btn-atk" onclick="playerAction('fisico')">
                 <i class="fa-solid fa-sword"></i> ESPADADA <div class="skill-info" id="val-atk">-</div>
@@ -529,11 +477,11 @@
             <button class="action-btn btn-rest" onclick="playerRest()">
                 <i class="fa-solid fa-bed"></i> DESCANSAR <div class="skill-info" id="val-rest">-</div>
             </button>
-            
+           
             <button id="ult-btn" class="action-btn btn-ult" onclick="useUltimate()">
                 <i class="fa-solid fa-sun"></i> GOLPE SUPREMO <div class="skill-info" id="val-ult">LIBERADO!</div>
             </button>
-            
+           
             <div class="skill-row">
                 <button id="skill-slot-0" class="action-btn btn-skill" onclick="useSkill(0)" disabled>
                     <i class="fa-solid fa-lock"></i>
@@ -546,7 +494,6 @@
                 </button>
             </div>
         </div>
-
         <div id="inventory-container">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <small><i class="fa-solid fa-suitcase"></i> INVENTÁRIO</small>
@@ -565,11 +512,10 @@
         </div>
     </main>
 </div>
-
 <script>
     let p, e, isTyping = false;
     let isDefending = false;
-    
+   
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(type) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -577,7 +523,6 @@
         const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
         const now = audioCtx.currentTime;
-
         switch(type) {
             case 'atk':
                 osc.type = 'square'; osc.frequency.setValueAtTime(150, now);
@@ -606,61 +551,55 @@
                 osc.start(); osc.stop(now + 0.1); break;
         }
     }
-
     const skillList = [
         { id: 'fogo', name: 'Bola de Fogo', icon: 'fa-fire', mana: 10, color: 'var(--skill-fogo)', desc: 'Lança chamas intensas. 30% chance de QUEIMADURA.' },
         { id: 'agua', name: 'Tempestade', icon: 'fa-cloud-showers-heavy', mana: 8, color: 'var(--skill-agua)', desc: 'Chuva mística. Chance de dano extra baseado em INT.' },
         { id: 'terra', name: 'Muralha', icon: 'fa-mountain', mana: 12, color: 'var(--skill-terra)', desc: 'Causa cegueira temporária no alvo.' }
     ];
-
     const monsterTemplates = [
         { name: "Ratazana", minLv: 1, img: "ratazana gigante.png" },
         { name: "Esqueleto", minLv: 1, img: "esqueleto.png" },
         { name: "Ogro", minLv: 5, img: "ogro.png" },
         { name: "Vampiro", minLv: 10, img: "vampiro.png" }
     ];
-
     window.onload = () => {
         if(localStorage.getItem('rpg_save')) {
             document.getElementById('continue-btn').style.display = 'flex';
         }
     };
-
     function autoSave() {
         if (p && p.hp > 0) {
             localStorage.setItem('rpg_save', JSON.stringify({p, e}));
         }
     }
-
     function startNewGame() {
         playSound('heal');
         const inputName = document.getElementById('player-name-input').value.trim();
         const finalName = inputName || "GUERREIRO";
-        
-        p = { 
+       
+        p = {
             name: finalName,
-            lv: 1, hp: 10, maxHp: 10, mana: 20, maxMana: 20, 
+            lv: 1, hp: 10, maxHp: 10, mana: 20, maxMana: 20,
             str: 3, int: 5, luk: 3, spd: 3, vit: 1, xp: 0, nextXp: 50, furia: 0,
-            gold: 0, inventory: [], 
+            gold: 0, inventory: [],
             skills: [],
             skillPoints: 0,
             pendingPoints: 0,
             levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 },
             buffs: { boots: 0, shield: 0, coin: 0 },
-            bleeding: false 
+            bleeding: false
         };
-        
+       
         document.getElementById('p-display-name').innerText = p.name;
         showGame();
         spawnMonster();
     }
-
     function loadGame() {
         playSound('heal');
         const saved = JSON.parse(localStorage.getItem('rpg_save'));
         if(saved) {
             p = saved.p; e = saved.e;
-            if (p.bleeding === undefined) p.bleeding = false; 
+            if (p.bleeding === undefined) p.bleeding = false;
             document.getElementById('p-display-name').innerText = p.name;
             showGame();
             if (e && e.img) document.getElementById('enemy-img').src = e.img;
@@ -669,21 +608,19 @@
             toggleButtons(false);
         }
     }
-
-    function showGame() { 
-        document.getElementById('start-menu').style.display = 'none'; 
-        document.getElementById('game-ui').style.display = 'flex'; 
+    function showGame() {
+        document.getElementById('start-menu').style.display = 'none';
+        document.getElementById('game-ui').style.display = 'flex';
     }
-    
+   
     function openShop() { if(p.hp <= 0) return; document.getElementById('overlay').style.display = 'block'; document.getElementById('shop-modal').style.display = 'block'; }
-    
-    function openSkillTree() { 
-        if(p.hp <= 0) return; 
-        document.getElementById('overlay').style.display = 'block'; 
+   
+    function openSkillTree() {
+        if(p.hp <= 0) return;
+        document.getElementById('overlay').style.display = 'block';
         document.getElementById('skill-modal').style.display = 'block';
         renderSkillTree();
     }
-
     function renderSkillTree() {
         const container = document.getElementById('skill-tree-content');
         container.innerHTML = "";
@@ -701,21 +638,18 @@
             container.appendChild(node);
         });
     }
-
     function openSkillDetail(skill) {
         const playerSkill = p.skills.find(ps => ps.id === skill.id);
         const currentLv = playerSkill ? playerSkill.level : 0;
         const nextLv = currentLv + 1;
-        const reqLv = nextLv * 5; 
-        
+        const reqLv = nextLv * 5;
+       
         const detailModal = document.getElementById('skill-detail-modal');
         const content = document.getElementById('skill-detail-content');
         const btn = document.getElementById('learn-confirm-btn');
-
         const canAfford = p.skillPoints > 0;
         const hasLevel = p.lv >= reqLv;
         const isLocked = !hasLevel;
-
         content.innerHTML = `
             <i class="fa-solid ${skill.icon} detail-icon" style="color: ${skill.color}"></i>
             <h2 style="color:${skill.color}; margin: 0;">${skill.name.toUpperCase()} ${currentLv > 0 ? '(LV '+currentLv+')' : ''}</h2>
@@ -724,16 +658,13 @@
             <div class="stat-badge"><i class="fa-solid fa-droplet"></i> CUSTO MANA: ${skill.mana + (currentLv * 5)}</div>
             ${isLocked ? `<p style="color:var(--primary); font-size:12px;">Desbloqueia no nível ${reqLv}</p>` : ''}
         `;
-
         btn.onclick = () => learnSkill(skill, reqLv);
         btn.disabled = isLocked || !canAfford;
         btn.innerHTML = currentLv === 0 ? "DESBLOQUEAR (1 PT)" : "MELHORAR (1 PT)";
-        
+       
         detailModal.style.display = 'block';
     }
-
     function closeDetailModal() { document.getElementById('skill-detail-modal').style.display = 'none'; }
-
     function learnSkill(skillData, reqLv) {
         if(p.skillPoints > 0 && p.lv >= reqLv) {
             playSound('gold');
@@ -748,13 +679,11 @@
             autoSave();
         }
     }
-
-    function closeAllModals() { 
-        document.getElementById('overlay').style.display = 'none'; 
+    function closeAllModals() {
+        document.getElementById('overlay').style.display = 'none';
         const modals = ['shop-modal', 'skill-modal', 'skill-detail-modal', 'death-modal'];
         modals.forEach(m => document.getElementById(m).style.display = 'none');
     }
-
     function buyItem(type, btn) {
         const items = {
             potion: { cost: 10, name: "Poção Vida", heal: 15, icon: "fa-flask" },
@@ -766,7 +695,7 @@
         const item = items[type];
         if(p.gold >= item.cost && p.inventory.length < 5) {
             playSound('gold');
-            p.gold -= item.cost; 
+            p.gold -= item.cost;
             p.inventory.push({...item});
             updateUI();
             typeLog(`Comprou ${item.name}!`, "#2ed573");
@@ -776,7 +705,6 @@
             setTimeout(() => btn.classList.remove('error-blink'), 400);
         }
     }
-
     async function useItem(index) {
         if(isTyping || !p.inventory[index] || p.hp <= 0) return;
         const item = p.inventory[index];
@@ -788,33 +716,29 @@
         updateUI();
         await typeLog(`Usou ${item.name}!`, "#54a0ff");
     }
-
     async function useSkill(index) {
         if(isTyping || !p.skills[index] || p.hp <= 0) return;
         const pSkill = p.skills[index];
         const sData = skillList.find(s => s.id === pSkill.id);
         const manaCost = sData.mana + (pSkill.level - 1) * 5;
-
         if(p.mana < manaCost) {
             playSound('dmg');
             typeLog("Mana insuficiente!", "#ff4757");
             return;
         }
-
         playSound('magic');
         toggleButtons(true);
         p.mana -= manaCost;
         updateUI();
-
         let dmg = 0;
         let color = sData.color;
-        
+       
         if(pSkill.id === 'fogo') {
             dmg = Math.ceil(p.int * (1.2 + (pSkill.level * 0.4)));
             e.hp -= dmg;
             if(Math.random() < 0.3) e.burning = true;
             await typeLog(`BOLA DE FOGO LV${pSkill.level}: ${dmg} de dano!`, color);
-        } 
+        }
         else if(pSkill.id === 'agua') {
             dmg = Math.ceil(p.int * (1.0 + (pSkill.level * 0.2)));
             e.hp -= dmg;
@@ -823,53 +747,46 @@
         else if(pSkill.id === 'terra') {
             dmg = 5 + (pSkill.level * 2);
             e.hp -= dmg;
-            e.blinded = true; 
+            e.blinded = true;
             await typeLog(`MURALHA LV${pSkill.level}: Inimigo cego e tomou ${dmg} de dano.`, color);
         }
-
         applyDamageEffect();
         updateUI();
         if(e.hp <= 0) await win(); else await enemyTurn();
     }
-
     function updateUI() {
         if(!p) return;
-        
+       
         document.getElementById('p-display-name').innerText = p.name;
         document.getElementById('p-hp-bar').style.width = (p.hp/p.maxHp*100) + "%";
         document.getElementById('p-mana-bar').style.width = (p.mana/p.maxMana*100) + "%";
         document.getElementById('p-furia-bar').style.width = p.furia + "%";
         document.getElementById('p-xp-bar').style.width = (p.xp/p.nextXp*100) + "%";
         if(e) document.getElementById('enemy-bar').style.width = (e.hp/e.maxHp*100) + "%";
-        
+       
         document.getElementById('p-lv').innerText = p.lv;
         document.getElementById('p-hp').innerText = Math.ceil(p.hp);
         document.getElementById('p-max-hp').innerText = p.maxHp;
         document.getElementById('p-mana').innerText = Math.ceil(p.mana);
         document.getElementById('p-gold').innerText = p.gold;
         document.getElementById('p-skill-points').innerText = p.skillPoints || 0;
-
         document.getElementById('stat-str').innerText = p.levels.str;
         document.getElementById('stat-spd').innerText = p.levels.spd;
         document.getElementById('stat-int').innerText = p.levels.int;
         document.getElementById('stat-luk').innerText = p.levels.luk;
         document.getElementById('stat-vit').innerText = p.levels.vit;
-
         const pStatusIcons = document.getElementById('p-status-icons');
         pStatusIcons.innerHTML = p.bleeding ? '<i class="fa-solid fa-droplet effect-icon" style="color: #ff4757" title="Sangrando"></i>' : '';
-
         document.querySelectorAll('.lvl-up-btn').forEach(btn => btn.style.display = p.pendingPoints > 0 ? 'block' : 'none');
-        
+       
         if(e) {
             document.getElementById('enemy-name').innerText = e.name;
             document.getElementById('enemy-hp').innerText = Math.ceil(e.hp);
             document.getElementById('enemy-max-hp').innerText = e.maxHp;
         }
-
         document.getElementById('val-atk').innerText = `${Math.floor(p.str*0.7)}-${Math.ceil(p.str)} Dano`;
         document.getElementById('val-heal').innerText = `8 MP | +${Math.floor(p.int * 1.5)}`;
         document.getElementById('val-rest').innerText = `+${Math.floor(p.int/2)}-${p.int} MP`;
-
         for(let i=0; i<3; i++) {
             const slot = document.getElementById(`skill-slot-${i}`);
             if(p.skills[i]) {
@@ -882,17 +799,14 @@
                 slot.innerHTML = `<i class="fa-solid fa-lock"></i>`;
             }
         }
-
         const slots = document.querySelectorAll('.slot');
         slots.forEach((s, i) => {
             if(p.inventory[i]) {
                 s.innerHTML = `<i class="fa-solid ${p.inventory[i].icon}" style="color: #ffa502"></i>`;
             } else { s.innerHTML = ""; }
         });
-
         document.getElementById('ult-btn').style.display = p.furia >= 100 ? 'flex' : 'none';
     }
-
     async function typeLog(text, color = "#00ff9d") {
         isTyping = true;
         const log = document.getElementById('game-log');
@@ -908,49 +822,45 @@
         isTyping = false;
         await new Promise(r => setTimeout(r, 400));
     }
-
     async function spawnMonster() {
         let avail = monsterTemplates.filter(m => p.lv >= m.minLv);
         let data = avail[Math.floor(Math.random() * avail.length)];
-        
+       
         let finalHp = 8 + (p.lv * 4);
         let finalStr = 2 + (p.lv * 0.5);
-
         e = { ...data, hp: finalHp, maxHp: finalHp, str: finalStr, blinded: false, burning: false };
         document.getElementById('enemy-img').src = e.img;
         updateUI();
         await typeLog(`${e.name} apareceu!`, "#f1c40f");
         toggleButtons(false);
     }
-
     function spendPoint(stat) {
         playSound('heal');
         p.levels[stat]++;
         if(stat === 'vit') p.maxHp += 5; else p[stat] += 1;
         p.lv++; p.xp = 0; p.nextXp = Math.floor(p.nextXp * 1.3);
         p.skillPoints++;
-        p.hp = p.maxHp; p.pendingPoints = 0;
+        p.hp = p.maxHp;
+        p.mana = p.maxMana;  // <-- ÚNICA ALTERAÇÃO: restaura mana cheia ao subir de nível
+        p.pendingPoints = 0;
         updateUI(); spawnMonster();
     }
-
     async function win() {
         playSound('gold');
         let xpGanha = 25 + (p.lv * 10); let goldGanho = getRandom(5, 10);
         p.xp += xpGanha; p.gold += goldGanho;
         await typeLog(`VITÓRIA! +${xpGanha} XP | +${goldGanho} Gold`, "#2ecc71");
-        
+       
         if(p.bleeding && Math.random() > 0.4) {
             p.bleeding = false;
             await typeLog("As feridas pararam de sangrar.", "#2ed573");
         }
-
         if(p.xp >= p.nextXp) { p.pendingPoints++; await typeLog("LEVEL UP!", "#ffa502"); }
         if(p.pendingPoints === 0) spawnMonster(); else { updateUI(); }
     }
-
     function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
     function toggleButtons(state) { document.querySelectorAll('#action-buttons button').forEach(b => { if(!b.id.includes('slot')) b.disabled = state; }); }
-    
+   
     // --- LÓGICA DE REINICIAR (MANTER NÍVEL) ---
     function restartAfterDeath() {
         // Reseta atributos voláteis, mas mantém o núcleo (LV e Status Base)
@@ -962,19 +872,17 @@
         p.furia = 0;
         p.bleeding = false;
         p.buffs = { boots: 0, shield: 0, coin: 0 };
-        
+       
         closeAllModals();
         document.getElementById('game-log').innerHTML = "";
         typeLog("Você desperta em uma taverna, sem ouro, mas com a experiência de sua vida passada...", "#ffa502");
-        
+       
         updateUI();
         spawnMonster();
         autoSave();
     }
-
     function exitToMenu() { location.reload(); }
     function saveAndExit() { autoSave(); location.reload(); }
-
     async function playerAction(tipo) {
         if(isTyping || p.hp <= 0) return;
         playSound('atk');
@@ -984,7 +892,6 @@
         updateUI(); await typeLog(`Você causou ${dmg} de dano!`);
         if(e.hp <= 0) await win(); else await enemyTurn();
     }
-
     async function enemyTurn() {
         if(e.burning && e.hp > 0) {
             let burnDmg = Math.ceil(e.maxHp * 0.1);
@@ -992,15 +899,13 @@
             await typeLog(`Inimigo queimando: -${burnDmg} HP`, "var(--skill-fogo)");
             if(e.hp <= 0) { await win(); return; }
         }
-
         if(p.bleeding && p.hp > 0) {
-            let bleedDmg = Math.ceil(p.maxHp * 0.05); 
+            let bleedDmg = Math.ceil(p.maxHp * 0.05);
             p.hp -= bleedDmg;
             playSound('dmg');
             await typeLog(`Você perde sangue: -${bleedDmg} HP`, "#ff4757");
             updateUI();
         }
-
         if(e.blinded && Math.random() > 0.5) {
             e.blinded = false;
             await typeLog(`${e.name} errou o golpe!`, "var(--skill-terra)");
@@ -1010,65 +915,61 @@
             p.hp -= dmg; p.furia = Math.min(100, p.furia + 20);
             playSound('dmg');
             updateUI(); await typeLog(`${e.name} atacou: -${dmg} HP`, "#ff4757");
-
             if((e.name === "Esqueleto" || e.name === "Vampiro") && Math.random() < 0.3 && !p.bleeding) {
                 p.bleeding = true;
                 await typeLog("As garras abriram uma ferida! SANGRAMENTO!", "#ff4757");
             }
         }
-
-        if(p.hp <= 0) { 
+        if(p.hp <= 0) {
             playSound('dmg');
-            document.getElementById('overlay').style.display = 'block'; 
-            document.getElementById('death-modal').style.display = 'block'; 
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('death-modal').style.display = 'block';
             // Salva o estado atual (com LV mantido) para quando ele clicar em "Tentar Novamente"
-            autoSave(); 
+            autoSave();
         } else {
             toggleButtons(false);
             autoSave();
         }
     }
-
     function playerHeal() {
-        if (p.mana < 8) return; 
+        if (p.mana < 8) return;
         playSound('heal');
         toggleButtons(true); p.mana -= 8;
-        let cura = Math.floor(p.int * 1.5); 
+        let cura = Math.floor(p.int * 1.5);
         p.hp = Math.min(p.maxHp, p.hp + cura);
         updateUI(); typeLog(`Curar: +${cura} HP`).then(() => enemyTurn());
     }
-    function playerDefend() { 
+    function playerDefend() {
         playSound('atk');
-        toggleButtons(true); isDefending = true; typeLog("Defendendo...").then(() => enemyTurn()); 
+        toggleButtons(true); isDefending = true; typeLog("Defendendo...").then(() => enemyTurn());
     }
-    
-    function playerRest() { 
+   
+    function playerRest() {
         playSound('heal');
-        toggleButtons(true); 
-        let ganho = p.int; 
-        p.mana = Math.min(p.maxMana, p.mana + ganho); 
-        
+        toggleButtons(true);
+        let ganho = p.int;
+        p.mana = Math.min(p.maxMana, p.mana + ganho);
+       
         if(p.bleeding) {
             p.bleeding = false;
             typeLog("Você cuidou das feridas enquanto descansava.", "#2ed573");
         }
-        
-        updateUI(); typeLog(`Descansou: +${ganho} Mana`).then(() => enemyTurn()); 
+       
+        updateUI(); typeLog(`Descansou: +${ganho} Mana`).then(() => enemyTurn());
     }
-
-    function useUltimate() { 
-        if(p.furia < 100) return; 
+    function useUltimate() {
+        if(p.furia < 100) return;
         playSound('magic');
-        toggleButtons(true); 
-        let dmg = Math.ceil(p.str * 3); 
-        e.hp -= dmg; p.furia = 0; 
-        updateUI(); typeLog("GOLPE SUPREMO!"); 
-        if(e.hp <= 0) win(); else enemyTurn(); 
+        toggleButtons(true);
+        let dmg = Math.ceil(p.str * 3);
+        e.hp -= dmg; p.furia = 0;
+        updateUI(); typeLog("GOLPE SUPREMO!");
+        if(e.hp <= 0) win(); else enemyTurn();
     }
-    function applyDamageEffect() { 
-        const img = document.getElementById('enemy-img'); 
-        img.classList.add('take-damage'); 
-        setTimeout(() => img.classList.remove('take-damage'), 400); 
+    function applyDamageEffect() {
+        const img = document.getElementById('enemy-img');
+        img.classList.add('take-damage');
+        setTimeout(() => img.classList.remove('take-damage'), 400);
     }
 </script>
 </body>
