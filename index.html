@@ -17,7 +17,7 @@
             --mana: #1e90ff;
             --text: #ffffff;
             --border: rgba(255, 255, 255, 0.1);
-         
+        
             --skill-fogo: #ff9f43;
             --skill-agua: #54a0ff;
             --skill-terra: #1dd1a1;
@@ -25,7 +25,7 @@
             --skill-def: #1e90ff;
         }
         * { box-sizing: border-box; touch-action: manipulation; }
-     
+    
         body {
             font-family: 'Poppins', sans-serif;
             background: radial-gradient(circle at center, #1a1a2e 0%, #050508 100%);
@@ -34,7 +34,57 @@
             display: flex; justify-content: center; align-items: flex-start;
             min-height: 100vh;
             overflow-x: hidden;
+            position: relative;
         }
+
+        /* Tooltip personalizado bonito */
+        #stat-tooltip {
+            position: absolute;
+            background: rgba(15, 15, 25, 0.95);
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--accent);
+            border-radius: 16px;
+            padding: 16px 20px;
+            box-shadow: 0 0 30px rgba(255, 165, 2, 0.4);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            z-index: 10000;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            min-width: 200px;
+            text-align: center;
+        }
+        #stat-tooltip.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        #stat-tooltip i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+        #stat-tooltip .stat-name {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        #stat-tooltip .stat-detail {
+            margin: 8px 0;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+        #stat-tooltip .stat-value {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--accent);
+            margin-top: 5px;
+        }
+
         /* --- TELAS --- */
         #start-menu {
             display: flex;
@@ -125,8 +175,21 @@
             border-left: 4px solid var(--accent);
             transition: all 0.3s ease;
         }
+        .attribute-card:hover {
+            background: rgba(255, 165, 2, 0.08);
+            border-left-color: var(--accent);
+            transform: translateX(5px);
+        }
         .attr-info i { color: var(--accent); margin-right: 10px; width: 20px; text-align: center; }
-        .attr-info { font-weight: 700; font-size: 14px; text-transform: uppercase; color: #ccc; }
+        .attr-info { 
+            font-weight: 700; 
+            font-size: 14px; 
+            text-transform: uppercase; 
+            color: #ccc; 
+            cursor: pointer; 
+            transition: color 0.3s;
+        }
+        .attr-info:hover { color: #fff; }
         .attr-value { color: #fff; font-size: 16px; margin-left: 5px; }
         .lvl-up-btn {
             width: 35px; height: 35px;
@@ -154,7 +217,7 @@
             margin-bottom: 20px;
             border: 1px solid var(--border);
         }
-     
+    
         .enemy-sprite-container {
             width: 180px; height: 180px;
             background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
@@ -181,7 +244,7 @@
             line-height: 1.5;
         }
         .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-     
+    
         .skill-row {
             grid-column: span 2;
             display: grid;
@@ -189,7 +252,7 @@
             gap: 10px;
             margin-top: 5px;
         }
-     
+    
         button.action-btn {
             padding: 15px 10px; font-family: 'Poppins'; font-weight: 700; border: none;
             border-radius: 16px; color: white; cursor: pointer; transition: 0.2s;
@@ -208,7 +271,7 @@
         .btn-heal { box-shadow: inset 0 -4px 0 0 var(--secondary), 0 4px 12px rgba(46, 213, 115, 0.4); }
         .btn-def { box-shadow: inset 0 -4px 0 0 var(--skill-def), 0 4px 12px rgba(30, 144, 255, 0.4); }
         .btn-rest { box-shadow: inset 0 -4px 0 0 var(--skill-rest), 0 4px 12px rgba(83, 82, 237, 0.4); }
-     
+    
         .btn-ult {
             grid-column: span 2;
             box-shadow: inset 0 -4px 0 0 var(--accent), 0 6px 15px rgba(255, 165, 2, 0.5);
@@ -292,7 +355,7 @@
         #skill-modal { border-color: var(--mana); width: 90%; max-width: 500px; }
         #skill-detail-modal { z-index: 1001; border-color: #fff; background: #0f0f1b; }
         #death-modal { border-color: var(--primary); }
-     
+    
         .overlay {
             display: none;
             position: fixed;
@@ -337,12 +400,20 @@
         }
         .detail-icon { font-size: 4rem; margin-bottom: 15px; display: block; }
         .stat-badge { background: #000; padding: 5px 12px; border-radius: 20px; font-size: 12px; margin: 5px; border: 1px solid var(--border); display: inline-block; }
-     
+    
         .effect-icon { margin-left: 5px; font-size: 14px; animation: bounce 0.5s infinite alternate; }
         @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-3px); } }
     </style>
 </head>
 <body>
+<!-- Tooltip bonito para os atributos -->
+<div id="stat-tooltip">
+    <i id="tooltip-icon"></i>
+    <div class="stat-name" id="tooltip-name"></div>
+    <div class="stat-detail">Nível: <span id="tooltip-level"></span></div>
+    <div class="stat-detail">Valor atual: <span class="stat-value" id="tooltip-value"></span></div>
+</div>
+
 <div id="start-menu">
     <div class="game-title">MASTERY RPG</div>
     <input type="text" id="player-name-input" class="name-input" placeholder="Digite seu nome..." maxlength="12">
@@ -409,23 +480,23 @@
             <h2 id="p-display-name">GUERREIRO</h2>
         </div>
         <div class="attribute-card">
-            <div class="attr-info"><i class="fa-solid fa-hand-fist"></i> FORÇA NVL <span class="attr-value" id="stat-str">1</span></div>
+            <div class="attr-info" onclick="showStatValue('str')"><i class="fa-solid fa-hand-fist"></i> FORÇA NVL <span class="attr-value" id="stat-str">1</span></div>
             <button class="lvl-up-btn" onclick="spendPoint('str')">+</button>
         </div>
         <div class="attribute-card">
-            <div class="attr-info"><i class="fa-solid fa-bolt"></i> VELOCIDADE NVL <span class="attr-value" id="stat-spd">1</span></div>
+            <div class="attr-info" onclick="showStatValue('spd')"><i class="fa-solid fa-bolt"></i> VELOCIDADE NVL <span class="attr-value" id="stat-spd">1</span></div>
             <button class="lvl-up-btn" onclick="spendPoint('spd')">+</button>
         </div>
         <div class="attribute-card">
-            <div class="attr-info"><i class="fa-solid fa-brain"></i> INTELIGÊNCIA NVL <span class="attr-value" id="stat-int">1</span></div>
+            <div class="attr-info" onclick="showStatValue('int')"><i class="fa-solid fa-brain"></i> INTELIGÊNCIA NVL <span class="attr-value" id="stat-int">1</span></div>
             <button class="lvl-up-btn" onclick="spendPoint('int')">+</button>
         </div>
         <div class="attribute-card">
-            <div class="attr-info"><i class="fa-solid fa-clover"></i> SORTE NVL <span class="attr-value" id="stat-luk">1</span></div>
+            <div class="attr-info" onclick="showStatValue('luk')"><i class="fa-solid fa-clover"></i> SORTE NVL <span class="attr-value" id="stat-luk">1</span></div>
             <button class="lvl-up-btn" onclick="spendPoint('luk')">+</button>
         </div>
         <div class="attribute-card">
-            <div class="attr-info"><i class="fa-solid fa-heart-pulse"></i> VITALIDADE NVL <span class="attr-value" id="stat-vit">1</span></div>
+            <div class="attr-info" onclick="showStatValue('vit')"><i class="fa-solid fa-heart-pulse"></i> VITALIDADE NVL <span class="attr-value" id="stat-vit">1</span></div>
             <button class="lvl-up-btn" onclick="spendPoint('vit')">+</button>
         </div>
         <button class="action-btn btn-open-tree" onclick="openSkillTree()">
@@ -477,11 +548,11 @@
             <button class="action-btn btn-rest" onclick="playerRest()">
                 <i class="fa-solid fa-bed"></i> DESCANSAR <div class="skill-info" id="val-rest">-</div>
             </button>
-         
+        
             <button id="ult-btn" class="action-btn btn-ult" onclick="useUltimate()">
                 <i class="fa-solid fa-sun"></i> GOLPE SUPREMO <div class="skill-info" id="val-ult">LIBERADO!</div>
             </button>
-         
+        
             <div class="skill-row">
                 <button id="skill-slot-0" class="action-btn btn-skill" onclick="useSkill(0)" disabled>
                     <i class="fa-solid fa-lock"></i>
@@ -515,8 +586,59 @@
 <script>
     let p, e, isTyping = false;
     let isDefending = false;
- 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const tooltip = document.getElementById('stat-tooltip');
+    let tooltipTimeout;
+
+    // Função aprimorada: mostra tooltip bonito ao clicar no atributo
+    function showStatValue(stat) {
+        if (!p) return;
+
+        const config = {
+            str: { name: "FORÇA", icon: "fa-hand-fist", color: "#ff4757" },
+            spd: { name: "VELOCIDADE", icon: "fa-bolt", color: "#54a0ff" },
+            int: { name: "INTELIGÊNCIA", icon: "fa-brain", color: "#9c88ff" },
+            luk: { name: "SORTE", icon: "fa-clover", color: "#2ed573" },
+            vit: { name: "VITALIDADE", icon: "fa-heart-pulse", color: "#ff6b81" }
+        };
+
+        const c = config[stat];
+        const level = p.levels[stat];
+        const value = p[stat];
+
+        document.getElementById('tooltip-icon').className = `fa-solid ${c.icon}`;
+        document.getElementById('tooltip-icon').style.color = c.color;
+        document.getElementById('tooltip-name').innerText = c.name;
+        document.getElementById('tooltip-level').innerText = level;
+        document.getElementById('tooltip-value').innerText = value;
+
+        // Posiciona perto do cursor (aproximado)
+        tooltip.style.left = `${event.clientX + 15}px`;
+        tooltip.style.top = `${event.clientY - 20}px`;
+
+        tooltip.classList.add('visible');
+
+        // Remove automaticamente após 3 segundos
+        clearTimeout(tooltipTimeout);
+        tooltipTimeout = setTimeout(() => {
+            tooltip.classList.remove('visible');
+        }, 3000);
+
+        // Clique no tooltip também fecha
+        tooltip.onclick = () => {
+            tooltip.classList.remove('visible');
+            clearTimeout(tooltipTimeout);
+        };
+    }
+
+    // Fecha tooltip ao clicar fora
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.attr-info') && tooltip.classList.contains('visible')) {
+            tooltip.classList.remove('visible');
+            clearTimeout(tooltipTimeout);
+        }
+    });
+
     function playSound(type) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
@@ -576,13 +698,13 @@
         playSound('heal');
         const inputName = document.getElementById('player-name-input').value.trim();
         const finalName = inputName || "GUERREIRO";
-     
+    
         p = {
             name: finalName,
-            lv: 1, 
-            hp: 20, maxHp: 20, 
+            lv: 1,
+            hp: 20, maxHp: 20,
             mana: 20, maxMana: 20,
-            str: 5, int: 5, luk: 3, spd: 3, vit: 5, 
+            str: 5, int: 5, luk: 3, spd: 3, vit: 5,
             xp: 0, nextXp: 50, furia: 0,
             gold: 0, inventory: [],
             skills: [],
@@ -592,7 +714,7 @@
             buffs: { boots: 0, shield: 0, coin: 0 },
             bleeding: false
         };
-     
+    
         document.getElementById('p-display-name').innerText = p.name;
         showGame();
         spawnMonster();
@@ -616,9 +738,7 @@
         document.getElementById('start-menu').style.display = 'none';
         document.getElementById('game-ui').style.display = 'flex';
     }
- 
     function openShop() { if(p.hp <= 0) return; document.getElementById('overlay').style.display = 'block'; document.getElementById('shop-modal').style.display = 'block'; }
- 
     function openSkillTree() {
         if(p.hp <= 0) return;
         document.getElementById('overlay').style.display = 'block';
@@ -647,7 +767,7 @@
         const currentLv = playerSkill ? playerSkill.level : 0;
         const nextLv = currentLv + 1;
         const reqLv = nextLv === 1 ? 5 : 5 * nextLv;
-     
+    
         const detailModal = document.getElementById('skill-detail-modal');
         const content = document.getElementById('skill-detail-content');
         const btn = document.getElementById('learn-confirm-btn');
@@ -665,7 +785,7 @@
         btn.onclick = () => learnSkill(skill, reqLv);
         btn.disabled = isLocked || !canAfford;
         btn.innerHTML = currentLv === 0 ? "DESBLOQUEAR (1 PT)" : "MELHORAR (1 PT)";
-     
+    
         detailModal.style.display = 'block';
     }
     function closeDetailModal() { document.getElementById('skill-detail-modal').style.display = 'none'; }
@@ -736,7 +856,7 @@
         updateUI();
         let dmg = 0;
         let color = sData.color;
-     
+    
         if(pSkill.id === 'fogo') {
             dmg = Math.ceil(p.int * (1.2 + (pSkill.level * 0.4)));
             e.hp -= dmg;
@@ -760,14 +880,14 @@
     }
     function updateUI() {
         if(!p) return;
-     
+    
         document.getElementById('p-display-name').innerText = p.name;
         document.getElementById('p-hp-bar').style.width = (p.hp/p.maxHp*100) + "%";
         document.getElementById('p-mana-bar').style.width = (p.mana/p.maxMana*100) + "%";
         document.getElementById('p-furia-bar').style.width = p.furia + "%";
         document.getElementById('p-xp-bar').style.width = (p.xp/p.nextXp*100) + "%";
         if(e) document.getElementById('enemy-bar').style.width = (e.hp/e.maxHp*100) + "%";
-     
+    
         document.getElementById('p-lv').innerText = p.lv;
         document.getElementById('p-hp').innerText = Math.ceil(p.hp);
         document.getElementById('p-max-hp').innerText = p.maxHp;
@@ -782,7 +902,7 @@
         const pStatusIcons = document.getElementById('p-status-icons');
         pStatusIcons.innerHTML = p.bleeding ? '<i class="fa-solid fa-droplet effect-icon" style="color: #ff4757" title="Sangrando"></i>' : '';
         document.querySelectorAll('.lvl-up-btn').forEach(btn => btn.style.display = p.pendingPoints > 0 ? 'block' : 'none');
-     
+    
         if(e) {
             document.getElementById('enemy-name').innerText = e.name;
             document.getElementById('enemy-hp').innerText = Math.ceil(e.hp);
@@ -829,7 +949,7 @@
     async function spawnMonster() {
         let avail = monsterTemplates.filter(m => p.lv >= m.minLv);
         let data = avail[Math.floor(Math.random() * avail.length)];
-     
+    
         let finalHp = 8 + (p.lv * 6);
         let finalStr = 3 + (p.lv * 0.8);
         e = { ...data, hp: finalHp, maxHp: finalHp, str: finalStr, blinded: false, burning: false };
@@ -842,14 +962,11 @@
         if (p.pendingPoints <= 0) return;
         playSound('heal');
         p.levels[stat]++;
-        p[stat] += 2; // aumento base por ponto
-
-        // Atualização imediata de stats derivados
+        p[stat] += 2;
         if (stat === 'vit') p.maxHp += 8;
         if (stat === 'int') p.maxMana += 6;
-
         p.pendingPoints--;
-       
+      
         if (p.pendingPoints === 0) {
             p.lv++;
             p.xp = 0;
@@ -872,7 +989,7 @@
         p.xp += xpGanha;
         p.gold += goldGanho;
         await typeLog(`VITÓRIA! +${xpGanha} XP | +${goldGanho} Gold`, "#2ecc71");
-     
+    
         if(p.bleeding && Math.random() > 0.4) {
             p.bleeding = false;
             await typeLog("As feridas pararam de sangrar.", "#2ed573");
@@ -887,7 +1004,6 @@
     }
     function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
     function toggleButtons(state) { document.querySelectorAll('#action-buttons button').forEach(b => { if(!b.id.includes('slot')) b.disabled = state; }); }
- 
     function restartAfterDeath() {
         p.hp = p.maxHp;
         p.mana = p.maxMana;
@@ -897,11 +1013,11 @@
         p.furia = 0;
         p.bleeding = false;
         p.buffs = { boots: 0, shield: 0, coin: 0 };
-     
+    
         closeAllModals();
         document.getElementById('game-log').innerHTML = "";
         typeLog("Você desperta em uma taverna, sem ouro, mas com a experiência de sua vida passada...", "#ffa502");
-     
+    
         updateUI();
         spawnMonster();
         autoSave();
@@ -912,16 +1028,12 @@
         if(isTyping || p.hp <= 0) return;
         playSound('atk');
         toggleButtons(true); isDefending = false;
-
         let baseDmg = getRandom(Math.floor(p.str * 0.8), Math.ceil(p.str * 1.2));
         let finalDmg = baseDmg;
-
-        // Crítico baseado em sorte
         if (Math.random() < (p.luk * 0.04)) {
             finalDmg *= 2;
             await typeLog("CRÍTICO!", "#ffa502");
         }
-
         e.hp -= finalDmg;
         applyDamageEffect();
         updateUI();
@@ -947,13 +1059,10 @@
             await typeLog(`${e.name} errou o golpe!`, "var(--skill-terra)");
         } else {
             let dmg = Math.ceil(getRandom(e.str * 0.8, e.str * 1.2));
-
-            // Desvio baseado em velocidade
             if (Math.random() < (p.spd * 0.04)) {
                 await typeLog("Você desviou do ataque!", "#54a0ff");
                 dmg = 0;
             }
-
             if(isDefending) dmg = Math.ceil(dmg * 0.5);
             p.hp -= dmg;
             p.furia = Math.min(100, p.furia + (dmg > 0 ? 25 : 10));
@@ -987,18 +1096,17 @@
         playSound('atk');
         toggleButtons(true); isDefending = true; typeLog("Defendendo...").then(() => enemyTurn());
     }
- 
     function playerRest() {
         playSound('heal');
         toggleButtons(true);
         let ganho = getRandom(Math.floor(p.int * 0.8), Math.ceil(p.int * 1.4));
         p.mana = Math.min(p.maxMana, p.mana + ganho);
-     
+    
         if(p.bleeding) {
             p.bleeding = false;
             typeLog("Você cuidou das feridas enquanto descansava.", "#2ed573");
         }
-     
+    
         updateUI(); typeLog(`Descansou: +${ganho} Mana`).then(() => enemyTurn());
     }
     function useUltimate() {
