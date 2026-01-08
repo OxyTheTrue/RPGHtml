@@ -287,8 +287,8 @@
         .slot:hover:not(:empty) { border-color: var(--secondary); background: #222; }
         .slot.empty { cursor: default; opacity: 0.5; }
 
-        /* Modal da Loja */
-        #shop-modal {
+        /* Modal da Loja e Morte */
+        #shop-modal, #death-modal {
             display: none;
             position: fixed;
             top: 50%; left: 50%;
@@ -300,12 +300,14 @@
             z-index: 1000;
             text-align: center;
             box-shadow: 0 0 100px rgba(0,0,0,0.9);
+            min-width: 300px;
         }
+        #death-modal { border-color: var(--primary); }
         .overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             z-index: 999;
         }
     </style>
@@ -323,6 +325,7 @@
 </div>
 
 <div class="overlay" id="overlay" onclick="closeShop()"></div>
+
 <div id="shop-modal">
     <h3 style="color: var(--accent); margin-top: 0;">LOJA DO ALQUIMISTA</h3>
     <p>Poção de Cura: 10 Gold</p>
@@ -330,6 +333,17 @@
         <i class="fa-solid fa-cart-shopping"></i> COMPRAR
     </button>
     <button class="action-btn btn-def" style="width: 100%;" onclick="closeShop()">FECHAR</button>
+</div>
+
+<div id="death-modal">
+    <h2 style="color: var(--primary); margin-top: 0;">VOCÊ MORREU!</h2>
+    <p style="font-size: 0.9rem; opacity: 0.8;">O seu ouro e experiência foram perdidos nas sombras, mas seu conhecimento permanece.</p>
+    <button class="action-btn btn-heal" style="width: 100%; margin-bottom: 10px;" onclick="restartGame()">
+        <i class="fa-solid fa-rotate-left"></i> REINICIAR
+    </button>
+    <button class="action-btn btn-atk" style="width: 100%; background: #441111;" onclick="exitToMenu()">
+        <i class="fa-solid fa-door-open"></i> SAIR
+    </button>
 </div>
 
 <div class="main-wrapper" id="game-ui">
@@ -510,6 +524,29 @@
         spawnMonster();
     }
 
+    function restartGame() {
+        // Reiniciar mantendo Lvl e Atributos, mas zerando Gold e XP
+        p.hp = p.maxHp;
+        p.mana = p.maxMana;
+        p.xp = 0;
+        p.gold = 0;
+        p.furia = 0;
+        p.inventory = [];
+        p.pendingPoints = 0;
+        
+        document.getElementById('death-modal').style.display = 'none';
+        document.getElementById('overlay').style.display = 'none';
+        
+        updateUI();
+        spawnMonster();
+        typeLog("Você renasce em busca de vingança!", "#ffa502");
+    }
+
+    function exitToMenu() {
+        localStorage.removeItem('rpg_save');
+        location.reload();
+    }
+
     function saveAndExit() {
         const saveData = { p, e };
         localStorage.setItem('rpg_save', JSON.stringify(saveData));
@@ -534,6 +571,7 @@
     }
 
     function openShop() {
+        if(p.hp <= 0) return;
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('shop-modal').style.display = 'block';
     }
@@ -651,7 +689,6 @@
 
         document.getElementById('ult-btn').style.display = p.furia >= 100 ? 'flex' : 'none';
 
-        // Atualizar Slots
         const slots = document.querySelectorAll('.slot');
         slots.forEach((s, i) => {
             if(p.inventory[i]) {
@@ -733,16 +770,18 @@
         isDefending = false;
         updateUI();
         if(p.hp <= 0) { 
-            await typeLog("VOCÊ CAIU EM COMBATE..."); 
-            localStorage.removeItem('rpg_save');
-            setTimeout(() => location.reload(), 3000); 
+            await typeLog("VOCÊ CAIU EM COMBATE...", "#ff4757"); 
+            setTimeout(() => {
+                document.getElementById('overlay').style.display = 'block';
+                document.getElementById('death-modal').style.display = 'block';
+            }, 1000);
         }
         else toggleButtons(false);
     }
 
     async function win() {
         let xpGanha = 25 + (p.lv * 15);
-        let goldGanho = getRandom(2, 8); // Pouco gold por eliminação
+        let goldGanho = getRandom(2, 8);
         p.xp += xpGanha;
         p.gold += goldGanho;
         await typeLog(`VITÓRIA! +${xpGanha} XP | +${goldGanho} Gold`, "#2ecc71");
