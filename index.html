@@ -508,71 +508,6 @@
 </div>
 
 <script>
-    // --- SISTEMA DE ÁUDIO SINTETIZADO ---
-    const AudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    function playSound(type) {
-        const osc = AudioCtx.createOscillator();
-        const gain = AudioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(AudioCtx.destination);
-        const now = AudioCtx.currentTime;
-
-        switch(type) {
-            case 'atk':
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(150, now);
-                osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.1);
-                osc.start(); osc.stop(now + 0.1);
-                break;
-            case 'mag':
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(400, now);
-                osc.frequency.exponentialRampToValueAtTime(800, now + 0.2);
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.2);
-                osc.start(); osc.stop(now + 0.2);
-                break;
-            case 'hit':
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(100, now);
-                osc.frequency.linearRampToValueAtTime(20, now + 0.2);
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.2);
-                osc.start(); osc.stop(now + 0.2);
-                break;
-            case 'heal':
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(500, now);
-                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.3);
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.3);
-                osc.start(); osc.stop(now + 0.3);
-                break;
-            case 'buy':
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(880, now);
-                osc.frequency.setValueAtTime(1100, now + 0.05);
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.15);
-                osc.start(); osc.stop(now + 0.15);
-                break;
-            case 'lvl':
-                [440, 554, 659, 880].forEach((f, i) => {
-                    const o = AudioCtx.createOscillator();
-                    const g = AudioCtx.createGain();
-                    o.connect(g); g.connect(AudioCtx.destination);
-                    o.frequency.setValueAtTime(f, now + (i * 0.1));
-                    g.gain.setValueAtTime(0.05, now + (i * 0.1));
-                    g.gain.linearRampToValueAtTime(0, now + (i * 0.1) + 0.2);
-                    o.start(now + (i * 0.1)); o.stop(now + (i * 0.1) + 0.2);
-                });
-                break;
-        }
-    }
-
     let p, e, isTyping = false;
     let isDefending = false;
     const types = ['fogo', 'agua', 'terra'];
@@ -649,7 +584,6 @@
         if(p.gold >= item.cost && p.inventory.length < 5) {
             p.gold -= item.cost;
             p.inventory.push(item);
-            playSound('buy');
             updateUI();
             typeLog(`Comprou ${item.name}!`, "#2ed573");
         } else {
@@ -662,11 +596,9 @@
             const item = p.inventory[index];
             if(item.heal) {
                 p.hp = Math.min(p.maxHp, p.hp + item.heal);
-                playSound('heal');
                 typeLog(`Usou ${item.name}: +${item.heal} HP`, "#2ed573");
             } else {
                 p.buffs[item.type] = item.dur;
-                playSound('mag');
                 typeLog(`Ativou ${item.name}!`, "#ffa502");
             }
             p.inventory.splice(index, 1);
@@ -750,7 +682,6 @@
         if(stat === 'vit') p.maxHp += (gain * 5); else p[stat] += gain;
         p.lv++; p.xp = 0; p.nextXp = Math.floor(p.nextXp * 1.4);
         p.hp = p.maxHp; p.mana = p.maxMana; p.pendingPoints = 0;
-        playSound('lvl');
         updateUI(); spawnMonster();
     }
 
@@ -758,13 +689,10 @@
         if(isTyping || p.hp <= 0 || p.pendingPoints > 0) return;
         toggleButtons(true); isDefending = false;
         let dmg;
-        if (tipo === 'fisico') { 
-            dmg = getRandomFloat(p.str * 0.5, p.str); 
-            playSound('atk');
-        } else {
+        if (tipo === 'fisico') dmg = getRandomFloat(p.str * 0.5, p.str);
+        else {
             if (p.mana < 10) { await typeLog("Sem mana suficiente!"); toggleButtons(false); return; }
             p.mana -= 10; dmg = getRandomFloat(p.int * 0.8, p.int * 1.2);
-            playSound('mag');
             if (elems[e.elem].fraqueza === tipo) dmg *= 1.5;
             if (elems[e.elem].resiste === tipo) dmg *= 0.6;
         }
@@ -778,13 +706,11 @@
         let dodgeChance = (p.spd * 2) + (p.buffs.coin > 0 ? 40 : 0);
         if (Math.random() * 100 < dodgeChance) {
             await typeLog("Você esquivou!", "#3498db");
-            playSound('mag'); // Som de esquiva
         } else {
             let dmg = Math.ceil(getRandomFloat(e.str * 0.7, e.str));
             if(isDefending) dmg = Math.ceil(dmg * 0.5);
             if(p.buffs.shield > 0) { dmg = Math.ceil(dmg * 0.7); await typeLog("Escudo Prata absorveu dano!"); }
             p.hp -= dmg; p.furia = Math.min(100, p.furia + 25);
-            playSound('hit');
             await typeLog(`${e.name} atacou: -${dmg} HP`, "#ff4757");
         }
         
@@ -799,7 +725,6 @@
     async function win() {
         let xpGanha = 25 + (p.lv * 15); let goldGanho = getRandom(2, 8);
         p.xp += xpGanha; p.gold += goldGanho;
-        playSound('lvl');
         await typeLog(`VITÓRIA! +${xpGanha} XP | +${goldGanho} Gold`, "#2ecc71");
         if(p.xp >= p.nextXp) { p.pendingPoints++; await typeLog("LEVEL UP!", "#ffa502"); }
         if(p.pendingPoints === 0) spawnMonster(); else updateUI();
@@ -810,7 +735,6 @@
         let bonusSpd = p.buffs.boots > 0 ? 1.25 : 1;
         let ganho = Math.floor((p.int/2 + Math.random() * p.int) * bonusSpd);
         p.mana = Math.min(p.maxMana, p.mana + ganho);
-        playSound('heal');
         updateUI(); typeLog(`Você descansou e recuperou ${ganho} mana`).then(() => enemyTurn());
     }
 
@@ -819,7 +743,6 @@
         toggleButtons(true); p.mana -= 8;
         let cura = Math.floor(p.int * 1.5);
         p.hp = Math.min(p.maxHp, p.hp + cura);
-        playSound('heal');
         updateUI(); typeLog(`Magia de luz: +${cura} HP`).then(() => enemyTurn());
     }
 
@@ -827,7 +750,6 @@
     function useUltimate() {
         if(p.furia < 100) return;
         toggleButtons(true); let dmg = Math.ceil(p.str * 2.5);
-        playSound('mag');
         applyDamageEffect(); e.hp -= dmg; p.furia = 0;
         updateUI(); typeLog("ULTIMATE: EXPLOSÃO ESTELAR!");
         if(e.hp <= 0) win(); else enemyTurn();
