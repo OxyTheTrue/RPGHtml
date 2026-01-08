@@ -241,13 +241,15 @@
             100% { transform: translateX(0); filter: none; }
         }
 
-        /* --- ANIMAÇÃO PISCAR VERMELHO --- */
+        /* --- ESTILO DE ERRO (PISCAR) --- */
         @keyframes blink-red {
-            0% { background-color: #2a2a35; }
-            50% { background-color: #ff4757; }
-            100% { background-color: #2a2a35; }
+            0% { background: #2a2a35; }
+            50% { background: #ff4757; }
+            100% { background: #2a2a35; }
         }
-        .blink-error { animation: blink-red 0.3s ease 2; }
+        .error-blink {
+            animation: blink-red 0.4s ease;
+        }
 
         .gold-container {
             background: rgba(255, 165, 2, 0.15);
@@ -584,8 +586,8 @@
     function openShop() { if(p.hp <= 0) return; document.getElementById('overlay').style.display = 'block'; document.getElementById('shop-modal').style.display = 'block'; }
     function closeShop() { document.getElementById('overlay').style.display = 'none'; document.getElementById('shop-modal').style.display = 'none'; }
 
-    // ATUALIZADO: Adicionado efeito visual de piscar ao falhar na compra
-    function buyItem(type, btnElement) {
+    // CORREÇÃO: buyItem agora aceita o elemento do botão e limpa a classe após a animação
+    function buyItem(type, btn) {
         const items = {
             potion: { cost: 10, name: "Poção Vida", heal: 15, icon: "fa-flask" },
             mana_potion: { cost: 12, name: "Poção Mana", manaGain: 20, icon: "fa-flask-vial" },
@@ -594,17 +596,19 @@
             coin: { cost: 40, name: "Moeda Sorte", type: "coin", dur: 3, icon: "fa-coins" }
         };
         const item = items[type];
+        
         if(p.gold >= item.cost && p.inventory.length < 5) {
             p.gold -= item.cost;
             p.inventory.push(item);
             updateUI();
             typeLog(`Comprou ${item.name}!`, "#2ed573");
         } else {
-            // Efeito de piscar vermelho
-            if(btnElement) {
-                btnElement.classList.remove('blink-error');
-                void btnElement.offsetWidth; // Trigger reflow para reiniciar animação
-                btnElement.classList.add('blink-error');
+            // Se o botão foi passado, adicionamos a classe e a removemos quando a animação terminar
+            if(btn) {
+                btn.classList.add('error-blink');
+                btn.addEventListener('animationend', () => {
+                    btn.classList.remove('error-blink');
+                }, { once: true }); // Garante que o listener seja removido após rodar uma vez
             }
             typeLog(p.inventory.length >= 5 ? "Mochila cheia!" : "Ouro insuficiente!", "#ff4757");
         }
