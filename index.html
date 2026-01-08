@@ -1,768 +1,213 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RPG Visual Mastery Pro - Edição Luxo</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Poppins:wght@400;600;800&display=swap');
+// --- SISTEMA DE ÁUDIO SINTETIZADO ---
+const AudioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        :root {
-            --bg: #050508;
-            --card: rgba(26, 26, 36, 0.95);
-            --panel: rgba(30, 30, 45, 0.7);
-            --primary: #ff4757;
-            --secondary: #2ed573;
-            --accent: #ffa502;
-            --mana: #1e90ff;
-            --text: #ffffff;
-            --border: rgba(255, 255, 255, 0.1);
-            
-            --skill-fogo: #ff9f43;
-            --skill-agua: #54a0ff;
-            --skill-terra: #1dd1a1;
-            --skill-rest: #5352ed;
-            --skill-def: #1e90ff;
-        }
+function playSound(type) {
+    const osc = AudioCtx.createOscillator();
+    const gain = AudioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(AudioCtx.destination);
 
-        * { box-sizing: border-box; touch-action: manipulation; }
-        
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            background: radial-gradient(circle at center, #1a1a2e 0%, #050508 100%); 
-            color: var(--text); 
-            margin: 0; padding: 20px; 
-            display: flex; justify-content: center; align-items: flex-start;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+    const now = AudioCtx.currentTime;
 
-        /* --- TELAS --- */
-        #start-menu {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 80vh;
-            text-align: center;
-            z-index: 100;
-        }
+    switch(type) {
+        case 'atk':
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.1);
+            osc.start(); osc.stop(now + 0.1);
+            break;
+        case 'mag':
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.exponentialRampToValueAtTime(800, now + 0.2);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.2);
+            osc.start(); osc.stop(now + 0.2);
+            break;
+        case 'hit':
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(100, now);
+            osc.frequency.linearRampToValueAtTime(20, now + 0.2);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.2);
+            osc.start(); osc.stop(now + 0.2);
+            break;
+        case 'heal':
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(500, now);
+            osc.frequency.exponentialRampToValueAtTime(1200, now + 0.3);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.3);
+            osc.start(); osc.stop(now + 0.3);
+            break;
+        case 'buy':
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(880, now);
+            osc.frequency.setValueAtTime(1100, now + 0.1);
+            gain.gain.setValueAtTime(0.05, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.2);
+            osc.start(); osc.stop(now + 0.2);
+            break;
+        case 'lvl':
+            [440, 554, 659, 880].forEach((f, i) => {
+                const o = AudioCtx.createOscillator();
+                const g = AudioCtx.createGain();
+                o.connect(g); g.connect(AudioCtx.destination);
+                o.frequency.setValueAtTime(f, now + (i * 0.1));
+                g.gain.setValueAtTime(0.05, now + (i * 0.1));
+                g.gain.linearRampToValueAtTime(0, now + (i * 0.1) + 0.2);
+                o.start(now + (i * 0.1)); o.stop(now + (i * 0.1) + 0.2);
+            });
+            break;
+    }
+}
 
-        .game-title {
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--accent);
-            text-shadow: 0 0 20px rgba(255, 165, 2, 0.4);
-            margin-bottom: 40px;
-            letter-spacing: -1px;
-        }
+// --- VARIÁVEIS DO JOGO ---
+let p, e, isTyping = false, isDefending = false;
+const types = ['fogo', 'agua', 'terra'];
+const elems = { 
+    fogo: { cor: '#ff9f43', fraqueza: 'agua', resiste: 'terra' }, 
+    agua: { cor: '#54a0ff', fraqueza: 'terra', resiste: 'fogo' }, 
+    terra: { cor: '#1dd1a1', fraqueza: 'fogo', resiste: 'agua' } 
+};
 
-        .main-wrapper {
-            display: none;
-            gap: 20px;
-            width: 100%;
-            max-width: 1000px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
+const monsterTemplates = [
+    { name: "Ratazana", hpMin: 5, hpMax: 8, strMin: 1.2, strMax: 2.5, minLv: 1, type: 'basic', img: "ratazana gigante.png" },
+    { name: "Esqueleto", hpMin: 8, hpMax: 12, strMin: 2, strMax: 3.5, minLv: 1, type: 'basic', img: "esqueleto.png" },
+    { name: "Ogro", hpMultMin: 1.0, hpMultMax: 1.2, strMultMin: 0.9, strMultMax: 1.1, minLv: 5, type: 'proportional', img: "ogro.png" },
+    { name: "Vampiro", hpMultMin: 1.1, hpMultMax: 1.3, strMultMin: 0.8, strMultMax: 1.0, minLv: 10, type: 'proportional', img: "vampiro.png" }
+];
 
-        .btn-menu {
-            width: 280px;
-            margin: 10px;
-            font-size: 1.1rem;
-        }
+window.onload = () => { if(localStorage.getItem('rpg_save')) document.getElementById('continue-btn').style.display = 'flex'; };
 
-        .btn-exit {
-            position: absolute;
-            top: 20px;
-            right: 25px;
-            padding: 8px 15px !important;
-            font-size: 12px !important;
-            background: #441111 !important;
-            min-height: auto !important;
-        }
+function startNewGame() {
+    p = { lv: 1, hp: 10, maxHp: 10, mana: 20, maxMana: 20, str: 4, int: 5, luk: 3, spd: 3, vit: 1, xp: 0, nextXp: 50, furia: 0, gold: 0, inventory: [], pendingPoints: 0, levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 }, buffs: { boots: 0, shield: 0, coin: 0 } };
+    showGame(); spawnMonster();
+}
 
-        #hero-sidebar {
-            flex: 1;
-            min-width: 280px;
-            max-width: 320px;
-            background: var(--panel);
-            backdrop-filter: blur(10px);
-            padding: 25px;
-            border-radius: 24px;
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+function restartGame() {
+    p.hp = p.maxHp; p.mana = p.maxMana; p.xp = 0; p.gold = 0; p.furia = 0; p.inventory = []; p.pendingPoints = 0; p.buffs = { boots: 0, shield: 0, coin: 0 };
+    document.getElementById('death-modal').style.display = 'none'; document.getElementById('overlay').style.display = 'none';
+    updateUI(); spawnMonster(); typeLog("Você renasce!", "#ffa502");
+}
 
-        #game-container { 
-            flex: 2;
-            min-width: 350px;
-            max-width: 550px; 
-            background: var(--card); 
-            padding: 25px; 
-            border-radius: 32px; 
-            border: 1px solid rgba(255,255,255,0.15);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
-            position: relative;
-        }
+function exitToMenu() { localStorage.removeItem('rpg_save'); location.reload(); }
+function saveAndExit() { const saveData = { p, e }; localStorage.setItem('rpg_save', JSON.stringify(saveData)); location.reload(); }
 
-        .hero-header { border-bottom: 2px solid var(--border); margin-bottom: 20px; padding-bottom: 10px; }
-        .hero-header h2 { margin: 0; color: var(--accent); font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
+function loadGame() {
+    const saved = JSON.parse(localStorage.getItem('rpg_save'));
+    if(saved) { p = saved.p; e = saved.e; if(!p.buffs) p.buffs = { boots: 0, shield: 0, coin: 0 }; showGame(); if (e && e.img) document.getElementById('enemy-img').src = e.img; updateUI(); typeLog("Progresso carregado!", "#2ed573"); toggleButtons(false); }
+}
 
-        .attribute-card {
-            background: rgba(0,0,0,0.3);
-            margin-bottom: 10px;
-            padding: 12px 15px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 4px solid var(--accent);
-            transition: all 0.3s ease;
-        }
+function showGame() { document.getElementById('start-menu').style.display = 'none'; document.getElementById('game-ui').style.display = 'flex'; }
+function openShop() { if(p.hp <= 0) return; document.getElementById('overlay').style.display = 'block'; document.getElementById('shop-modal').style.display = 'block'; }
+function closeShop() { document.getElementById('overlay').style.display = 'none'; document.getElementById('shop-modal').style.display = 'none'; }
 
-        .attr-info i { color: var(--accent); margin-right: 10px; width: 20px; text-align: center; }
-        .attr-info { font-weight: 700; font-size: 14px; text-transform: uppercase; color: #ccc; }
-        .attr-value { color: #fff; font-size: 16px; margin-left: 5px; }
-
-        .lvl-up-btn {
-            width: 35px; height: 35px;
-            background: var(--accent);
-            color: #000;
-            border-radius: 50%;
-            border: none;
-            font-weight: 900;
-            font-size: 20px;
-            cursor: pointer;
-            box-shadow: 0 0 15px var(--accent);
-            animation: pulse 1.5s infinite;
-            display: none;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 5px var(--accent); }
-            50% { transform: scale(1.1); box-shadow: 0 0 20px var(--accent); }
-            100% { transform: scale(1); box-shadow: 0 0 5px var(--accent); }
-        }
-
-        .enemy-card { 
-            background: rgba(0,0,0,0.5); 
-            padding: 20px; 
-            border-radius: 24px; 
-            text-align: center; 
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
-        }
-        
-        .enemy-sprite-container {
-            width: 180px; height: 180px;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            margin: 15px auto;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        .enemy-sprite {
-            width: 100%; height: 100%; object-fit: contain;
-            image-rendering: pixelated;
-        }
-
-        .status-bar { 
-            background: #000; height: 14px; border-radius: 7px; margin: 8px 0; 
-            overflow: hidden; border: 1px solid rgba(255,255,255,0.1); 
-        }
-        .bar-fill { height: 100%; transition: width 0.4s ease-out; }
-        .hp-fill { background: linear-gradient(90deg, #ff4757, #ff6b81); box-shadow: 0 0 10px rgba(255,71,87,0.5); }
-        .mana-fill { background: linear-gradient(90deg, #1e90ff, #70a1ff); box-shadow: 0 0 10px rgba(30,144,255,0.5); }
-        .xp-fill { background: #a29bfe; }
-        .furia-fill { background: #ffa502; }
-
-        .log { 
-            height: 120px; overflow-y: auto; background: rgba(0,0,0,0.8); padding: 15px; 
-            border-radius: 16px; font-family: 'Fira Code', monospace; font-size: 12px; 
-            margin-bottom: 20px; border: 1px solid var(--border);
-            line-height: 1.5;
-        }
-
-        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .magic-row { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 5px; }
-        
-        button.action-btn { 
-            padding: 15px 10px; font-family: 'Poppins'; font-weight: 700; border: none; 
-            border-radius: 16px; color: white; cursor: pointer; transition: 0.2s;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-transform: uppercase;
-            background: #2a2a35;
-            position: relative;
-            overflow: hidden;
-        }
-
-        button.action-btn i { margin-bottom: 5px; font-size: 18px; }
-
-        .btn-mag .bg-icon {
-            position: absolute;
-            font-size: 50px;
-            opacity: 0.15;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .action-btn span, .action-btn div { z-index: 1; }
-
-        button.action-btn:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.3); }
-        button.action-btn:active:not(:disabled) { transform: translateY(1px); }
-        button:disabled { opacity: 0.4; cursor: not-allowed; }
-
-        .btn-atk { box-shadow: inset 0 -4px 0 0 var(--primary), 0 4px 12px rgba(255, 71, 87, 0.4); }
-        .btn-heal { box-shadow: inset 0 -4px 0 0 var(--secondary), 0 4px 12px rgba(46, 213, 115, 0.4); }
-        .btn-def { box-shadow: inset 0 -4px 0 0 var(--skill-def), 0 4px 12px rgba(30, 144, 255, 0.4); }
-        .btn-rest { box-shadow: inset 0 -4px 0 0 var(--skill-rest), 0 4px 12px rgba(83, 82, 237, 0.4); }
-        
-        .btn-ult { 
-            grid-column: span 2; 
-            box-shadow: inset 0 -4px 0 0 var(--accent), 0 6px 15px rgba(255, 165, 2, 0.5); 
-        }
-
-        .btn-mag { min-height: 70px; }
-        .btn-mag.fogo { box-shadow: inset 0 -4px 0 0 var(--skill-fogo), 0 4px 12px rgba(255, 159, 67, 0.4); }
-        .btn-mag.agua { box-shadow: inset 0 -4px 0 0 var(--skill-agua), 0 4px 12px rgba(84, 160, 255, 0.4); }
-        .btn-mag.terra { box-shadow: inset 0 -4px 0 0 var(--skill-terra), 0 4px 12px rgba(29, 209, 161, 0.4); }
-
-        .skill-info { font-size: 10px; font-weight: 400; opacity: 0.8; margin-top: 2px; letter-spacing: 0.5px; }
-        .badge { font-size: 10px; padding: 4px 10px; border-radius: 8px; font-weight: 700; color: #000; }
-
-        .take-damage { animation: damage-pulse 0.4s ease-in-out; }
-
-        @keyframes damage-pulse {
-            0% { transform: translateX(0); filter: brightness(2) sepia(1) saturate(20) hue-rotate(-50deg); }
-            25% { transform: translateX(-10px); }
-            50% { transform: translateX(10px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); filter: none; }
-        }
-
-        /* --- NOVOS ESTILOS: GOLD, LOJA E INVENTÁRIO --- */
-        .gold-container {
-            background: rgba(255, 165, 2, 0.15);
-            padding: 8px 15px;
-            border-radius: 12px;
-            border: 1px solid var(--accent);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: 0.3s;
-        }
-        .gold-container:hover { background: rgba(255, 165, 2, 0.3); }
-        .gold-icon { color: var(--accent); font-size: 18px; text-shadow: 0 0 10px var(--accent); }
-
-        #inventory-container {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(0,0,0,0.4);
-            border-radius: 20px;
-            border: 1px dashed var(--border);
-        }
-        .inventory-slots {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .slot {
-            aspect-ratio: 1/1;
-            background: #1a1a2e;
-            border: 2px solid #333;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 20px;
-            transition: 0.2s;
-            position: relative;
-        }
-        .slot:hover:not(:empty) { border-color: var(--secondary); background: #222; }
-        .slot.empty { cursor: default; opacity: 0.5; }
-
-        /* Modal da Loja e Morte */
-        #shop-modal, #death-modal {
-            display: none;
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: #1a1a2e;
-            padding: 30px;
-            border-radius: 24px;
-            border: 2px solid var(--accent);
-            z-index: 1000;
-            text-align: center;
-            box-shadow: 0 0 100px rgba(0,0,0,0.9);
-            min-width: 300px;
-        }
-        #death-modal { border-color: var(--primary); }
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            z-index: 999;
-        }
-
-        .shop-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .shop-item-btn {
-            font-size: 11px !important;
-            padding: 10px 5px !important;
-        }
-    </style>
-</head>
-<body>
-
-<div id="start-menu">
-    <div class="game-title">MASTERY RPG</div>
-    <button class="action-btn btn-atk btn-menu" onclick="startNewGame()">
-        <i class="fa-solid fa-play"></i> NOVO JOGO
-    </button>
-    <button id="continue-btn" class="action-btn btn-heal btn-menu" onclick="loadGame()" style="display: none;">
-        <i class="fa-solid fa-forward"></i> CONTINUAR
-    </button>
-</div>
-
-<div class="overlay" id="overlay" onclick="closeShop()"></div>
-
-<div id="shop-modal">
-    <h3 style="color: var(--accent); margin-top: 0;">LOJA DO ALQUIMISTA</h3>
-    <div class="shop-grid">
-        <button class="action-btn btn-heal shop-item-btn" onclick="buyItem('potion')">
-            <i class="fa-solid fa-flask"></i> POÇÃO (10G)<div class="skill-info">+15 HP</div>
-        </button>
-        <button class="action-btn btn-mag fogo shop-item-btn" onclick="buyItem('boots')">
-            <i class="fa-solid fa-boot-heeled"></i> BOTAS (25G)<div class="skill-info">+SPD (5 rod)</div>
-        </button>
-        <button class="action-btn btn-def shop-item-btn" onclick="buyItem('shield')">
-            <i class="fa-solid fa-shield-halved"></i> ESCUDO (30G)<div class="skill-info">-Dano (2 rod)</div>
-        </button>
-        <button class="action-btn btn-ult shop-item-btn" onclick="buyItem('coin')">
-            <i class="fa-solid fa-coins"></i> MOEDA (40G)<div class="skill-info">+Esq (3 rod)</div>
-        </button>
-    </div>
-    <button class="action-btn btn-def" style="width: 100%; margin-top: 15px;" onclick="closeShop()">FECHAR</button>
-</div>
-
-<div id="death-modal">
-    <h2 style="color: var(--primary); margin-top: 0;">VOCÊ MORREU!</h2>
-    <p style="font-size: 0.9rem; opacity: 0.8;">O seu ouro e experiência foram perdidos nas sombras, mas seu conhecimento permanece.</p>
-    <button class="action-btn btn-heal" style="width: 100%; margin-bottom: 10px;" onclick="restartGame()">
-        <i class="fa-solid fa-rotate-left"></i> REINICIAR
-    </button>
-    <button class="action-btn btn-atk" style="width: 100%; background: #441111;" onclick="exitToMenu()">
-        <i class="fa-solid fa-door-open"></i> SAIR
-    </button>
-</div>
-
-<div class="main-wrapper" id="game-ui">
-    <aside id="hero-sidebar">
-        <div class="hero-header">
-            <small>NÍVEL <span id="p-lv">1</span></small>
-            <h2>GUERREIRO</h2>
-        </div>
-
-        <div class="attribute-card">
-            <div class="attr-info">
-                <i class="fa-solid fa-hand-fist"></i> FORÇA NVL <span class="attr-value" id="stat-str">1</span>
-            </div>
-            <button class="lvl-up-btn" onclick="spendPoint('str')">+</button>
-        </div>
-
-        <div class="attribute-card">
-            <div class="attr-info">
-                <i class="fa-solid fa-bolt"></i> VELOCIDADE NVL <span class="attr-value" id="stat-spd">1</span>
-            </div>
-            <button class="lvl-up-btn" onclick="spendPoint('spd')">+</button>
-        </div>
-
-        <div class="attribute-card">
-            <div class="attr-info">
-                <i class="fa-solid fa-brain"></i> INTELIGÊNCIA NVL <span class="attr-value" id="stat-int">1</span>
-            </div>
-            <button class="lvl-up-btn" onclick="spendPoint('int')">+</button>
-        </div>
-
-        <div class="attribute-card">
-            <div class="attr-info">
-                <i class="fa-solid fa-clover"></i> SORTE NVL <span class="attr-value" id="stat-luk">1</span>
-            </div>
-            <button class="lvl-up-btn" onclick="spendPoint('luk')">+</button>
-        </div>
-
-        <div class="attribute-card">
-            <div class="attr-info">
-                <i class="fa-solid fa-heart-pulse"></i> VITALIDADE NVL <span class="attr-value" id="stat-vit">1</span>
-            </div>
-            <button class="lvl-up-btn" onclick="spendPoint('vit')">+</button>
-        </div>
-
-        <div style="margin-top: 20px;">
-            <small><i class="fa-solid fa-star"></i> EXPERIÊNCIA</small>
-            <div class="status-bar"><div id="p-xp-bar" class="bar-fill xp-fill"></div></div>
-        </div>
-    </aside>
-
-    <main id="game-container">
-        <button class="action-btn btn-atk btn-exit" onclick="saveAndExit()">
-            <i class="fa-solid fa-door-open"></i> SAIR
-        </button>
-
-        <div class="enemy-card">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3 id="enemy-name" style="margin:0">BUSCANDO...</h3>
-                <div id="enemy-badges"></div>
-            </div>
-            
-            <div class="enemy-sprite-container">
-                <img id="enemy-img" src="" alt="" class="enemy-sprite">
-            </div>
-
-            <div class="status-bar"><div id="enemy-bar" class="bar-fill hp-fill"></div></div>
-            <small><span id="enemy-hp">0</span> / <span id="enemy-max-hp">0</span> HP</small>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-            <div>
-                <small><i class="fa-solid fa-heart"></i> VIDA: <span id="p-hp">0</span>/<span id="p-max-hp">0</span></small>
-                <div class="status-bar"><div id="p-hp-bar" class="bar-fill hp-fill"></div></div>
-            </div>
-            <div>
-                <small><i class="fa-solid fa-wand-sparkles"></i> MANA: <span id="p-mana">0</span></small>
-                <div class="status-bar"><div id="p-mana-bar" class="bar-fill mana-fill"></div></div>
-            </div>
-            <div style="grid-column: span 2;">
-                <small><i class="fa-solid fa-fire-glow"></i> FÚRIA ESPECIAL</small>
-                <div class="status-bar" style="height: 6px;"><div id="p-furia-bar" class="bar-fill furia-fill"></div></div>
-            </div>
-        </div>
-
-        <div class="log" id="game-log"></div>
-
-        <div class="actions" id="action-buttons">
-            <button class="action-btn btn-atk" onclick="playerAction('fisico')">
-                <i class="fa-solid fa-sword"></i>
-                ESPADADA <div class="skill-info" id="val-atk">-</div>
-            </button>
-            <button class="action-btn btn-heal" onclick="playerHeal()">
-                <i class="fa-solid fa-hand-holding-medical"></i>
-                CURAR <div class="skill-info" id="val-heal">-</div>
-            </button>
-            <button class="action-btn btn-def" onclick="playerDefend()">
-                <i class="fa-solid fa-shield-halved"></i>
-                DEFENDER <div class="skill-info">REDUZ DANO</div>
-            </button>
-            <button class="action-btn btn-rest" onclick="playerRest()">
-                <i class="fa-solid fa-bed"></i>
-                DESCANSAR <div class="skill-info" id="val-rest">-</div>
-            </button>
-            <button id="ult-btn" class="action-btn btn-ult" onclick="useUltimate()">
-                <i class="fa-solid fa-sun"></i>
-                GOLPE SUPREMO <div class="skill-info" id="val-ult">LIBERADO!</div>
-            </button>
-            
-            <div class="magic-row">
-                <button class="action-btn btn-mag fogo" onclick="playerAction('fogo')">
-                    <i class="fa-solid fa-fire-flame-curved bg-icon"></i>
-                    FOGO <div class="skill-info">10 MP | <span id="eff-fogo">-</span></div>
-                </button>
-                <button class="action-btn btn-mag agua" onclick="playerAction('agua')">
-                    <i class="fa-solid fa-droplet bg-icon"></i>
-                    ÁGUA <div class="skill-info">10 MP | <span id="eff-agua">-</span></div>
-                </button>
-                <button class="action-btn btn-mag terra" onclick="playerAction('terra')">
-                    <i class="fa-solid fa-mountain bg-icon"></i>
-                    TERRA <div class="skill-info">10 MP | <span id="eff-terra">-</span></div>
-                </button>
-            </div>
-        </div>
-
-        <div id="inventory-container">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <small><i class="fa-solid fa-suitcase"></i> INVENTÁRIO</small>
-                <div class="gold-container" onclick="openShop()">
-                    <i class="fa-solid fa-coins gold-icon"></i>
-                    <span id="p-gold" style="font-weight: bold; color: var(--accent);">0</span>
-                </div>
-            </div>
-            <div class="inventory-slots" id="p-slots">
-                <div class="slot empty" onclick="useItem(0)"></div>
-                <div class="slot empty" onclick="useItem(1)"></div>
-                <div class="slot empty" onclick="useItem(2)"></div>
-                <div class="slot empty" onclick="useItem(3)"></div>
-                <div class="slot empty" onclick="useItem(4)"></div>
-            </div>
-        </div>
-
-    </main>
-</div>
-
-<script>
-    let p, e, isTyping = false;
-    let isDefending = false;
-    const types = ['fogo', 'agua', 'terra'];
-    
-    const elems = { 
-        fogo: { cor: '#ff9f43', fraqueza: 'agua', resiste: 'terra' }, 
-        agua: { cor: '#54a0ff', fraqueza: 'terra', resiste: 'fogo' }, 
-        terra: { cor: '#1dd1a1', fraqueza: 'fogo', resiste: 'agua' } 
+function buyItem(type) {
+    const items = {
+        potion: { cost: 10, name: "Poção", heal: 15, icon: "fa-flask" },
+        boots: { cost: 25, name: "Bota Agilidade", type: "boots", dur: 5, icon: "fa-boot-heeled" },
+        shield: { cost: 30, name: "Escudo Prata", type: "shield", dur: 2, icon: "fa-shield-halved" },
+        coin: { cost: 40, name: "Moeda Sorte", type: "coin", dur: 3, icon: "fa-coins" }
     };
+    const item = items[type];
+    if(p.gold >= item.cost && p.inventory.length < 5) {
+        p.gold -= item.cost; p.inventory.push(item);
+        playSound('buy'); updateUI(); typeLog(`Comprou ${item.name}!`, "#2ed573");
+    } else { typeLog(p.inventory.length >= 5 ? "Mochila cheia!" : "Ouro insuficiente!", "#ff4757"); }
+}
 
-    const monsterTemplates = [
-        { name: "Ratazana", hpMin: 5, hpMax: 8, strMin: 1.2, strMax: 2.5, minLv: 1, type: 'basic', img: "ratazana gigante.png" },
-        { name: "Esqueleto", hpMin: 8, hpMax: 12, strMin: 2, strMax: 3.5, minLv: 1, type: 'basic', img: "esqueleto.png" },
-        { name: "Ogro", hpMultMin: 1.0, hpMultMax: 1.2, strMultMin: 0.9, strMultMax: 1.1, minLv: 5, type: 'proportional', img: "ogro.png" },
-        { name: "Vampiro", hpMultMin: 1.1, hpMultMax: 1.3, strMultMin: 0.8, strMultMax: 1.0, minLv: 10, type: 'proportional', img: "vampiro.png" }
-    ];
-
-    window.onload = () => {
-        if(localStorage.getItem('rpg_save')) {
-            document.getElementById('continue-btn').style.display = 'flex';
-        }
-    };
-
-    function startNewGame() {
-        p = { 
-            lv: 1, hp: 10, maxHp: 10, mana: 20, maxMana: 20, 
-            str: 4, int: 5, luk: 3, spd: 3, vit: 1, xp: 0, nextXp: 50, furia: 0,
-            gold: 0, inventory: [], 
-            pendingPoints: 0,
-            levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 },
-            buffs: { boots: 0, shield: 0, coin: 0 }
-        };
-        showGame();
-        spawnMonster();
+function useItem(index) {
+    if(p.inventory[index]) {
+        const item = p.inventory[index];
+        if(item.heal) { p.hp = Math.min(p.maxHp, p.hp + item.heal); playSound('heal'); typeLog(`Usou ${item.name}: +${item.heal} HP`, "#2ed573"); }
+        else { p.buffs[item.type] = item.dur; playSound('mag'); typeLog(`Ativou ${item.name}!`, "#ffa502"); }
+        p.inventory.splice(index, 1); updateUI();
     }
+}
 
-    function restartGame() {
-        p.hp = p.maxHp; p.mana = p.maxMana; p.xp = 0; p.gold = 0; p.furia = 0;
-        p.inventory = []; p.pendingPoints = 0; p.buffs = { boots: 0, shield: 0, coin: 0 };
-        document.getElementById('death-modal').style.display = 'none';
-        document.getElementById('overlay').style.display = 'none';
-        updateUI(); spawnMonster();
-        typeLog("Você renasce em busca de vingança!", "#ffa502");
+async function typeLog(text, color = "#00ff9d") {
+    isTyping = true; const log = document.getElementById('game-log'); const line = document.createElement('div');
+    line.style.color = color; line.innerHTML = "> "; log.appendChild(line);
+    for (let char of text) { line.innerHTML += char; log.scrollTop = log.scrollHeight; await new Promise(r => setTimeout(r, 15)); }
+    isTyping = false; await new Promise(r => setTimeout(r, 400));
+}
+
+async function spawnMonster() {
+    let avail = monsterTemplates.filter(m => p.lv >= m.minLv); let data = avail[Math.floor(Math.random() * avail.length)];
+    const randomElem = types[Math.floor(Math.random() * types.length)];
+    let finalHp = data.type === 'proportional' ? Math.ceil(p.maxHp * (Math.random() * (data.hpMultMax - data.hpMultMin) + data.hpMultMin)) : Math.floor(Math.random() * (data.hpMax - data.hpMin + 1)) + data.hpMin + (p.lv * 2);
+    let finalStr = data.type === 'proportional' ? p.str * (Math.random() * (data.strMultMax - data.strMultMin) + data.strMultMin) : (Math.random() * (data.strMax - data.strMin) + data.strMin) + (p.lv * 0.3);
+    e = { ...data, elem: randomElem, maxHp: finalHp, hp: finalHp, str: finalStr };
+    document.getElementById('enemy-img').src = e.img; updateUI();
+    await typeLog(`${e.name} apareceu!`, "#f1c40f"); toggleButtons(false);
+}
+
+function updateUI() {
+    document.getElementById('p-hp-bar').style.width = (p.hp/p.maxHp*100) + "%";
+    document.getElementById('p-mana-bar').style.width = (p.mana/p.maxMana*100) + "%";
+    document.getElementById('p-furia-bar').style.width = p.furia + "%";
+    document.getElementById('p-xp-bar').style.width = (p.xp/p.nextXp*100) + "%";
+    document.getElementById('enemy-bar').style.width = (e.hp/e.maxHp*100) + "%";
+    document.getElementById('p-lv').innerText = p.lv; document.getElementById('p-gold').innerText = p.gold;
+    document.getElementById('p-hp').innerText = Math.ceil(p.hp); document.getElementById('p-max-hp').innerText = p.maxHp;
+    document.getElementById('p-mana').innerText = Math.ceil(p.mana);
+    ['str', 'spd', 'int', 'luk', 'vit'].forEach(s => document.getElementById('stat-'+s).innerText = p.levels[s]);
+    document.querySelectorAll('.lvl-up-btn').forEach(btn => btn.style.display = p.pendingPoints > 0 ? 'block' : 'none');
+    document.getElementById('enemy-name').innerText = e.name; document.getElementById('enemy-hp').innerText = Math.ceil(e.hp); document.getElementById('enemy-max-hp').innerText = e.maxHp;
+    document.getElementById('enemy-badges').innerHTML = `<span class="badge" style="background: ${elems[e.elem].cor}">${e.elem.toUpperCase()}</span>`;
+    document.querySelectorAll('.slot').forEach((s, i) => {
+        if(p.inventory[i]) { s.innerHTML = `<i class="fa-solid ${p.inventory[i].icon}" style="color: ${p.inventory[i].heal ? '#2ed573' : '#ffa502'}"></i>`; s.classList.remove('empty'); }
+        else { s.innerHTML = ""; s.classList.add('empty'); }
+    });
+}
+
+function spendPoint(stat) {
+    p.levels[stat]++; let gain = Math.floor(Math.random() * 3) + 1;
+    if(stat === 'vit') p.maxHp += (gain * 5); else p[stat] += gain;
+    p.lv++; p.xp = 0; p.nextXp = Math.floor(p.nextXp * 1.4); p.hp = p.maxHp; p.mana = p.maxMana; p.pendingPoints = 0;
+    playSound('lvl'); updateUI(); spawnMonster();
+}
+
+async function playerAction(tipo) {
+    if(isTyping || p.hp <= 0 || p.pendingPoints > 0) return;
+    toggleButtons(true); isDefending = false;
+    let dmg;
+    if (tipo === 'fisico') { dmg = p.str * (Math.random() * 0.5 + 0.5); playSound('atk'); }
+    else { if (p.mana < 10) { await typeLog("Sem mana!"); toggleButtons(false); return; } p.mana -= 10; dmg = p.int * (Math.random() * 0.4 + 0.8); playSound('mag'); if (elems[e.elem].fraqueza === tipo) dmg *= 1.5; }
+    if (Math.random() * 100 < p.luk) { dmg *= 2; await typeLog("CRÍTICO!", "#ffa502"); }
+    dmg = Math.ceil(dmg); applyDamageEffect(); e.hp -= dmg; updateUI(); await typeLog(`Dano: ${dmg}`);
+    if(e.hp <= 0) await win(); else await enemyTurn();
+}
+
+async function enemyTurn() {
+    let dodgeChance = (p.spd * 2) + (p.buffs.coin > 0 ? 40 : 0);
+    if (Math.random() * 100 < dodgeChance) await typeLog("Esquivou!", "#3498db");
+    else {
+        let dmg = Math.ceil(e.str * (Math.random() * 0.3 + 0.7));
+        if(isDefending) dmg = Math.ceil(dmg * 0.5);
+        if(p.buffs.shield > 0) dmg = Math.ceil(dmg * 0.7);
+        p.hp -= dmg; p.furia = Math.min(100, p.furia + 25); playSound('hit');
+        await typeLog(`${e.name} causou ${dmg} dano`, "#ff4757");
     }
+    for(let b in p.buffs) if(p.buffs[b] > 0) p.buffs[b]--;
+    isDefending = false; updateUI();
+    if(p.hp <= 0) setTimeout(() => { document.getElementById('overlay').style.display = 'block'; document.getElementById('death-modal').style.display = 'block'; }, 1000);
+    else toggleButtons(false);
+}
 
-    function exitToMenu() { localStorage.removeItem('rpg_save'); location.reload(); }
-    function saveAndExit() { const saveData = { p, e }; localStorage.setItem('rpg_save', JSON.stringify(saveData)); location.reload(); }
+async function win() {
+    let xpGanha = 25 + (p.lv * 15); let goldGanho = Math.floor(Math.random() * 7) + 2;
+    p.xp += xpGanha; p.gold += goldGanho; playSound('lvl');
+    await typeLog(`Vitória! +${xpGanha} XP | +${goldGanho}G`);
+    if(p.xp >= p.nextXp) { p.pendingPoints++; await typeLog("LEVEL UP!", "#ffa502"); }
+    if(p.pendingPoints === 0) spawnMonster(); else updateUI();
+}
 
-    function loadGame() {
-        const saved = JSON.parse(localStorage.getItem('rpg_save'));
-        if(saved) {
-            p = saved.p; e = saved.e;
-            if(!p.buffs) p.buffs = { boots: 0, shield: 0, coin: 0 };
-            showGame();
-            if (e && e.img) document.getElementById('enemy-img').src = e.img;
-            updateUI();
-            typeLog("Progresso carregado!", "#2ed573");
-            toggleButtons(false);
-        }
-    }
-
-    function showGame() { document.getElementById('start-menu').style.display = 'none'; document.getElementById('game-ui').style.display = 'flex'; }
-    function openShop() { if(p.hp <= 0) return; document.getElementById('overlay').style.display = 'block'; document.getElementById('shop-modal').style.display = 'block'; }
-    function closeShop() { document.getElementById('overlay').style.display = 'none'; document.getElementById('shop-modal').style.display = 'none'; }
-
-    function buyItem(type) {
-        const items = {
-            potion: { cost: 10, name: "Poção", heal: 15, icon: "fa-flask" },
-            boots: { cost: 25, name: "Bota Agilidade", type: "boots", dur: 5, icon: "fa-boot-heeled" },
-            shield: { cost: 30, name: "Escudo Prata", type: "shield", dur: 2, icon: "fa-shield-halved" },
-            coin: { cost: 40, name: "Moeda Sorte", type: "coin", dur: 3, icon: "fa-coins" }
-        };
-        const item = items[type];
-        if(p.gold >= item.cost && p.inventory.length < 5) {
-            p.gold -= item.cost;
-            p.inventory.push(item);
-            updateUI();
-            typeLog(`Comprou ${item.name}!`, "#2ed573");
-        } else {
-            typeLog(p.inventory.length >= 5 ? "Mochila cheia!" : "Ouro insuficiente!", "#ff4757");
-        }
-    }
-
-    function useItem(index) {
-        if(p.inventory[index]) {
-            const item = p.inventory[index];
-            if(item.heal) {
-                p.hp = Math.min(p.maxHp, p.hp + item.heal);
-                typeLog(`Usou ${item.name}: +${item.heal} HP`, "#2ed573");
-            } else {
-                p.buffs[item.type] = item.dur;
-                typeLog(`Ativou ${item.name}!`, "#ffa502");
-            }
-            p.inventory.splice(index, 1);
-            updateUI();
-        }
-    }
-
-    function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-    function getRandomFloat(min, max) { return Math.random() * (max - min) + min; }
-
-    async function typeLog(text, color = "#00ff9d") {
-        isTyping = true;
-        const log = document.getElementById('game-log');
-        const line = document.createElement('div');
-        line.style.color = color;
-        line.innerHTML = "> ";
-        log.appendChild(line);
-        for (let char of text) {
-            line.innerHTML += char;
-            log.scrollTop = log.scrollHeight;
-            await new Promise(r => setTimeout(r, 15));
-        }
-        isTyping = false;
-        await new Promise(r => setTimeout(r, 400));
-    }
-
-    async function spawnMonster() {
-        let avail = monsterTemplates.filter(m => p.lv >= m.minLv);
-        let data = avail[Math.floor(Math.random() * avail.length)];
-        const randomElem = types[Math.floor(Math.random() * types.length)];
-        let finalHp = data.type === 'proportional' ? Math.ceil(p.maxHp * getRandomFloat(data.hpMultMin, data.hpMultMax)) : getRandom(data.hpMin, data.hpMax) + (p.lv * 2);
-        let finalStr = data.type === 'proportional' ? p.str * getRandomFloat(data.strMultMin, data.strMultMax) : getRandomFloat(data.strMin, data.strMax) + (p.lv * 0.3);
-        e = { ...data, elem: randomElem, maxHp: finalHp, hp: finalHp, str: finalStr };
-        document.getElementById('enemy-img').src = e.img;
-        updateUI();
-        await typeLog(`${e.name} (${e.elem.toUpperCase()}) apareceu!`, "#f1c40f");
-        toggleButtons(false);
-    }
-
-    function updateUI() {
-        document.getElementById('p-hp-bar').style.width = (p.hp/p.maxHp*100) + "%";
-        document.getElementById('p-mana-bar').style.width = (p.mana/p.maxMana*100) + "%";
-        document.getElementById('p-furia-bar').style.width = p.furia + "%";
-        document.getElementById('p-xp-bar').style.width = (p.xp/p.nextXp*100) + "%";
-        document.getElementById('enemy-bar').style.width = (e.hp/e.maxHp*100) + "%";
-        document.getElementById('p-lv').innerText = p.lv;
-        document.getElementById('p-hp').innerText = Math.ceil(p.hp);
-        document.getElementById('p-max-hp').innerText = p.maxHp;
-        document.getElementById('p-mana').innerText = Math.ceil(p.mana);
-        document.getElementById('p-gold').innerText = p.gold;
-        document.getElementById('stat-str').innerText = p.levels.str;
-        document.getElementById('stat-spd').innerText = p.levels.spd;
-        document.getElementById('stat-int').innerText = p.levels.int;
-        document.getElementById('stat-luk').innerText = p.levels.luk;
-        document.getElementById('stat-vit').innerText = p.levels.vit;
-        document.querySelectorAll('.lvl-up-btn').forEach(btn => btn.style.display = p.pendingPoints > 0 ? 'block' : 'none');
-        document.getElementById('enemy-name').innerText = e.name;
-        document.getElementById('enemy-hp').innerText = Math.ceil(e.hp);
-        document.getElementById('enemy-max-hp').innerText = e.maxHp;
-        document.getElementById('enemy-badges').innerHTML = `<span class="badge" style="background: ${elems[e.elem].cor}">${e.elem.toUpperCase()}</span>`;
-        document.getElementById('val-atk').innerText = `${Math.floor(p.str*0.5)}-${Math.ceil(p.str)} Dano`;
-        document.getElementById('val-heal').innerText = `8 MP | +${Math.floor(p.int * 1.5)}`;
-        document.getElementById('val-rest').innerText = `+${Math.floor(p.int/2)}-${p.int} MP`;
-        document.getElementById('val-ult').innerText = `Dano: ${Math.ceil(p.str * 2.5)}`;
-        types.forEach(t => {
-            let label = document.getElementById(`eff-${t}`);
-            if (label) label.innerText = elems[e.elem].fraqueza === t ? "EFET." : (elems[e.elem].resiste === t ? "FRACO" : "NEUTRO");
-        });
-        document.getElementById('ult-btn').style.display = p.furia >= 100 ? 'flex' : 'none';
-        document.querySelectorAll('.slot').forEach((s, i) => {
-            if(p.inventory[i]) {
-                s.innerHTML = `<i class="fa-solid ${p.inventory[i].icon}" style="color: ${p.inventory[i].heal ? '#2ed573' : '#ffa502'}"></i>`;
-                s.classList.remove('empty');
-            } else { s.innerHTML = ""; s.classList.add('empty'); }
-        });
-    }
-
-    function spendPoint(stat) {
-        p.levels[stat]++;
-        let gain = getRandom(1, 3);
-        if(stat === 'vit') p.maxHp += (gain * 5); else p[stat] += gain;
-        p.lv++; p.xp = 0; p.nextXp = Math.floor(p.nextXp * 1.4);
-        p.hp = p.maxHp; p.mana = p.maxMana; p.pendingPoints = 0;
-        updateUI(); spawnMonster();
-    }
-
-    async function playerAction(tipo) {
-        if(isTyping || p.hp <= 0 || p.pendingPoints > 0) return;
-        toggleButtons(true); isDefending = false;
-        let dmg;
-        if (tipo === 'fisico') dmg = getRandomFloat(p.str * 0.5, p.str);
-        else {
-            if (p.mana < 10) { await typeLog("Sem mana suficiente!"); toggleButtons(false); return; }
-            p.mana -= 10; dmg = getRandomFloat(p.int * 0.8, p.int * 1.2);
-            if (elems[e.elem].fraqueza === tipo) dmg *= 1.5;
-            if (elems[e.elem].resiste === tipo) dmg *= 0.6;
-        }
-        if (Math.random() * 100 < p.luk) { dmg *= 2; await typeLog("CRÍTICO!", "#ffa502"); }
-        dmg = Math.ceil(dmg); applyDamageEffect(); e.hp -= dmg;
-        updateUI(); await typeLog(`Você usou ${tipo.toUpperCase()} e causou ${dmg} de dano!`);
-        if(e.hp <= 0) await win(); else await enemyTurn();
-    }
-
-    async function enemyTurn() {
-        let dodgeChance = (p.spd * 2) + (p.buffs.coin > 0 ? 40 : 0);
-        if (Math.random() * 100 < dodgeChance) {
-            await typeLog("Você esquivou!", "#3498db");
-        } else {
-            let dmg = Math.ceil(getRandomFloat(e.str * 0.7, e.str));
-            if(isDefending) dmg = Math.ceil(dmg * 0.5);
-            if(p.buffs.shield > 0) { dmg = Math.ceil(dmg * 0.7); await typeLog("Escudo Prata absorveu dano!"); }
-            p.hp -= dmg; p.furia = Math.min(100, p.furia + 25);
-            await typeLog(`${e.name} atacou: -${dmg} HP`, "#ff4757");
-        }
-        
-        for(let b in p.buffs) if(p.buffs[b] > 0) p.buffs[b]--;
-        isDefending = false; updateUI();
-        if(p.hp <= 0) { 
-            await typeLog("VOCÊ CAIU...", "#ff4757"); 
-            setTimeout(() => { document.getElementById('overlay').style.display = 'block'; document.getElementById('death-modal').style.display = 'block'; }, 1000);
-        } else toggleButtons(false);
-    }
-
-    async function win() {
-        let xpGanha = 25 + (p.lv * 15); let goldGanho = getRandom(2, 8);
-        p.xp += xpGanha; p.gold += goldGanho;
-        await typeLog(`VITÓRIA! +${xpGanha} XP | +${goldGanho} Gold`, "#2ecc71");
-        if(p.xp >= p.nextXp) { p.pendingPoints++; await typeLog("LEVEL UP!", "#ffa502"); }
-        if(p.pendingPoints === 0) spawnMonster(); else updateUI();
-    }
-
-    function playerRest() {
-        toggleButtons(true);
-        let bonusSpd = p.buffs.boots > 0 ? 1.25 : 1;
-        let ganho = Math.floor((p.int/2 + Math.random() * p.int) * bonusSpd);
-        p.mana = Math.min(p.maxMana, p.mana + ganho);
-        updateUI(); typeLog(`Você descansou e recuperou ${ganho} mana`).then(() => enemyTurn());
-    }
-
-    function playerHeal() {
-        if (p.mana < 8) { typeLog("Sem mana!"); return; }
-        toggleButtons(true); p.mana -= 8;
-        let cura = Math.floor(p.int * 1.5);
-        p.hp = Math.min(p.maxHp, p.hp + cura);
-        updateUI(); typeLog(`Magia de luz: +${cura} HP`).then(() => enemyTurn());
-    }
-
-    function playerDefend() { toggleButtons(true); isDefending = true; typeLog("Postura defensiva!").then(() => enemyTurn()); }
-    function useUltimate() {
-        if(p.furia < 100) return;
-        toggleButtons(true); let dmg = Math.ceil(p.str * 2.5);
-        applyDamageEffect(); e.hp -= dmg; p.furia = 0;
-        updateUI(); typeLog("ULTIMATE: EXPLOSÃO ESTELAR!");
-        if(e.hp <= 0) win(); else enemyTurn();
-    }
-
-    function applyDamageEffect() {
-        const img = document.getElementById('enemy-img');
-        img.classList.remove('take-damage'); void img.offsetWidth;
-        img.classList.add('take-damage');
-        setTimeout(() => img.classList.remove('take-damage'), 400);
-    }
-
-    function toggleButtons(state) { document.querySelectorAll('#action-buttons button').forEach(b => b.disabled = state); }
-</script>
-</body>
-</html>
+function playerRest() { toggleButtons(true); let ganho = Math.floor((p.int/2 + Math.random() * p.int) * (p.buffs.boots > 0 ? 1.25 : 1)); p.mana = Math.min(p.maxMana, p.mana + ganho); playSound('heal'); updateUI(); typeLog(`Recuperou ${ganho} mana`).then(() => enemyTurn()); }
+function playerHeal() { if (p.mana < 8) return; toggleButtons(true); p.mana -= 8; let cura = Math.floor(p.int * 1.5); p.hp = Math.min(p.maxHp, p.hp + cura); playSound('heal'); updateUI(); typeLog(`Curou ${cura} HP`).then(() => enemyTurn()); }
+function playerDefend() { toggleButtons(true); isDefending = true; typeLog("Defendendo!").then(() => enemyTurn()); }
+function applyDamageEffect() { const img = document.getElementById('enemy-img'); img.classList.remove('take-damage'); void img.offsetWidth; img.classList.add('take-damage'); }
+function toggleButtons(state) { document.querySelectorAll('#action-buttons button').forEach(b => b.disabled = state); }
