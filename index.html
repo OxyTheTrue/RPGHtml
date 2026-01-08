@@ -673,10 +673,10 @@
         document.getElementById('shop-modal').style.display = 'none'; 
         document.getElementById('skill-modal').style.display = 'none';
         document.getElementById('skill-detail-modal').style.display = 'none';
+        document.getElementById('death-modal').style.display = 'none';
     }
 
-    // --- RESTANTE DO CÓDIGO (MANTIDO IGUAL) ---
-
+    // --- LOGICA DE COMPRA ---
     function buyItem(type, btn) {
         const items = {
             potion: { cost: 10, name: "Poção Vida", heal: 15, icon: "fa-flask" },
@@ -888,9 +888,30 @@
     function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
     function getRandomFloat(min, max) { return Math.random() * (max - min) + min; }
     function toggleButtons(state) { document.querySelectorAll('#action-buttons button').forEach(b => { if(!b.id.includes('slot') || (b.id.includes('slot') && state)) b.disabled = state; }); }
-    function restartGame() { location.reload(); }
-    function exitToMenu() { localStorage.removeItem('rpg_save'); location.reload(); }
-    function saveAndExit() { localStorage.setItem('rpg_save', JSON.stringify({p, e})); location.reload(); }
+    
+    // --- FUNÇÕES DE MORTE E REINÍCIO ---
+    function restartGame() {
+        p.hp = p.maxHp;
+        p.mana = p.maxMana;
+        p.xp = 0;
+        p.gold = 0;
+        p.furia = 0;
+        p.inventory = [];
+        closeAllModals();
+        updateUI();
+        spawnMonster();
+        typeLog("Você retornou, mas suas posses se foram...", "#ff4757");
+    }
+
+    function exitToMenu() { 
+        localStorage.removeItem('rpg_save'); 
+        location.reload(); 
+    }
+
+    function saveAndExit() { 
+        localStorage.setItem('rpg_save', JSON.stringify({p, e})); 
+        location.reload(); 
+    }
 
     async function playerAction(tipo) {
         if(isTyping || p.hp <= 0) return;
