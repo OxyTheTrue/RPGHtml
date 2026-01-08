@@ -569,7 +569,6 @@
     let p, e, isTyping = false;
     let isDefending = false;
 
-    // Definição das Skills Disponíveis
     const skillList = [
         { id: 'fogo', name: 'Bola de Fogo', icon: 'fa-fire', mana: 10, color: 'var(--skill-fogo)', desc: 'Lança chamas intensas. 30% chance de QUEIMADURA.' },
         { id: 'agua', name: 'Tempestade', icon: 'fa-cloud-showers-heavy', mana: 8, color: 'var(--skill-agua)', desc: 'Chuva mística. Chance de dano extra baseado em INT.' },
@@ -604,7 +603,7 @@
             lv: 1, hp: 10, maxHp: 10, mana: 20, maxMana: 20, 
             str: 3, int: 5, luk: 3, spd: 3, vit: 1, xp: 0, nextXp: 50, furia: 0,
             gold: 0, inventory: [], 
-            skills: [], // Guardará {id, level}
+            skills: [],
             skillPoints: 0,
             pendingPoints: 0,
             levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 },
@@ -612,6 +611,7 @@
             bleeding: false 
         };
         
+        document.getElementById('p-display-name').innerText = p.name;
         showGame();
         spawnMonster();
     }
@@ -620,6 +620,7 @@
         const saved = JSON.parse(localStorage.getItem('rpg_save'));
         if(saved) {
             p = saved.p; e = saved.e;
+            document.getElementById('p-display-name').innerText = p.name;
             showGame();
             if (e && e.img) document.getElementById('enemy-img').src = e.img;
             updateUI();
@@ -664,7 +665,7 @@
         const playerSkill = p.skills.find(ps => ps.id === skill.id);
         const currentLv = playerSkill ? playerSkill.level : 0;
         const nextLv = currentLv + 1;
-        const reqLv = nextLv * 5; // Requisito: 5, 10, 15...
+        const reqLv = nextLv * 5; 
         
         const detailModal = document.getElementById('skill-detail-modal');
         const content = document.getElementById('skill-detail-content');
@@ -789,6 +790,8 @@
 
     function updateUI() {
         if(!p) return;
+        
+        document.getElementById('p-display-name').innerText = p.name;
         document.getElementById('p-hp-bar').style.width = (p.hp/p.maxHp*100) + "%";
         document.getElementById('p-mana-bar').style.width = (p.mana/p.maxMana*100) + "%";
         document.getElementById('p-furia-bar').style.width = p.furia + "%";
@@ -816,7 +819,6 @@
             document.getElementById('enemy-max-hp').innerText = e.maxHp;
         }
 
-        // Dano base aproximado 2-3 no lvl 1
         document.getElementById('val-atk').innerText = `${Math.floor(p.str*0.7)}-${Math.ceil(p.str)} Dano`;
         document.getElementById('val-heal').innerText = `8 MP | +${Math.floor(p.int * 1.5)}`;
         document.getElementById('val-rest').innerText = `+${Math.floor(p.int/2)}-${p.int} MP`;
@@ -864,7 +866,6 @@
         let avail = monsterTemplates.filter(m => p.lv >= m.minLv);
         let data = avail[Math.floor(Math.random() * avail.length)];
         
-        // Inimigo parecidos com o player (Vida base 10 + 5 por nível)
         let finalHp = 8 + (p.lv * 4);
         let finalStr = 2 + (p.lv * 0.5);
 
