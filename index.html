@@ -59,7 +59,7 @@
         }
 
         .main-wrapper {
-            display: none; /* Escondido por padrão */
+            display: none;
             gap: 20px;
             width: 100%;
             max-width: 1000px;
@@ -67,14 +67,12 @@
             justify-content: center;
         }
 
-        /* --- ESTILO DOS BOTÕES (MENU E AÇÃO) --- */
         .btn-menu {
             width: 280px;
             margin: 10px;
             font-size: 1.1rem;
         }
 
-        /* Reutilizando estilo das ações para o botão Sair */
         .btn-exit {
             position: absolute;
             top: 20px;
@@ -310,6 +308,17 @@
             background: rgba(0,0,0,0.85);
             z-index: 999;
         }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .shop-item-btn {
+            font-size: 11px !important;
+            padding: 10px 5px !important;
+        }
     </style>
 </head>
 <body>
@@ -328,11 +337,21 @@
 
 <div id="shop-modal">
     <h3 style="color: var(--accent); margin-top: 0;">LOJA DO ALQUIMISTA</h3>
-    <p>Poção de Cura: 10 Gold</p>
-    <button class="action-btn btn-heal" style="width: 100%; margin-bottom: 10px;" onclick="buyPotion()">
-        <i class="fa-solid fa-cart-shopping"></i> COMPRAR
-    </button>
-    <button class="action-btn btn-def" style="width: 100%;" onclick="closeShop()">FECHAR</button>
+    <div class="shop-grid">
+        <button class="action-btn btn-heal shop-item-btn" onclick="buyItem('potion')">
+            <i class="fa-solid fa-flask"></i> POÇÃO (10G)<div class="skill-info">+15 HP</div>
+        </button>
+        <button class="action-btn btn-mag fogo shop-item-btn" onclick="buyItem('boots')">
+            <i class="fa-solid fa-boot-heeled"></i> BOTAS (25G)<div class="skill-info">+SPD (5 rod)</div>
+        </button>
+        <button class="action-btn btn-def shop-item-btn" onclick="buyItem('shield')">
+            <i class="fa-solid fa-shield-halved"></i> ESCUDO (30G)<div class="skill-info">-Dano (2 rod)</div>
+        </button>
+        <button class="action-btn btn-ult shop-item-btn" onclick="buyItem('coin')">
+            <i class="fa-solid fa-coins"></i> MOEDA (40G)<div class="skill-info">+Esq (3 rod)</div>
+        </button>
+    </div>
+    <button class="action-btn btn-def" style="width: 100%; margin-top: 15px;" onclick="closeShop()">FECHAR</button>
 </div>
 
 <div id="death-modal">
@@ -518,94 +537,72 @@
             str: 4, int: 5, luk: 3, spd: 3, vit: 1, xp: 0, nextXp: 50, furia: 0,
             gold: 0, inventory: [], 
             pendingPoints: 0,
-            levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 }
+            levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 },
+            buffs: { boots: 0, shield: 0, coin: 0 }
         };
         showGame();
         spawnMonster();
     }
 
     function restartGame() {
-        p.hp = p.maxHp;
-        p.mana = p.maxMana;
-        p.xp = 0;
-        p.gold = 0;
-        p.furia = 0;
-        p.inventory = [];
-        p.pendingPoints = 0;
-        
+        p.hp = p.maxHp; p.mana = p.maxMana; p.xp = 0; p.gold = 0; p.furia = 0;
+        p.inventory = []; p.pendingPoints = 0; p.buffs = { boots: 0, shield: 0, coin: 0 };
         document.getElementById('death-modal').style.display = 'none';
         document.getElementById('overlay').style.display = 'none';
-        
-        updateUI();
-        spawnMonster();
+        updateUI(); spawnMonster();
         typeLog("Você renasce em busca de vingança!", "#ffa502");
     }
 
-    function exitToMenu() {
-        localStorage.removeItem('rpg_save');
-        location.reload();
-    }
-
-    function saveAndExit() {
-        const saveData = { p, e };
-        localStorage.setItem('rpg_save', JSON.stringify(saveData));
-        location.reload();
-    }
+    function exitToMenu() { localStorage.removeItem('rpg_save'); location.reload(); }
+    function saveAndExit() { const saveData = { p, e }; localStorage.setItem('rpg_save', JSON.stringify(saveData)); location.reload(); }
 
     function loadGame() {
         const saved = JSON.parse(localStorage.getItem('rpg_save'));
         if(saved) {
-            p = saved.p;
-            e = saved.e;
+            p = saved.p; e = saved.e;
+            if(!p.buffs) p.buffs = { boots: 0, shield: 0, coin: 0 };
             showGame();
-            
-            // CORREÇÃO: Repõe a imagem do inimigo carregada do save
-            if (e && e.img) {
-                document.getElementById('enemy-img').src = e.img;
-            }
-
+            if (e && e.img) document.getElementById('enemy-img').src = e.img;
             updateUI();
             typeLog("Progresso carregado!", "#2ed573");
             toggleButtons(false);
         }
     }
 
-    function showGame() {
-        document.getElementById('start-menu').style.display = 'none';
-        document.getElementById('game-ui').style.display = 'flex';
-    }
+    function showGame() { document.getElementById('start-menu').style.display = 'none'; document.getElementById('game-ui').style.display = 'flex'; }
+    function openShop() { if(p.hp <= 0) return; document.getElementById('overlay').style.display = 'block'; document.getElementById('shop-modal').style.display = 'block'; }
+    function closeShop() { document.getElementById('overlay').style.display = 'none'; document.getElementById('shop-modal').style.display = 'none'; }
 
-    function openShop() {
-        if(p.hp <= 0) return;
-        document.getElementById('overlay').style.display = 'block';
-        document.getElementById('shop-modal').style.display = 'block';
-    }
-
-    function closeShop() {
-        document.getElementById('overlay').style.display = 'none';
-        document.getElementById('shop-modal').style.display = 'none';
-    }
-
-    function buyPotion() {
-        if(p.gold >= 10 && p.inventory.length < 5) {
-            p.gold -= 10;
-            p.inventory.push({ name: "Poção", heal: 15, icon: "🧪" });
+    function buyItem(type) {
+        const items = {
+            potion: { cost: 10, name: "Poção", heal: 15, icon: "fa-flask" },
+            boots: { cost: 25, name: "Bota Agilidade", type: "boots", dur: 5, icon: "fa-boot-heeled" },
+            shield: { cost: 30, name: "Escudo Prata", type: "shield", dur: 2, icon: "fa-shield-halved" },
+            coin: { cost: 40, name: "Moeda Sorte", type: "coin", dur: 3, icon: "fa-coins" }
+        };
+        const item = items[type];
+        if(p.gold >= item.cost && p.inventory.length < 5) {
+            p.gold -= item.cost;
+            p.inventory.push(item);
             updateUI();
-            typeLog("Você comprou uma poção!", "#2ed573");
-        } else if (p.inventory.length >= 5) {
-            typeLog("Inventário cheio!", "#ff4757");
+            typeLog(`Comprou ${item.name}!`, "#2ed573");
         } else {
-            typeLog("Gold insuficiente!", "#ff4757");
+            typeLog(p.inventory.length >= 5 ? "Mochila cheia!" : "Ouro insuficiente!", "#ff4757");
         }
     }
 
     function useItem(index) {
         if(p.inventory[index]) {
             const item = p.inventory[index];
-            p.hp = Math.min(p.maxHp, p.hp + item.heal);
+            if(item.heal) {
+                p.hp = Math.min(p.maxHp, p.hp + item.heal);
+                typeLog(`Usou ${item.name}: +${item.heal} HP`, "#2ed573");
+            } else {
+                p.buffs[item.type] = item.dur;
+                typeLog(`Ativou ${item.name}!`, "#ffa502");
+            }
             p.inventory.splice(index, 1);
             updateUI();
-            typeLog(`Usou ${item.name}: +${item.heal} HP`, "#2ed573");
         }
     }
 
@@ -632,16 +629,8 @@
         let avail = monsterTemplates.filter(m => p.lv >= m.minLv);
         let data = avail[Math.floor(Math.random() * avail.length)];
         const randomElem = types[Math.floor(Math.random() * types.length)];
-        
-        let finalHp, finalStr;
-        if(data.type === 'proportional') {
-            finalHp = Math.ceil(p.maxHp * getRandomFloat(data.hpMultMin, data.hpMultMax));
-            finalStr = p.str * getRandomFloat(data.strMultMin, data.strMultMax);
-        } else {
-            finalHp = getRandom(data.hpMin, data.hpMax) + (p.lv * getRandom(1, 3));
-            finalStr = getRandomFloat(data.strMin, data.strMax) + (p.lv * 0.3);
-        }
-
+        let finalHp = data.type === 'proportional' ? Math.ceil(p.maxHp * getRandomFloat(data.hpMultMin, data.hpMultMax)) : getRandom(data.hpMin, data.hpMax) + (p.lv * 2);
+        let finalStr = data.type === 'proportional' ? p.str * getRandomFloat(data.strMultMin, data.strMultMax) : getRandomFloat(data.strMin, data.strMax) + (p.lv * 0.3);
         e = { ...data, elem: randomElem, maxHp: finalHp, hp: finalHp, str: finalStr };
         document.getElementById('enemy-img').src = e.img;
         updateUI();
@@ -655,154 +644,98 @@
         document.getElementById('p-furia-bar').style.width = p.furia + "%";
         document.getElementById('p-xp-bar').style.width = (p.xp/p.nextXp*100) + "%";
         document.getElementById('enemy-bar').style.width = (e.hp/e.maxHp*100) + "%";
-
         document.getElementById('p-lv').innerText = p.lv;
         document.getElementById('p-hp').innerText = Math.ceil(p.hp);
         document.getElementById('p-max-hp').innerText = p.maxHp;
         document.getElementById('p-mana').innerText = Math.ceil(p.mana);
         document.getElementById('p-gold').innerText = p.gold;
-        
         document.getElementById('stat-str').innerText = p.levels.str;
         document.getElementById('stat-spd').innerText = p.levels.spd;
         document.getElementById('stat-int').innerText = p.levels.int;
         document.getElementById('stat-luk').innerText = p.levels.luk;
         document.getElementById('stat-vit').innerText = p.levels.vit;
-
-        const lvlBtns = document.querySelectorAll('.lvl-up-btn');
-        lvlBtns.forEach(btn => btn.style.display = p.pendingPoints > 0 ? 'block' : 'none');
-
+        document.querySelectorAll('.lvl-up-btn').forEach(btn => btn.style.display = p.pendingPoints > 0 ? 'block' : 'none');
         document.getElementById('enemy-name').innerText = e.name;
         document.getElementById('enemy-hp').innerText = Math.ceil(e.hp);
         document.getElementById('enemy-max-hp').innerText = e.maxHp;
-        
-        const badgeColor = elems[e.elem].cor;
-        document.getElementById('enemy-badges').innerHTML = `<span class="badge" style="background: ${badgeColor}">${e.elem.toUpperCase()}</span>`;
-
+        document.getElementById('enemy-badges').innerHTML = `<span class="badge" style="background: ${elems[e.elem].cor}">${e.elem.toUpperCase()}</span>`;
         document.getElementById('val-atk').innerText = `${Math.floor(p.str*0.5)}-${Math.ceil(p.str)} Dano`;
         document.getElementById('val-heal').innerText = `8 MP | +${Math.floor(p.int * 1.5)}`;
         document.getElementById('val-rest').innerText = `+${Math.floor(p.int/2)}-${p.int} MP`;
         document.getElementById('val-ult').innerText = `Dano: ${Math.ceil(p.str * 2.5)}`;
-
         types.forEach(t => {
             let label = document.getElementById(`eff-${t}`);
-            if (label) {
-                if (elems[e.elem].fraqueza === t) label.innerText = "EFET.";
-                else if (elems[e.elem].resiste === t) label.innerText = "FRACO";
-                else label.innerText = "NEUTRO";
-            }
+            if (label) label.innerText = elems[e.elem].fraqueza === t ? "EFET." : (elems[e.elem].resiste === t ? "FRACO" : "NEUTRO");
         });
-
         document.getElementById('ult-btn').style.display = p.furia >= 100 ? 'flex' : 'none';
-
-        const slots = document.querySelectorAll('.slot');
-        slots.forEach((s, i) => {
+        document.querySelectorAll('.slot').forEach((s, i) => {
             if(p.inventory[i]) {
-                s.innerHTML = `<i class="fa-solid fa-flask-vial" style="color: #2ed573"></i>`;
+                s.innerHTML = `<i class="fa-solid ${p.inventory[i].icon}" style="color: ${p.inventory[i].heal ? '#2ed573' : '#ffa502'}"></i>`;
                 s.classList.remove('empty');
-            } else {
-                s.innerHTML = "";
-                s.classList.add('empty');
-            }
+            } else { s.innerHTML = ""; s.classList.add('empty'); }
         });
     }
 
     function spendPoint(stat) {
         p.levels[stat]++;
         let gain = getRandom(1, 3);
-        if(stat === 'vit') { p.maxHp += (gain * 5); } else { p[stat] += gain; }
-        p.lv++; p.xp = 0; 
-        p.nextXp = Math.floor(p.nextXp * 1.4);
-        p.hp = p.maxHp; p.mana = p.maxMana; 
-        p.pendingPoints = 0;
-        updateUI(); 
-        spawnMonster();
+        if(stat === 'vit') p.maxHp += (gain * 5); else p[stat] += gain;
+        p.lv++; p.xp = 0; p.nextXp = Math.floor(p.nextXp * 1.4);
+        p.hp = p.maxHp; p.mana = p.maxMana; p.pendingPoints = 0;
+        updateUI(); spawnMonster();
     }
 
     async function playerAction(tipo) {
         if(isTyping || p.hp <= 0 || p.pendingPoints > 0) return;
-        toggleButtons(true);
-        isDefending = false;
-        
+        toggleButtons(true); isDefending = false;
         let dmg;
-        if (tipo === 'fisico') {
-            dmg = getRandomFloat(p.str * 0.5, p.str);
-        } else {
+        if (tipo === 'fisico') dmg = getRandomFloat(p.str * 0.5, p.str);
+        else {
             if (p.mana < 10) { await typeLog("Sem mana suficiente!"); toggleButtons(false); return; }
-            p.mana -= 10;
-            dmg = getRandomFloat(p.int * 0.8, p.int * 1.2);
+            p.mana -= 10; dmg = getRandomFloat(p.int * 0.8, p.int * 1.2);
             if (elems[e.elem].fraqueza === tipo) dmg *= 1.5;
             if (elems[e.elem].resiste === tipo) dmg *= 0.6;
         }
-
         if (Math.random() * 100 < p.luk) { dmg *= 2; await typeLog("CRÍTICO!", "#ffa502"); }
-        
-        dmg = Math.ceil(dmg);
-        applyDamageEffect();
-        e.hp -= dmg;
-        updateUI();
-        await typeLog(`Você usou ${tipo.toUpperCase()} e causou ${dmg} de dano!`);
-        if(e.hp <= 0) await win(); else await enemyTurn();
-    }
-
-    async function playerDefend() {
-        if(isTyping || p.hp <= 0) return;
-        toggleButtons(true);
-        isDefending = true;
-        await typeLog("Você se prepara para o impacto!", "#1e90ff");
-        await enemyTurn();
-    }
-
-    async function useUltimate() {
-        if(p.furia < 100) return;
-        toggleButtons(true);
-        let dmg = Math.ceil(p.str * 2.5);
-        applyDamageEffect();
-        e.hp -= dmg; p.furia = 0;
-        updateUI();
-        await typeLog("ULTIMATE: EXPLOSÃO ESTELAR!");
+        dmg = Math.ceil(dmg); applyDamageEffect(); e.hp -= dmg;
+        updateUI(); await typeLog(`Você usou ${tipo.toUpperCase()} e causou ${dmg} de dano!`);
         if(e.hp <= 0) await win(); else await enemyTurn();
     }
 
     async function enemyTurn() {
-        if (Math.random() * 100 < p.spd * 2) {
+        let dodgeChance = (p.spd * 2) + (p.buffs.coin > 0 ? 40 : 0);
+        if (Math.random() * 100 < dodgeChance) {
             await typeLog("Você esquivou!", "#3498db");
         } else {
             let dmg = Math.ceil(getRandomFloat(e.str * 0.7, e.str));
-            if(isDefending) { dmg = Math.ceil(dmg * 0.5); await typeLog("Defesa: Dano reduzido!", "#1e90ff"); }
+            if(isDefending) dmg = Math.ceil(dmg * 0.5);
+            if(p.buffs.shield > 0) { dmg = Math.ceil(dmg * 0.7); await typeLog("Escudo Prata absorveu dano!"); }
             p.hp -= dmg; p.furia = Math.min(100, p.furia + 25);
             await typeLog(`${e.name} atacou: -${dmg} HP`, "#ff4757");
         }
-        isDefending = false;
-        updateUI();
+        
+        for(let b in p.buffs) if(p.buffs[b] > 0) p.buffs[b]--;
+        isDefending = false; updateUI();
         if(p.hp <= 0) { 
-            await typeLog("VOCÊ CAIU EM COMBATE...", "#ff4757"); 
-            setTimeout(() => {
-                document.getElementById('overlay').style.display = 'block';
-                document.getElementById('death-modal').style.display = 'block';
-            }, 1000);
-        }
-        else toggleButtons(false);
+            await typeLog("VOCÊ CAIU...", "#ff4757"); 
+            setTimeout(() => { document.getElementById('overlay').style.display = 'block'; document.getElementById('death-modal').style.display = 'block'; }, 1000);
+        } else toggleButtons(false);
     }
 
     async function win() {
-        let xpGanha = 25 + (p.lv * 15);
-        let goldGanho = getRandom(2, 8);
-        p.xp += xpGanha;
-        p.gold += goldGanho;
+        let xpGanha = 25 + (p.lv * 15); let goldGanho = getRandom(2, 8);
+        p.xp += xpGanha; p.gold += goldGanho;
         await typeLog(`VITÓRIA! +${xpGanha} XP | +${goldGanho} Gold`, "#2ecc71");
-        if(p.xp >= p.nextXp) {
-            p.pendingPoints++;
-            await typeLog("LEVEL UP! Melhore um atributo.", "#ffa502");
-        }
+        if(p.xp >= p.nextXp) { p.pendingPoints++; await typeLog("LEVEL UP!", "#ffa502"); }
         if(p.pendingPoints === 0) spawnMonster(); else updateUI();
     }
 
     function playerRest() {
         toggleButtons(true);
-        let ganho = Math.floor(p.int/2 + Math.random() * p.int);
+        let bonusSpd = p.buffs.boots > 0 ? 1.25 : 1;
+        let ganho = Math.floor((p.int/2 + Math.random() * p.int) * bonusSpd);
         p.mana = Math.min(p.maxMana, p.mana + ganho);
-        updateUI();
-        typeLog(`Você descansou e recuperou ${ganho} mana`).then(() => enemyTurn());
+        updateUI(); typeLog(`Você descansou e recuperou ${ganho} mana`).then(() => enemyTurn());
     }
 
     function playerHeal() {
@@ -810,22 +743,26 @@
         toggleButtons(true); p.mana -= 8;
         let cura = Math.floor(p.int * 1.5);
         p.hp = Math.min(p.maxHp, p.hp + cura);
-        updateUI();
-        typeLog(`Magia de luz: +${cura} HP`).then(() => enemyTurn());
+        updateUI(); typeLog(`Magia de luz: +${cura} HP`).then(() => enemyTurn());
+    }
+
+    function playerDefend() { toggleButtons(true); isDefending = true; typeLog("Postura defensiva!").then(() => enemyTurn()); }
+    function useUltimate() {
+        if(p.furia < 100) return;
+        toggleButtons(true); let dmg = Math.ceil(p.str * 2.5);
+        applyDamageEffect(); e.hp -= dmg; p.furia = 0;
+        updateUI(); typeLog("ULTIMATE: EXPLOSÃO ESTELAR!");
+        if(e.hp <= 0) win(); else enemyTurn();
     }
 
     function applyDamageEffect() {
         const img = document.getElementById('enemy-img');
-        img.classList.remove('take-damage');
-        void img.offsetWidth;
+        img.classList.remove('take-damage'); void img.offsetWidth;
         img.classList.add('take-damage');
         setTimeout(() => img.classList.remove('take-damage'), 400);
     }
 
-    function toggleButtons(state) {
-        const actionBtns = document.querySelectorAll('#action-buttons button');
-        actionBtns.forEach(b => b.disabled = state);
-    }
+    function toggleButtons(state) { document.querySelectorAll('#action-buttons button').forEach(b => b.disabled = state); }
 </script>
 </body>
 </html>
