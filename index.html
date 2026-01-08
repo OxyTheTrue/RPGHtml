@@ -525,7 +525,6 @@
     }
 
     function restartGame() {
-        // Reiniciar mantendo Lvl e Atributos, mas zerando Gold e XP
         p.hp = p.maxHp;
         p.mana = p.maxMana;
         p.xp = 0;
@@ -559,6 +558,12 @@
             p = saved.p;
             e = saved.e;
             showGame();
+            
+            // CORREÇÃO: Repõe a imagem do inimigo carregada do save
+            if (e && e.img) {
+                document.getElementById('enemy-img').src = e.img;
+            }
+
             updateUI();
             typeLog("Progresso carregado!", "#2ed573");
             toggleButtons(false);
