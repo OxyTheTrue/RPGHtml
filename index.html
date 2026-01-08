@@ -58,7 +58,6 @@
             letter-spacing: -1px;
         }
 
-        /* INPUT DE NOME */
         .name-input {
             background: rgba(255, 255, 255, 0.05);
             border: 2px solid var(--border);
@@ -226,7 +225,7 @@
         .action-btn span, .action-btn div { z-index: 1; }
 
         button.action-btn:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.3); }
-        button.action-btn:active:not(:disabled) { transform: translateY(1px); }
+        button.action-btn:active:not(:disabled) { transform: translateY(1px); filter: brightness(0.8); }
         button:disabled { opacity: 0.4; cursor: not-allowed; }
 
         .btn-atk { box-shadow: inset 0 -4px 0 0 var(--primary), 0 4px 12px rgba(255, 71, 87, 0.4); }
@@ -341,6 +340,11 @@
             margin-top: 15px;
         }
 
+        /* Efeito de clique específico para botões da loja */
+        .shop-item-btn:active {
+            transform: scale(0.95);
+        }
+
         /* --- SKILL TREE RE-DESIGN --- */
         .skill-tree-grid {
             display: grid;
@@ -426,7 +430,7 @@
             <i class="fa-solid fa-flask-vial"></i> POÇÃO MP (12G)<div class="skill-info">+20 MANA</div>
         </button>
         <button class="action-btn btn-mag fogo shop-item-btn" onclick="buyItem('boots', this)">
-            <i class="fa-solid fa-boot-heeled"></i> BOTAS (25G)<div class="skill-info">+SPD (Ativo)</div>
+            <i class="fa-solid fa-boot"></i> BOTAS (25G)<div class="skill-info">+SPD (Ativo)</div>
         </button>
         <button class="action-btn btn-def shop-item-btn" onclick="buyItem('shield', this)">
             <i class="fa-solid fa-shield-halved"></i> ESCUDO (30G)<div class="skill-info">-Dano (Ativo)</div>
@@ -593,14 +597,12 @@
         }
     };
 
-    // FUNÇÃO DE SALVAMENTO AUTOMÁTICO
     function autoSave() {
         if (p && p.hp > 0) {
             localStorage.setItem('rpg_save', JSON.stringify({p, e}));
         }
     }
 
-    // Salvar ao fechar/recarregar a página
     window.addEventListener('beforeunload', () => {
         autoSave();
     });
@@ -619,7 +621,7 @@
             pendingPoints: 0,
             levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 },
             buffs: { boots: 0, shield: 0, coin: 0 },
-            bleeding: false // Novo status
+            bleeding: false 
         };
         
         showGame();
@@ -693,6 +695,10 @@
         detailModal.style.display = 'block';
     }
 
+    function closeDetailModal() {
+        document.getElementById('skill-detail-modal').style.display = 'none';
+    }
+
     function learnSkill(skillData) {
         if(p.skillPoints > 0 && !p.skills.some(s => s.id === skillData.id)) {
             p.skillPoints--;
@@ -717,7 +723,7 @@
         const items = {
             potion: { cost: 10, name: "Poção Vida", heal: 15, icon: "fa-flask" },
             mana_potion: { cost: 12, name: "Poção Mana", manaGain: 20, icon: "fa-flask-vial" },
-            boots: { cost: 25, name: "Bota Agilidade", type: "boots", dur: 5, icon: "fa-boot-heeled" },
+            boots: { cost: 25, name: "Bota Agilidade", type: "boots", dur: 5, icon: "fa-boot" },
             shield: { cost: 30, name: "Escudo Prata", type: "shield", dur: 2, icon: "fa-shield-halved" },
             coin: { cost: 40, name: "Moeda Sorte", type: "coin", dur: 3, icon: "fa-coins" }
         };
@@ -841,7 +847,6 @@
         document.getElementById('stat-luk').innerText = p.levels.luk;
         document.getElementById('stat-vit').innerText = p.levels.vit;
 
-        // Ícones de Status Player
         const pStatus = document.getElementById('p-status-icons');
         pStatus.innerHTML = p.bleeding ? '<i class="fa-solid fa-droplet effect-icon" style="color: #ff4757" title="Sangramento"></i>' : '';
 
@@ -934,7 +939,6 @@
         p.xp += xpGanha; p.gold += goldGanho;
         await typeLog(`VITÓRIA! +${xpGanha} XP | +${goldGanho} Gold`, "#2ecc71");
         
-        // Chance do sangramento persistir
         if(p.bleeding && Math.random() > 0.2) {
              p.bleeding = false;
              await typeLog("As feridas pararam de sangrar.", "#2ed573");
@@ -981,7 +985,6 @@
         let dmg = getRandomFloat(p.str * 0.5, p.str);
         if (Math.random() * 100 < p.luk) { dmg *= 2; await typeLog("CRÍTICO!", "#ffa502"); }
         
-        // Efeito Queimadura: Inimigo toma 0.5% a mais de dano
         if(e.burning) dmg *= 1.005;
 
         dmg = Math.ceil(dmg); e.hp -= dmg; applyDamageEffect();
@@ -990,7 +993,6 @@
     }
 
     async function enemyTurn() {
-        // Turno começa: Queimadura do inimigo
         if(e.burning && e.hp > 0) {
             let burnDmg = Math.ceil(e.maxHp * 0.05);
             e.hp -= burnDmg;
@@ -999,7 +1001,6 @@
             if(e.hp <= 0) { await win(); return; }
         }
 
-        // Dano de sangramento do player
         if(p.bleeding) {
             let bleedDmg = Math.ceil(p.maxHp * 0.03);
             p.hp -= bleedDmg;
@@ -1017,7 +1018,6 @@
             p.hp -= dmg; p.furia = Math.min(100, p.furia + 25);
             updateUI(); await typeLog(`${e.name} atacou: -${dmg} HP`, "#ff4757");
 
-            // Efeito Sangramento do Esqueleto
             if(e.name === "Esqueleto" && Math.random() < 0.3 && !p.bleeding) {
                 p.bleeding = true;
                 await typeLog("Você está SANGRANDO!", "#ff4757");
@@ -1046,7 +1046,6 @@
         toggleButtons(true); 
         let ganho = Math.floor(p.int/2 + Math.random() * p.int); 
         p.mana = Math.min(p.maxMana, p.mana + ganho); 
-        // Descansar cura sangramento
         if(p.bleeding) {
             p.bleeding = false;
             typeLog("Você cuidou das suas feridas durante o descanso.", "#2ed573");
