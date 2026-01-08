@@ -32,7 +32,7 @@
             font-family: 'Poppins', sans-serif; 
             background: radial-gradient(circle at center, #1a1a2e 0%, #050508 100%); 
             color: var(--text); 
-            margin: 0; padding: 20px; 
+            margin: 0; padding: 10px; 
             display: flex; justify-content: center; align-items: flex-start;
             min-height: 100vh;
             overflow-x: hidden;
@@ -47,10 +47,11 @@
             height: 80vh;
             text-align: center;
             z-index: 100;
+            width: 100%;
         }
 
         .game-title {
-            font-size: 3rem;
+            font-size: clamp(2rem, 8vw, 3rem);
             font-weight: 800;
             color: var(--accent);
             text-shadow: 0 0 20px rgba(255, 165, 2, 0.4);
@@ -59,17 +60,19 @@
         }
 
         .main-wrapper {
-            display: none; 
+            display: none; /* Escondido por padrão */
             gap: 20px;
             width: 100%;
             max-width: 1000px;
             flex-wrap: wrap;
             justify-content: center;
+            padding-bottom: 40px;
         }
 
         /* --- ESTILO DOS BOTÕES (MENU E AÇÃO) --- */
         .btn-menu {
-            width: 280px;
+            width: 100%;
+            max-width: 280px;
             margin: 10px;
             font-size: 1.1rem;
         }
@@ -77,7 +80,7 @@
         .btn-exit {
             position: absolute;
             top: 20px;
-            right: 25px;
+            right: 20px;
             padding: 8px 15px !important;
             font-size: 12px !important;
             background: #441111 !important;
@@ -87,7 +90,7 @@
 
         #hero-sidebar {
             flex: 1;
-            min-width: 280px;
+            min-width: 300px;
             max-width: 320px;
             background: var(--panel);
             backdrop-filter: blur(10px);
@@ -95,59 +98,38 @@
             border-radius: 24px;
             border: 1px solid var(--border);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            order: 1; /* Desktop: Sidebar primeiro */
+            order: 1; /* Desktop: Lado esquerdo */
         }
 
         #game-container { 
             flex: 2;
-            min-width: 350px;
+            min-width: 300px;
             max-width: 550px; 
             background: var(--card); 
-            padding: 25px; 
+            padding: 20px; 
             border-radius: 32px; 
             border: 1px solid rgba(255,255,255,0.15);
             box-shadow: 0 25px 50px rgba(0,0,0,0.6);
             position: relative;
-            order: 2; /* Desktop: Gameplay segundo */
+            order: 2; /* Desktop: Centro */
         }
 
-        /* --- RESPONSIVIDADE (CELULAR) --- */
+        /* AJUSTE PARA CELULARES */
         @media (max-width: 768px) {
-            body { padding: 10px; }
-            
             .main-wrapper {
                 flex-direction: column;
                 align-items: center;
             }
-
             #game-container {
-                order: 1; /* Gameplay em cima no mobile */
+                order: 1; /* Jogo fica em cima */
                 width: 100%;
-                min-width: unset;
-                padding: 15px;
             }
-
             #hero-sidebar {
-                order: 2; /* Status em baixo no mobile */
+                order: 2; /* Status ficam embaixo */
                 width: 100%;
                 max-width: 100%;
-                min-width: unset;
-                padding: 20px;
-                margin-top: 10px;
             }
-
-            .game-title { font-size: 2.2rem; }
-            
-            /* Ampliação de elementos para toque */
-            button.action-btn {
-                padding: 18px 10px;
-                font-size: 14px;
-            }
-            
-            .log { height: 150px; font-size: 14px; }
-            .attribute-card { padding: 15px 20px; }
-            .lvl-up-btn { width: 45px; height: 45px; font-size: 24px; }
-            .btn-exit { top: 10px; right: 10px; }
+            .game-title { margin-top: 20px; }
         }
 
         .hero-header { border-bottom: 2px solid var(--border); margin-bottom: 20px; padding-bottom: 10px; }
@@ -196,10 +178,13 @@
             text-align: center; 
             margin-bottom: 20px;
             border: 1px solid var(--border);
+            margin-top: 30px;
         }
         
         .enemy-sprite-container {
-            width: 180px; height: 180px;
+            width: 100%;
+            max-width: 180px; 
+            height: 180px;
             background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
             margin: 15px auto;
             display: flex; align-items: center; justify-content: center;
@@ -422,7 +407,6 @@
 </div>
 
 <script>
-    /* Lógica mantida integralmente */
     let p, e, isTyping = false;
     let isDefending = false;
     const types = ['fogo', 'agua', 'terra'];
@@ -440,6 +424,7 @@
         { name: "Vampiro", hpMultMin: 1.1, hpMultMax: 1.3, strMultMin: 0.8, strMultMax: 1.0, minLv: 10, type: 'proportional', img: "vampiro.png" }
     ];
 
+    // Checa se existe save ao carregar a página
     window.onload = () => {
         if(localStorage.getItem('rpg_save')) {
             document.getElementById('continue-btn').style.display = 'flex';
@@ -460,7 +445,7 @@
     function saveAndExit() {
         const saveData = { p, e };
         localStorage.setItem('rpg_save', JSON.stringify(saveData));
-        location.reload(); 
+        location.reload(); // Recarrega para voltar ao menu
     }
 
     function loadGame() {
@@ -634,7 +619,7 @@
         updateUI();
         if(p.hp <= 0) { 
             await typeLog("VOCÊ CAIU EM COMBATE..."); 
-            localStorage.removeItem('rpg_save'); 
+            localStorage.removeItem('rpg_save'); // Deleta save se morrer
             setTimeout(() => location.reload(), 3000); 
         }
         else toggleButtons(false);
