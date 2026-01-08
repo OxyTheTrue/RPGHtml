@@ -32,26 +32,26 @@
             font-family: 'Poppins', sans-serif; 
             background: radial-gradient(circle at center, #1a1a2e 0%, #050508 100%); 
             color: var(--text); 
-            margin: 0; padding: 10px; 
+            margin: 0; padding: 15px; 
             display: flex; justify-content: center; align-items: flex-start;
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* --- TELAS E RESPONSIVIDADE --- */
+        /* --- TELAS --- */
         #start-menu {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 90vh;
+            height: 80vh;
             width: 100%;
             text-align: center;
             z-index: 100;
         }
 
         .game-title {
-            font-size: clamp(2rem, 8vw, 3rem); /* Redimensiona baseado na tela */
+            font-size: clamp(2rem, 10vw, 3.5rem);
             font-weight: 800;
             color: var(--accent);
             text-shadow: 0 0 20px rgba(255, 165, 2, 0.4);
@@ -64,23 +64,22 @@
             gap: 20px;
             width: 100%;
             max-width: 1000px;
-            flex-wrap: wrap;
+            flex-wrap: wrap; /* Permite quebrar linha no celular */
             justify-content: center;
-            padding-bottom: 30px;
         }
 
-        /* --- BOTÕES MENU --- */
+        /* --- ESTILO DOS BOTÕES --- */
         .btn-menu {
             width: 90%;
-            max-width: 300px;
+            max-width: 280px;
             margin: 10px;
             font-size: 1.1rem;
         }
 
         .btn-exit {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 10px;
+            right: 10px;
             padding: 5px 12px !important;
             font-size: 10px !important;
             background: #441111 !important;
@@ -90,38 +89,43 @@
 
         #hero-sidebar {
             flex: 1;
-            min-width: 300px;
-            width: 100%;
+            min-width: 300px; /* Largura mínima para mobile */
+            max-width: 100%;
             background: var(--panel);
             backdrop-filter: blur(10px);
             padding: 20px;
             border-radius: 24px;
             border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         #game-container { 
             flex: 2;
             min-width: 300px;
-            width: 100%;
+            max-width: 100%; 
             background: var(--card); 
             padding: 20px; 
             border-radius: 32px; 
             border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
             position: relative;
         }
 
-        /* Ajustes para telas pequenas */
-        @media (max-width: 600px) {
-            body { padding: 5px; }
-            #game-container, #hero-sidebar { border-radius: 20px; padding: 15px; }
+        /* AJUSTES MOBILE ESPECÍFICOS */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .main-wrapper { gap: 15px; }
             .enemy-sprite-container { width: 140px; height: 140px; }
             .actions { gap: 8px; }
-            button.action-btn { padding: 12px 5px; font-size: 12px; }
+            button.action-btn { padding: 12px 5px; font-size: 12px; border-radius: 12px; }
+            .btn-mag { min-height: 60px; }
             .skill-info { font-size: 8px; }
+            .log { height: 100px; font-size: 11px; }
+            .game-title { margin-bottom: 20px; }
         }
 
         .hero-header { border-bottom: 2px solid var(--border); margin-bottom: 20px; padding-bottom: 10px; }
-        .hero-header h2 { margin: 0; color: var(--accent); font-size: 24px; text-transform: uppercase; }
+        .hero-header h2 { margin: 0; color: var(--accent); font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
 
         .attribute-card {
             background: rgba(0,0,0,0.3);
@@ -134,17 +138,27 @@
             border-left: 4px solid var(--accent);
         }
 
-        .attr-info { font-weight: 700; font-size: 13px; text-transform: uppercase; color: #ccc; }
-        .attr-value { color: #fff; font-size: 15px; }
+        .attr-info i { color: var(--accent); margin-right: 10px; width: 20px; text-align: center; }
+        .attr-info { font-weight: 700; font-size: 14px; text-transform: uppercase; color: #ccc; }
+        .attr-value { color: #fff; font-size: 16px; margin-left: 5px; }
 
         .lvl-up-btn {
-            width: 30px; height: 30px;
+            width: 35px; height: 35px;
             background: var(--accent);
+            color: #000;
             border-radius: 50%;
             border: none;
             font-weight: 900;
+            font-size: 20px;
             cursor: pointer;
+            animation: pulse 1.5s infinite;
             display: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 5px var(--accent); }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px var(--accent); }
+            100% { transform: scale(1); box-shadow: 0 0 5px var(--accent); }
         }
 
         .enemy-card { 
@@ -152,7 +166,7 @@
             padding: 15px; 
             border-radius: 24px; 
             text-align: center; 
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border: 1px solid var(--border);
         }
         
@@ -175,41 +189,48 @@
         .furia-fill { background: #ffa502; }
 
         .log { 
-            height: 100px; overflow-y: auto; background: rgba(0,0,0,0.8); padding: 12px; 
-            border-radius: 16px; font-family: 'Fira Code', monospace; font-size: 11px; 
+            background: rgba(0,0,0,0.8); padding: 12px; 
+            border-radius: 16px; font-family: 'Fira Code', monospace; 
             margin-bottom: 15px; border: 1px solid var(--border);
+            overflow-y: auto;
         }
 
         .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .magic-row { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .magic-row { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 5px; }
         
         button.action-btn { 
             font-family: 'Poppins'; font-weight: 700; border: none; 
-            border-radius: 12px; color: white; cursor: pointer;
+            color: white; cursor: pointer; transition: 0.2s;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-transform: uppercase;
             background: #2a2a35;
             position: relative;
+            overflow: hidden;
         }
 
         button.action-btn i { margin-bottom: 3px; }
-        .btn-mag .bg-icon { position: absolute; font-size: 40px; opacity: 0.1; z-index: 0; }
+        .btn-mag .bg-icon { position: absolute; font-size: 35px; opacity: 0.15; z-index: 0; pointer-events: none; }
         .action-btn span, .action-btn div { z-index: 1; }
 
-        .btn-atk { box-shadow: inset 0 -3px 0 0 var(--primary); }
-        .btn-heal { box-shadow: inset 0 -3px 0 0 var(--secondary); }
-        .btn-def { box-shadow: inset 0 -3px 0 0 var(--skill-def); }
-        .btn-rest { box-shadow: inset 0 -3px 0 0 var(--skill-rest); }
-        .btn-ult { grid-column: span 2; box-shadow: inset 0 -3px 0 0 var(--accent); }
-        .btn-mag { min-height: 60px; }
-        .btn-mag.fogo { box-shadow: inset 0 -3px 0 0 var(--skill-fogo); }
-        .btn-mag.agua { box-shadow: inset 0 -3px 0 0 var(--skill-agua); }
-        .btn-mag.terra { box-shadow: inset 0 -3px 0 0 var(--skill-terra); }
+        button.action-btn:hover:not(:disabled) { filter: brightness(1.3); }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-atk { box-shadow: inset 0 -4px 0 0 var(--primary); }
+        .btn-heal { box-shadow: inset 0 -4px 0 0 var(--secondary); }
+        .btn-def { box-shadow: inset 0 -4px 0 0 var(--skill-def); }
+        .btn-rest { box-shadow: inset 0 -4px 0 0 var(--skill-rest); }
+        .btn-ult { grid-column: span 2; box-shadow: inset 0 -4px 0 0 var(--accent); }
+        .btn-mag { min-height: 65px; }
+        .btn-mag.fogo { box-shadow: inset 0 -4px 0 0 var(--skill-fogo); }
+        .btn-mag.agua { box-shadow: inset 0 -4px 0 0 var(--skill-agua); }
+        .btn-mag.terra { box-shadow: inset 0 -4px 0 0 var(--skill-terra); }
 
         .take-damage { animation: damage-pulse 0.4s ease-in-out; }
         @keyframes damage-pulse {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); filter: brightness(2) red; }
-            75% { transform: translateX(5px); }
+            0% { transform: translateX(0); filter: brightness(2); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            100% { transform: translateX(0); filter: none; }
         }
     </style>
 </head>
@@ -231,6 +252,7 @@
             <small>NÍVEL <span id="p-lv">1</span></small>
             <h2>GUERREIRO</h2>
         </div>
+
         <div class="attribute-card">
             <div class="attr-info"><i class="fa-solid fa-hand-fist"></i> FORÇA NVL <span class="attr-value" id="stat-str">1</span></div>
             <button class="lvl-up-btn" onclick="spendPoint('str')">+</button>
@@ -251,6 +273,7 @@
             <div class="attr-info"><i class="fa-solid fa-heart-pulse"></i> VITALIDADE NVL <span class="attr-value" id="stat-vit">1</span></div>
             <button class="lvl-up-btn" onclick="spendPoint('vit')">+</button>
         </div>
+
         <div style="margin-top: 15px;">
             <small><i class="fa-solid fa-star"></i> EXPERIÊNCIA</small>
             <div class="status-bar"><div id="p-xp-bar" class="bar-fill xp-fill"></div></div>
@@ -261,6 +284,7 @@
         <button class="action-btn btn-atk btn-exit" onclick="saveAndExit()">
             <i class="fa-solid fa-door-open"></i> SAIR
         </button>
+
         <div class="enemy-card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h3 id="enemy-name" style="margin:0; font-size: 16px;">BUSCANDO...</h3>
@@ -298,10 +322,11 @@
                 <i class="fa-solid fa-bed"></i> FOCO <div class="skill-info" id="val-rest">-</div>
             </button>
             <button id="ult-btn" class="action-btn btn-ult" onclick="useUltimate()">
-                <i class="fa-solid fa-sun"></i> SUPREMO <div class="skill-info">LIBERADO!</div>
+                <i class="fa-solid fa-sun"></i> SUPREMO
             </button>
+            
             <div class="magic-row">
-                <button class="action-btn btn-mag fogo" onclick="playerAction('fogo')"><i class="fa-solid fa-fire bg-icon"></i>FOGO</button>
+                <button class="action-btn btn-mag fogo" onclick="playerAction('fogo')"><i class="fa-solid fa-fire-flame-curved bg-icon"></i>FOGO</button>
                 <button class="action-btn btn-mag agua" onclick="playerAction('agua')"><i class="fa-solid fa-droplet bg-icon"></i>ÁGUA</button>
                 <button class="action-btn btn-mag terra" onclick="playerAction('terra')"><i class="fa-solid fa-mountain bg-icon"></i>TERRA</button>
             </div>
@@ -310,16 +335,11 @@
 </div>
 
 <script>
-    // Toda a lógica original mantida conforme solicitado
+    // Lógica Original Mantida
     let p, e, isTyping = false, isDefending = false;
     const types = ['fogo', 'agua', 'terra'];
     const elems = { fogo: { cor: '#ff9f43', fraqueza: 'agua', resiste: 'terra' }, agua: { cor: '#54a0ff', fraqueza: 'terra', resiste: 'fogo' }, terra: { cor: '#1dd1a1', fraqueza: 'fogo', resiste: 'agua' } };
-    const monsterTemplates = [
-        { name: "Ratazana", hpMin: 5, hpMax: 8, strMin: 1.2, strMax: 2.5, minLv: 1, type: 'basic', img: "ratazana gigante.png" },
-        { name: "Esqueleto", hpMin: 8, hpMax: 12, strMin: 2, strMax: 3.5, minLv: 1, type: 'basic', img: "esqueleto.png" },
-        { name: "Ogro", hpMultMin: 1.0, hpMultMax: 1.2, strMultMin: 0.9, strMultMax: 1.1, minLv: 5, type: 'proportional', img: "ogro.png" },
-        { name: "Vampiro", hpMultMin: 1.1, hpMultMax: 1.3, strMultMin: 0.8, strMultMax: 1.0, minLv: 10, type: 'proportional', img: "vampiro.png" }
-    ];
+    const monsterTemplates = [{ name: "Ratazana", hpMin: 5, hpMax: 8, strMin: 1.2, strMax: 2.5, minLv: 1, type: 'basic', img: "ratazana gigante.png" },{ name: "Esqueleto", hpMin: 8, hpMax: 12, strMin: 2, strMax: 3.5, minLv: 1, type: 'basic', img: "esqueleto.png" },{ name: "Ogro", hpMultMin: 1.0, hpMultMax: 1.2, strMultMin: 0.9, strMultMax: 1.1, minLv: 5, type: 'proportional', img: "ogro.png" },{ name: "Vampiro", hpMultMin: 1.1, hpMultMax: 1.3, strMultMin: 0.8, strMultMax: 1.0, minLv: 10, type: 'proportional', img: "vampiro.png" }];
 
     window.onload = () => { if(localStorage.getItem('rpg_save')) document.getElementById('continue-btn').style.display = 'flex'; };
 
