@@ -435,12 +435,14 @@
 
 <div id="death-modal">
     <h2 style="color: var(--primary); margin-top: 0;">VOCÊ MORREU!</h2>
-    <p style="font-size: 0.9rem; opacity: 0.8;">O seu ouro e experiência foram perdidos nas sombras.</p>
-    <button class="action-btn btn-heal" style="width: 100%; margin-bottom: 10px;" onclick="restartGame()">
-        <i class="fa-solid fa-rotate-left"></i> REINICIAR
+    <p style="font-size: 0.9rem; opacity: 0.8; line-height: 1.4;">
+        Seu nível e atributos foram preservados,<br>mas seu <b>ouro, XP e itens</b> sumiram.
+    </p>
+    <button class="action-btn btn-heal" style="width: 100%; margin-bottom: 10px;" onclick="restartAfterDeath()">
+        <i class="fa-solid fa-rotate-left"></i> TENTAR NOVAMENTE
     </button>
     <button class="action-btn btn-atk" style="width: 100%; background: #441111;" onclick="exitToMenu()">
-        <i class="fa-solid fa-door-open"></i> SAIR
+        <i class="fa-solid fa-door-open"></i> DESISTIR
     </button>
 </div>
 
@@ -568,7 +570,6 @@
     let p, e, isTyping = false;
     let isDefending = false;
     
-    // --- SISTEMA DE SOM (WEB AUDIO API) ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(type) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -950,9 +951,25 @@
     function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
     function toggleButtons(state) { document.querySelectorAll('#action-buttons button').forEach(b => { if(!b.id.includes('slot')) b.disabled = state; }); }
     
-    function restartGame() {
-        localStorage.removeItem('rpg_save');
-        location.reload();
+    // --- LÓGICA DE REINICIAR (MANTER NÍVEL) ---
+    function restartAfterDeath() {
+        // Reseta atributos voláteis, mas mantém o núcleo (LV e Status Base)
+        p.hp = p.maxHp;
+        p.mana = p.maxMana;
+        p.xp = 0;
+        p.gold = 0;
+        p.inventory = [];
+        p.furia = 0;
+        p.bleeding = false;
+        p.buffs = { boots: 0, shield: 0, coin: 0 };
+        
+        closeAllModals();
+        document.getElementById('game-log').innerHTML = "";
+        typeLog("Você desperta em uma taverna, sem ouro, mas com a experiência de sua vida passada...", "#ffa502");
+        
+        updateUI();
+        spawnMonster();
+        autoSave();
     }
 
     function exitToMenu() { location.reload(); }
@@ -1004,6 +1021,8 @@
             playSound('dmg');
             document.getElementById('overlay').style.display = 'block'; 
             document.getElementById('death-modal').style.display = 'block'; 
+            // Salva o estado atual (com LV mantido) para quando ele clicar em "Tentar Novamente"
+            autoSave(); 
         } else {
             toggleButtons(false);
             autoSave();
