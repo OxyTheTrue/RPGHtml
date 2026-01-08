@@ -242,6 +242,72 @@
             75% { transform: translateX(-5px); }
             100% { transform: translateX(0); filter: none; }
         }
+
+        /* --- NOVOS ESTILOS: GOLD, LOJA E INVENTÁRIO --- */
+        .gold-container {
+            background: rgba(255, 165, 2, 0.15);
+            padding: 8px 15px;
+            border-radius: 12px;
+            border: 1px solid var(--accent);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+        .gold-container:hover { background: rgba(255, 165, 2, 0.3); }
+        .gold-icon { color: var(--accent); font-size: 18px; text-shadow: 0 0 10px var(--accent); }
+
+        #inventory-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 20px;
+            border: 1px dashed var(--border);
+        }
+        .inventory-slots {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .slot {
+            aspect-ratio: 1/1;
+            background: #1a1a2e;
+            border: 2px solid #333;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: 0.2s;
+            position: relative;
+        }
+        .slot:hover:not(:empty) { border-color: var(--secondary); background: #222; }
+        .slot.empty { cursor: default; opacity: 0.5; }
+
+        /* Modal da Loja */
+        #shop-modal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 24px;
+            border: 2px solid var(--accent);
+            z-index: 1000;
+            text-align: center;
+            box-shadow: 0 0 100px rgba(0,0,0,0.9);
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 999;
+        }
     </style>
 </head>
 <body>
@@ -254,6 +320,16 @@
     <button id="continue-btn" class="action-btn btn-heal btn-menu" onclick="loadGame()" style="display: none;">
         <i class="fa-solid fa-forward"></i> CONTINUAR
     </button>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeShop()"></div>
+<div id="shop-modal">
+    <h3 style="color: var(--accent); margin-top: 0;">LOJA DO ALQUIMISTA</h3>
+    <p>Poção de Cura: 10 Gold</p>
+    <button class="action-btn btn-heal" style="width: 100%; margin-bottom: 10px;" onclick="buyPotion()">
+        <i class="fa-solid fa-cart-shopping"></i> COMPRAR
+    </button>
+    <button class="action-btn btn-def" style="width: 100%;" onclick="closeShop()">FECHAR</button>
 </div>
 
 <div class="main-wrapper" id="game-ui">
@@ -377,6 +453,24 @@
                 </button>
             </div>
         </div>
+
+        <div id="inventory-container">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <small><i class="fa-solid fa-suitcase"></i> INVENTÁRIO</small>
+                <div class="gold-container" onclick="openShop()">
+                    <i class="fa-solid fa-coins gold-icon"></i>
+                    <span id="p-gold" style="font-weight: bold; color: var(--accent);">0</span>
+                </div>
+            </div>
+            <div class="inventory-slots" id="p-slots">
+                <div class="slot empty" onclick="useItem(0)"></div>
+                <div class="slot empty" onclick="useItem(1)"></div>
+                <div class="slot empty" onclick="useItem(2)"></div>
+                <div class="slot empty" onclick="useItem(3)"></div>
+                <div class="slot empty" onclick="useItem(4)"></div>
+            </div>
+        </div>
+
     </main>
 </div>
 
@@ -398,7 +492,6 @@
         { name: "Vampiro", hpMultMin: 1.1, hpMultMax: 1.3, strMultMin: 0.8, strMultMax: 1.0, minLv: 10, type: 'proportional', img: "vampiro.png" }
     ];
 
-    // Checa se existe save ao carregar a página
     window.onload = () => {
         if(localStorage.getItem('rpg_save')) {
             document.getElementById('continue-btn').style.display = 'flex';
@@ -409,6 +502,7 @@
         p = { 
             lv: 1, hp: 10, maxHp: 10, mana: 20, maxMana: 20, 
             str: 4, int: 5, luk: 3, spd: 3, vit: 1, xp: 0, nextXp: 50, furia: 0,
+            gold: 0, inventory: [], 
             pendingPoints: 0,
             levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 }
         };
@@ -419,7 +513,7 @@
     function saveAndExit() {
         const saveData = { p, e };
         localStorage.setItem('rpg_save', JSON.stringify(saveData));
-        location.reload(); // Recarrega para voltar ao menu
+        location.reload();
     }
 
     function loadGame() {
@@ -437,6 +531,39 @@
     function showGame() {
         document.getElementById('start-menu').style.display = 'none';
         document.getElementById('game-ui').style.display = 'flex';
+    }
+
+    function openShop() {
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('shop-modal').style.display = 'block';
+    }
+
+    function closeShop() {
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('shop-modal').style.display = 'none';
+    }
+
+    function buyPotion() {
+        if(p.gold >= 10 && p.inventory.length < 5) {
+            p.gold -= 10;
+            p.inventory.push({ name: "Poção", heal: 15, icon: "🧪" });
+            updateUI();
+            typeLog("Você comprou uma poção!", "#2ed573");
+        } else if (p.inventory.length >= 5) {
+            typeLog("Inventário cheio!", "#ff4757");
+        } else {
+            typeLog("Gold insuficiente!", "#ff4757");
+        }
+    }
+
+    function useItem(index) {
+        if(p.inventory[index]) {
+            const item = p.inventory[index];
+            p.hp = Math.min(p.maxHp, p.hp + item.heal);
+            p.inventory.splice(index, 1);
+            updateUI();
+            typeLog(`Usou ${item.name}: +${item.heal} HP`, "#2ed573");
+        }
     }
 
     function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
@@ -490,6 +617,7 @@
         document.getElementById('p-hp').innerText = Math.ceil(p.hp);
         document.getElementById('p-max-hp').innerText = p.maxHp;
         document.getElementById('p-mana').innerText = Math.ceil(p.mana);
+        document.getElementById('p-gold').innerText = p.gold;
         
         document.getElementById('stat-str').innerText = p.levels.str;
         document.getElementById('stat-spd').innerText = p.levels.spd;
@@ -503,7 +631,6 @@
         document.getElementById('enemy-name').innerText = e.name;
         document.getElementById('enemy-hp').innerText = Math.ceil(e.hp);
         document.getElementById('enemy-max-hp').innerText = e.maxHp;
-        document.getElementById('enemy-img').src = e.img;
         
         const badgeColor = elems[e.elem].cor;
         document.getElementById('enemy-badges').innerHTML = `<span class="badge" style="background: ${badgeColor}">${e.elem.toUpperCase()}</span>`;
@@ -515,12 +642,26 @@
 
         types.forEach(t => {
             let label = document.getElementById(`eff-${t}`);
-            if (elems[e.elem].fraqueza === t) label.innerText = "EFET.";
-            else if (elems[e.elem].resiste === t) label.innerText = "FRACO";
-            else label.innerText = "NEUTRO";
+            if (label) {
+                if (elems[e.elem].fraqueza === t) label.innerText = "EFET.";
+                else if (elems[e.elem].resiste === t) label.innerText = "FRACO";
+                else label.innerText = "NEUTRO";
+            }
         });
 
         document.getElementById('ult-btn').style.display = p.furia >= 100 ? 'flex' : 'none';
+
+        // Atualizar Slots
+        const slots = document.querySelectorAll('.slot');
+        slots.forEach((s, i) => {
+            if(p.inventory[i]) {
+                s.innerHTML = `<i class="fa-solid fa-flask-vial" style="color: #2ed573"></i>`;
+                s.classList.remove('empty');
+            } else {
+                s.innerHTML = "";
+                s.classList.add('empty');
+            }
+        });
     }
 
     function spendPoint(stat) {
@@ -593,7 +734,7 @@
         updateUI();
         if(p.hp <= 0) { 
             await typeLog("VOCÊ CAIU EM COMBATE..."); 
-            localStorage.removeItem('rpg_save'); // Deleta save se morrer
+            localStorage.removeItem('rpg_save');
             setTimeout(() => location.reload(), 3000); 
         }
         else toggleButtons(false);
@@ -601,8 +742,10 @@
 
     async function win() {
         let xpGanha = 25 + (p.lv * 15);
+        let goldGanho = getRandom(2, 8); // Pouco gold por eliminação
         p.xp += xpGanha;
-        await typeLog(`VITÓRIA! Ganhou ${xpGanha} XP`, "#2ecc71");
+        p.gold += goldGanho;
+        await typeLog(`VITÓRIA! +${xpGanha} XP | +${goldGanho} Gold`, "#2ecc71");
         if(p.xp >= p.nextXp) {
             p.pendingPoints++;
             await typeLog("LEVEL UP! Melhore um atributo.", "#ffa502");
