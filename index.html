@@ -348,11 +348,8 @@
 <div id="skill-modal">
     <h3 style="color: var(--mana); margin-top: 0;">ÁRVORE DE HABILIDADES</h3>
     <p style="font-size: 12px; opacity: 0.7;">Pontos Disponíveis: <span id="p-skill-points">0</span></p>
-    <div class="skill-tree-grid">
-        <div style="grid-column: span 2; padding: 20px; border: 1px dashed #444; border-radius: 15px; font-size: 11px;">
-            Habilidades serão desbloqueadas conforme você sobe de nível.
+    <div class="skill-tree-grid" id="skill-tree-content">
         </div>
-    </div>
     <button class="action-btn btn-def" style="width: 100%; margin-top: 15px;" onclick="closeAllModals()">VOLTAR</button>
 </div>
 
@@ -513,6 +510,13 @@
     let p, e, isTyping = false;
     let isDefending = false;
 
+    // Definição das Skills Disponíveis
+    const skillList = [
+        { id: 'fogo', name: 'Bola de Fogo', icon: 'fa-fire', mana: 12, color: 'var(--skill-fogo)', desc: 'Dano alto de fogo' },
+        { id: 'agua', name: 'Tempestade', icon: 'fa-cloud-showers-heavy', mana: 10, color: 'var(--skill-agua)', desc: 'Dano + Tropeço' },
+        { id: 'terra', name: 'Areia', icon: 'fa-mountain', mana: 8, color: 'var(--skill-terra)', desc: 'Inimigo erra golpe' }
+    ];
+
     const monsterTemplates = [
         { name: "Ratazana", hpMin: 5, hpMax: 8, strMin: 1.2, strMax: 2.5, minLv: 1, type: 'basic', img: "ratazana gigante.png" },
         { name: "Esqueleto", hpMin: 8, hpMax: 12, strMin: 2, strMax: 3.5, minLv: 1, type: 'basic', img: "esqueleto.png" },
@@ -531,7 +535,7 @@
             lv: 1, hp: 10, maxHp: 10, mana: 20, maxMana: 20, 
             str: 4, int: 5, luk: 3, spd: 3, vit: 1, xp: 0, nextXp: 50, furia: 0,
             gold: 0, inventory: [], 
-            skills: [],
+            skills: [], // Armazena objetos das skills aprendidas
             skillPoints: 0,
             pendingPoints: 0,
             levels: { str: 1, spd: 1, int: 1, luk: 1, vit: 1 },
@@ -560,7 +564,41 @@
     }
     
     function openShop() { if(p.hp <= 0) return; document.getElementById('overlay').style.display = 'block'; document.getElementById('shop-modal').style.display = 'block'; }
-    function openSkillTree() { if(p.hp <= 0) return; document.getElementById('overlay').style.display = 'block'; document.getElementById('skill-modal').style.display = 'block'; }
+    
+    function openSkillTree() { 
+        if(p.hp <= 0) return; 
+        document.getElementById('overlay').style.display = 'block'; 
+        document.getElementById('skill-modal').style.display = 'block';
+        renderSkillTree();
+    }
+
+    function renderSkillTree() {
+        const container = document.getElementById('skill-tree-content');
+        container.innerHTML = "";
+        skillList.forEach(s => {
+            const isLearned = p.skills.some(ps => ps.id === s.id);
+            const btn = document.createElement('button');
+            btn.className = `action-btn ${isLearned ? 'btn-rest' : 'btn-skill'}`;
+            btn.style.width = "100%";
+            btn.innerHTML = `<i class="fa-solid ${s.icon}"></i> ${s.name} ${isLearned ? '(OK)' : '(1 PT)'} <div class="skill-info">${s.desc}</div>`;
+            btn.onclick = () => learnSkill(s);
+            if(isLearned) btn.disabled = true;
+            container.appendChild(btn);
+        });
+    }
+
+    function learnSkill(skillData) {
+        if(p.skillPoints > 0 && !p.skills.some(s => s.id === skillData.id)) {
+            p.skillPoints--;
+            p.skills.push(skillData);
+            updateUI();
+            renderSkillTree();
+            typeLog(`Aprendeu ${skillData.name}!`, "#54a0ff");
+        } else if (p.skillPoints <= 0) {
+            typeLog("Sem pontos de skill!", "#ff4757");
+        }
+    }
+
     function closeAllModals() { 
         document.getElementById('overlay').style.display = 'none'; 
         document.getElementById('shop-modal').style.display = 'none'; 
@@ -578,7 +616,7 @@
         const item = items[type];
         if(p.gold >= item.cost && p.inventory.length < 5) {
             p.gold -= item.cost; 
-            p.inventory.push({...item}); // Adiciona cópia do item
+            p.inventory.push({...item});
             updateUI();
             typeLog(`Comprou ${item.name}!`, "#2ed573");
         } else {
@@ -590,33 +628,59 @@
         }
     }
 
-    // --- NOVA FUNÇÃO: USAR ITEM ---
     async function useItem(index) {
         if(isTyping || !p.inventory[index] || p.hp <= 0) return;
-        
         const item = p.inventory[index];
         let message = `Usou ${item.name}!`;
-
-        if(item.heal) {
-            p.hp = Math.min(p.maxHp, p.hp + item.heal);
-            message += ` (+${item.heal} HP)`;
-        } else if(item.manaGain) {
-            p.mana = Math.min(p.maxMana, p.mana + item.manaGain);
-            message += ` (+${item.manaGain} Mana)`;
-        } else if(item.type) {
-            p.buffs[item.type] = item.dur;
-            message += ` (Efeito Ativado!)`;
-        }
-
-        // Remove item do array
+        if(item.heal) { p.hp = Math.min(p.maxHp, p.hp + item.heal); message += ` (+${item.heal} HP)`; }
+        else if(item.manaGain) { p.mana = Math.min(p.maxMana, p.mana + item.manaGain); message += ` (+${item.manaGain} Mana)`; }
+        else if(item.type) { p.buffs[item.type] = item.dur; message += ` (Efeito Ativado!)`; }
         p.inventory.splice(index, 1);
         updateUI();
         await typeLog(message, "#54a0ff");
     }
 
-    function useSkill(index) {
-        if(isTyping || !p.skills[index]) return;
-        typeLog(`Usou habilidade do slot ${index+1}`);
+    async function useSkill(index) {
+        if(isTyping || !p.skills[index] || p.hp <= 0) return;
+        const skill = p.skills[index];
+
+        if(p.mana < skill.mana) {
+            typeLog("Mana insuficiente!", "#ff4757");
+            return;
+        }
+
+        toggleButtons(true);
+        p.mana -= skill.mana;
+        updateUI();
+
+        let logMsg = "";
+        let color = skill.color;
+
+        if(skill.id === 'fogo') {
+            let dmg = Math.ceil(p.int * 1.8 + 5);
+            e.hp -= dmg;
+            logMsg = `Lançou BOLA DE FOGO: ${dmg} de dano!`;
+        } 
+        else if(skill.id === 'agua') {
+            let dmg = Math.ceil(p.int * 1.2);
+            e.hp -= dmg;
+            logMsg = `TEMPESTADE: ${dmg} de dano.`;
+            if(Math.random() > 0.5) {
+                let extra = Math.ceil(p.int * 0.5);
+                e.hp -= extra;
+                logMsg += ` O inimigo tropeçou e tomou +${extra}!`;
+            }
+        }
+        else if(skill.id === 'terra') {
+            logMsg = `TEMPESTADE DE AREIA! O inimigo está cego.`;
+            e.blinded = true; // Flag temporária para o turno do inimigo
+        }
+
+        applyDamageEffect();
+        updateUI();
+        await typeLog(logMsg, color);
+        
+        if(e.hp <= 0) await win(); else await enemyTurn();
     }
 
     function updateUI() {
@@ -650,15 +714,25 @@
         document.getElementById('val-rest').innerText = `+${Math.floor(p.int/2)}-${p.int} MP`;
         document.getElementById('val-ult').innerText = `Dano: ${Math.ceil(p.str * 2.5)}`;
 
-        // Atualiza Inventário
+        // Atualiza Slots de Skill no Combate
+        for(let i=0; i<3; i++) {
+            const slot = document.getElementById(`skill-slot-${i}`);
+            if(p.skills[i]) {
+                slot.disabled = false;
+                slot.style.boxShadow = `inset 0 -4px 0 0 ${p.skills[i].color}`;
+                slot.innerHTML = `<i class="fa-solid ${p.skills[i].icon}"></i><div class="skill-info">${p.skills[i].mana} MP</div>`;
+            } else {
+                slot.disabled = true;
+                slot.innerHTML = `<i class="fa-solid fa-lock"></i>`;
+            }
+        }
+
         const slots = document.querySelectorAll('.slot');
         slots.forEach((s, i) => {
             if(p.inventory[i]) {
                 let color = p.inventory[i].heal ? '#2ed573' : (p.inventory[i].manaGain ? '#1e90ff' : '#ffa502');
                 s.innerHTML = `<i class="fa-solid ${p.inventory[i].icon}" style="color: ${color}"></i>`;
-            } else { 
-                s.innerHTML = ""; 
-            }
+            } else { s.innerHTML = ""; }
         });
 
         document.getElementById('ult-btn').style.display = p.furia >= 100 ? 'flex' : 'none';
@@ -685,7 +759,7 @@
         let data = avail[Math.floor(Math.random() * avail.length)];
         let finalHp = data.type === 'proportional' ? Math.ceil(p.maxHp * getRandomFloat(data.hpMultMin, data.hpMultMax)) : getRandom(data.hpMin, data.hpMax) + (p.lv * 2);
         let finalStr = data.type === 'proportional' ? p.str * getRandomFloat(data.strMultMin, data.strMultMax) : getRandomFloat(data.strMin, data.strMax) + (p.lv * 0.3);
-        e = { ...data, hp: finalHp, maxHp: finalHp, str: finalStr };
+        e = { ...data, hp: finalHp, maxHp: finalHp, str: finalStr, blinded: false };
         document.getElementById('enemy-img').src = e.img;
         updateUI();
         await typeLog(`${e.name} apareceu!`, "#f1c40f");
@@ -712,7 +786,7 @@
 
     function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
     function getRandomFloat(min, max) { return Math.random() * (max - min) + min; }
-    function toggleButtons(state) { document.querySelectorAll('#action-buttons button').forEach(b => { if(!b.id.includes('slot')) b.disabled = state; }); }
+    function toggleButtons(state) { document.querySelectorAll('#action-buttons button').forEach(b => { if(!b.id.includes('slot') || (b.id.includes('slot') && state)) b.disabled = state; }); }
     function restartGame() { location.reload(); }
     function exitToMenu() { localStorage.removeItem('rpg_save'); location.reload(); }
     function saveAndExit() { localStorage.setItem('rpg_save', JSON.stringify({p, e})); location.reload(); }
@@ -728,10 +802,17 @@
     }
 
     async function enemyTurn() {
-        let dmg = Math.ceil(getRandomFloat(e.str * 0.7, e.str));
-        if(isDefending) dmg = Math.ceil(dmg * 0.5);
-        p.hp -= dmg; p.furia = Math.min(100, p.furia + 25);
-        updateUI(); await typeLog(`${e.name} atacou: -${dmg} HP`, "#ff4757");
+        if(e.blinded && Math.random() > 0.4) {
+            e.blinded = false;
+            await typeLog(`${e.name} errou o golpe por causa da areia!`, "var(--skill-terra)");
+        } else {
+            e.blinded = false;
+            let dmg = Math.ceil(getRandomFloat(e.str * 0.7, e.str));
+            if(isDefending) dmg = Math.ceil(dmg * 0.5);
+            p.hp -= dmg; p.furia = Math.min(100, p.furia + 25);
+            updateUI(); await typeLog(`${e.name} atacou: -${dmg} HP`, "#ff4757");
+        }
+
         if(p.hp <= 0) { 
             document.getElementById('overlay').style.display = 'block'; 
             document.getElementById('death-modal').style.display = 'block'; 
@@ -742,28 +823,24 @@
 
     function playerHeal() {
         if (p.mana < 8) return; 
-        toggleButtons(true); 
-        p.mana -= 8;
+        toggleButtons(true); p.mana -= 8;
         let cura = Math.floor(p.int * 1.5); 
         p.hp = Math.min(p.maxHp, p.hp + cura);
-        updateUI(); 
-        typeLog(`Curar: +${cura} HP`).then(() => enemyTurn());
+        updateUI(); typeLog(`Curar: +${cura} HP`).then(() => enemyTurn());
     }
     function playerDefend() { toggleButtons(true); isDefending = true; typeLog("Defendendo...").then(() => enemyTurn()); }
     function playerRest() { 
         toggleButtons(true); 
         let ganho = Math.floor(p.int/2 + Math.random() * p.int); 
         p.mana = Math.min(p.maxMana, p.mana + ganho); 
-        updateUI(); 
-        typeLog(`Descansou: +${ganho} Mana`).then(() => enemyTurn()); 
+        updateUI(); typeLog(`Descansou: +${ganho} Mana`).then(() => enemyTurn()); 
     }
     function useUltimate() { 
         if(p.furia < 100) return; 
         toggleButtons(true); 
         let dmg = Math.ceil(p.str * 2.5); 
         e.hp -= dmg; p.furia = 0; 
-        updateUI(); 
-        typeLog("ULTIMATE!"); 
+        updateUI(); typeLog("ULTIMATE!"); 
         if(e.hp <= 0) win(); else enemyTurn(); 
     }
     function applyDamageEffect() { 
