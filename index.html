@@ -339,7 +339,10 @@
     <h3 style="color: var(--accent); margin-top: 0;">LOJA DO ALQUIMISTA</h3>
     <div class="shop-grid">
         <button class="action-btn btn-heal shop-item-btn" onclick="buyItem('potion')">
-            <i class="fa-solid fa-flask"></i> POÇÃO (10G)<div class="skill-info">+15 HP</div>
+            <i class="fa-solid fa-flask"></i> POÇÃO HP (10G)<div class="skill-info">+15 HP</div>
+        </button>
+        <button class="action-btn btn-mag agua shop-item-btn" onclick="buyItem('mana_potion')">
+            <i class="fa-solid fa-flask-vial"></i> POÇÃO MP (12G)<div class="skill-info">+20 MANA</div>
         </button>
         <button class="action-btn btn-mag fogo shop-item-btn" onclick="buyItem('boots')">
             <i class="fa-solid fa-boot-heeled"></i> BOTAS (25G)<div class="skill-info">+SPD (5 rod)</div>
@@ -347,8 +350,8 @@
         <button class="action-btn btn-def shop-item-btn" onclick="buyItem('shield')">
             <i class="fa-solid fa-shield-halved"></i> ESCUDO (30G)<div class="skill-info">-Dano (2 rod)</div>
         </button>
-        <button class="action-btn btn-ult shop-item-btn" onclick="buyItem('coin')">
-            <i class="fa-solid fa-coins"></i> MOEDA (40G)<div class="skill-info">+Esq (3 rod)</div>
+        <button class="action-btn btn-ult shop-item-btn" onclick="buyItem('coin')" style="grid-column: span 2;">
+            <i class="fa-solid fa-coins"></i> MOEDA DA SORTE (40G)<div class="skill-info">+Esq (3 rod)</div>
         </button>
     </div>
     <button class="action-btn btn-def" style="width: 100%; margin-top: 15px;" onclick="closeShop()">FECHAR</button>
@@ -521,7 +524,8 @@
     const monsterTemplates = [
         { name: "Ratazana", hpMin: 5, hpMax: 8, strMin: 1.2, strMax: 2.5, minLv: 1, type: 'basic', img: "ratazana gigante.png" },
         { name: "Esqueleto", hpMin: 8, hpMax: 12, strMin: 2, strMax: 3.5, minLv: 1, type: 'basic', img: "esqueleto.png" },
-        { name: "Ogro", hpMultMin: 1.0, hpMultMax: 1.2, strMultMin: 0.9, strMultMax: 1.1, minLv: 5, type: 'proportional', img: "ogro.png" },
+        // OGRO ATUALIZADO: MULTIPLICADORES MAIS ALTOS PARA SER ACIMA DA MÉDIA
+        { name: "Ogro", hpMultMin: 1.5, hpMultMax: 1.8, strMultMin: 1.2, strMultMax: 1.4, minLv: 5, type: 'proportional', img: "ogro.png" },
         { name: "Vampiro", hpMultMin: 1.1, hpMultMax: 1.3, strMultMin: 0.8, strMultMax: 1.0, minLv: 10, type: 'proportional', img: "vampiro.png" }
     ];
 
@@ -575,7 +579,8 @@
 
     function buyItem(type) {
         const items = {
-            potion: { cost: 10, name: "Poção", heal: 15, icon: "fa-flask" },
+            potion: { cost: 10, name: "Poção Vida", heal: 15, icon: "fa-flask" },
+            mana_potion: { cost: 12, name: "Poção Mana", manaGain: 20, icon: "fa-flask-vial" }, // NOVA POÇÃO
             boots: { cost: 25, name: "Bota Agilidade", type: "boots", dur: 5, icon: "fa-boot-heeled" },
             shield: { cost: 30, name: "Escudo Prata", type: "shield", dur: 2, icon: "fa-shield-halved" },
             coin: { cost: 40, name: "Moeda Sorte", type: "coin", dur: 3, icon: "fa-coins" }
@@ -597,6 +602,9 @@
             if(item.heal) {
                 p.hp = Math.min(p.maxHp, p.hp + item.heal);
                 typeLog(`Usou ${item.name}: +${item.heal} HP`, "#2ed573");
+            } else if(item.manaGain) {
+                p.mana = Math.min(p.maxMana, p.mana + item.manaGain);
+                typeLog(`Usou ${item.name}: +${item.manaGain} Mana`, "#1e90ff");
             } else {
                 p.buffs[item.type] = item.dur;
                 typeLog(`Ativou ${item.name}!`, "#ffa502");
@@ -629,8 +637,16 @@
         let avail = monsterTemplates.filter(m => p.lv >= m.minLv);
         let data = avail[Math.floor(Math.random() * avail.length)];
         const randomElem = types[Math.floor(Math.random() * types.length)];
-        let finalHp = data.type === 'proportional' ? Math.ceil(p.maxHp * getRandomFloat(data.hpMultMin, data.hpMultMax)) : getRandom(data.hpMin, data.hpMax) + (p.lv * 2);
-        let finalStr = data.type === 'proportional' ? p.str * getRandomFloat(data.strMultMin, data.strMultMax) : getRandomFloat(data.strMin, data.strMax) + (p.lv * 0.3);
+        
+        let finalHp, finalStr;
+        if(data.type === 'proportional') {
+            finalHp = Math.ceil(p.maxHp * getRandomFloat(data.hpMultMin, data.hpMultMax));
+            finalStr = p.str * getRandomFloat(data.strMultMin, data.strMultMax);
+        } else {
+            finalHp = getRandom(data.hpMin, data.hpMax) + (p.lv * 2);
+            finalStr = getRandomFloat(data.strMin, data.strMax) + (p.lv * 0.3);
+        }
+
         e = { ...data, elem: randomElem, maxHp: finalHp, hp: finalHp, str: finalStr };
         document.getElementById('enemy-img').src = e.img;
         updateUI();
@@ -670,7 +686,8 @@
         document.getElementById('ult-btn').style.display = p.furia >= 100 ? 'flex' : 'none';
         document.querySelectorAll('.slot').forEach((s, i) => {
             if(p.inventory[i]) {
-                s.innerHTML = `<i class="fa-solid ${p.inventory[i].icon}" style="color: ${p.inventory[i].heal ? '#2ed573' : '#ffa502'}"></i>`;
+                let color = p.inventory[i].heal ? '#2ed573' : (p.inventory[i].manaGain ? '#1e90ff' : '#ffa502');
+                s.innerHTML = `<i class="fa-solid ${p.inventory[i].icon}" style="color: ${color}"></i>`;
                 s.classList.remove('empty');
             } else { s.innerHTML = ""; s.classList.add('empty'); }
         });
