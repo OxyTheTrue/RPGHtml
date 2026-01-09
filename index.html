@@ -933,7 +933,7 @@
         for (let char of text) {
             line.innerHTML += char;
             log.scrollTop = log.scrollHeight;
-            await new Promise(r => setTimeout(r, 15));
+            await new Promise(r => setTimeout(r, 10));
         }
         isTyping = false;
         await new Promise(r => setTimeout(r, 400));
@@ -980,7 +980,7 @@
     }
     async function win() {
         playSound('gold');
-        let xpGanha = 10 + (p.lv * 1);
+        let xpGanha = 10 + (p.lv * 1.5);
         let goldGanho = getRandom(3, 10);
         p.xp += xpGanha;
         p.gold += goldGanho;
