@@ -17,7 +17,7 @@
             --mana: #1e90ff;
             --text: #ffffff;
             --border: rgba(255, 255, 255, 0.1);
-       
+      
             --skill-fogo: #ff9f43;
             --skill-agua: #54a0ff;
             --skill-terra: #1dd1a1;
@@ -25,7 +25,7 @@
             --skill-def: #1e90ff;
         }
         * { box-sizing: border-box; touch-action: manipulation; }
-   
+  
         body {
             font-family: 'Poppins', sans-serif;
             background: radial-gradient(circle at center, #1a1a2e 0%, #050508 100%);
@@ -215,7 +215,7 @@
             margin-bottom: 20px;
             border: 1px solid var(--border);
         }
-   
+  
         .enemy-sprite-container {
             width: 180px; height: 180px;
             background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
@@ -242,7 +242,7 @@
             line-height: 1.5;
         }
         .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-   
+  
         .skill-row {
             grid-column: span 2;
             display: grid;
@@ -250,7 +250,7 @@
             gap: 10px;
             margin-top: 5px;
         }
-   
+  
         button.action-btn {
             padding: 15px 10px; font-family: 'Poppins'; font-weight: 700; border: none;
             border-radius: 16px; color: white; cursor: pointer; transition: 0.2s;
@@ -269,7 +269,7 @@
         .btn-heal { box-shadow: inset 0 -4px 0 0 var(--secondary), 0 4px 12px rgba(46, 213, 115, 0.4); }
         .btn-def { box-shadow: inset 0 -4px 0 0 var(--skill-def), 0 4px 12px rgba(30, 144, 255, 0.4); }
         .btn-rest { box-shadow: inset 0 -4px 0 0 var(--skill-rest), 0 4px 12px rgba(83, 82, 237, 0.4); }
-   
+  
         .btn-ult {
             grid-column: span 2;
             box-shadow: inset 0 -4px 0 0 var(--accent), 0 6px 15px rgba(255, 165, 2, 0.5);
@@ -353,7 +353,7 @@
         #skill-modal { border-color: var(--mana); width: 90%; max-width: 500px; }
         #skill-detail-modal { z-index: 1001; border-color: #fff; background: #0f0f1b; }
         #death-modal { border-color: var(--primary); }
-   
+  
         .overlay {
             display: none;
             position: fixed;
@@ -398,7 +398,7 @@
         }
         .detail-icon { font-size: 4rem; margin-bottom: 15px; display: block; }
         .stat-badge { background: #000; padding: 5px 12px; border-radius: 20px; font-size: 12px; margin: 5px; border: 1px solid var(--border); display: inline-block; }
-   
+  
         .effect-icon { margin-left: 5px; font-size: 14px; animation: bounce 0.5s infinite alternate; }
         @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-3px); } }
     </style>
@@ -545,11 +545,11 @@
             <button class="action-btn btn-rest" onclick="playerRest()">
                 <i class="fa-solid fa-bed"></i> DESCANSAR <div class="skill-info" id="val-rest">-</div>
             </button>
-       
+      
             <button id="ult-btn" class="action-btn btn-ult" onclick="useUltimate()">
                 <i class="fa-solid fa-sun"></i> GOLPE SUPREMO <div class="skill-info" id="val-ult">LIBERADO!</div>
             </button>
-       
+      
             <div class="skill-row">
                 <button id="skill-slot-0" class="action-btn btn-skill" onclick="useSkill(0)" disabled>
                     <i class="fa-solid fa-lock"></i>
@@ -668,8 +668,13 @@
     const monsterTemplates = [
         { name: "Ratazana", minLv: 1, img: "ratazana gigante.png" },
         { name: "Esqueleto", minLv: 1, img: "esqueleto.png" },
+        { name: "Lobo", minLv: 3, img: "lobo.png" },
         { name: "Ogro", minLv: 5, img: "ogro.png" },
-        { name: "Vampiro", minLv: 10, img: "vampiro.png" }
+        { name: "Cavaleiro", minLv: 8, img: "cavaleiro.png" },
+        { name: "Vampiro", minLv: 10, img: "vampiro.png" },
+        { name: "Yeti", minLv: 12, img: "yeti.png" },
+        { name: "Demônio", minLv: 15, img: "demonio.png" },
+        { name: "Dragão", minLv: 20, img: "dragao.png" }
     ];
     window.onload = () => {
         if(localStorage.getItem('rpg_save')) {
@@ -685,7 +690,7 @@
         playSound('heal');
         const inputName = document.getElementById('player-name-input').value.trim();
         const finalName = inputName || "GUERREIRO";
-   
+  
         p = {
             name: finalName,
             lv: 1,
@@ -701,7 +706,7 @@
             buffs: { boots: 0, shield: 0, coin: 0 },
             bleeding: false
         };
-   
+  
         document.getElementById('p-display-name').innerText = p.name;
         showGame();
         spawnMonster();
@@ -754,7 +759,7 @@
         const currentLv = playerSkill ? playerSkill.level : 0;
         const nextLv = currentLv + 1;
         const reqLv = nextLv === 1 ? 5 : 5 * nextLv;
-   
+  
         const detailModal = document.getElementById('skill-detail-modal');
         const content = document.getElementById('skill-detail-content');
         const btn = document.getElementById('learn-confirm-btn');
@@ -772,7 +777,7 @@
         btn.onclick = () => learnSkill(skill, reqLv);
         btn.disabled = isLocked || !canAfford;
         btn.innerHTML = currentLv === 0 ? "DESBLOQUEAR (1 PT)" : "MELHORAR (1 PT)";
-   
+  
         detailModal.style.display = 'block';
     }
     function closeDetailModal() { document.getElementById('skill-detail-modal').style.display = 'none'; }
@@ -843,7 +848,7 @@
         updateUI();
         let dmg = 0;
         let color = sData.color;
-   
+  
         if(pSkill.id === 'fogo') {
             dmg = Math.ceil(p.int * (1.2 + (pSkill.level * 0.4)));
             e.hp -= dmg;
@@ -867,14 +872,14 @@
     }
     function updateUI() {
         if(!p) return;
-   
+  
         document.getElementById('p-display-name').innerText = p.name;
         document.getElementById('p-hp-bar').style.width = (p.hp/p.maxHp*100) + "%";
         document.getElementById('p-mana-bar').style.width = (p.mana/p.maxMana*100) + "%";
         document.getElementById('p-furia-bar').style.width = p.furia + "%";
         document.getElementById('p-xp-bar').style.width = (p.xp/p.nextXp*100) + "%";
         if(e) document.getElementById('enemy-bar').style.width = (e.hp/e.maxHp*100) + "%";
-   
+  
         document.getElementById('p-lv').innerText = p.lv;
         document.getElementById('p-hp').innerText = Math.ceil(p.hp);
         document.getElementById('p-max-hp').innerText = p.maxHp;
@@ -889,7 +894,7 @@
         const pStatusIcons = document.getElementById('p-status-icons');
         pStatusIcons.innerHTML = p.bleeding ? '<i class="fa-solid fa-droplet effect-icon" style="color: #ff4757" title="Sangrando"></i>' : '';
         document.querySelectorAll('.lvl-up-btn').forEach(btn => btn.style.display = p.pendingPoints > 0 ? 'block' : 'none');
-   
+  
         if(e) {
             document.getElementById('enemy-name').innerText = e.name;
             document.getElementById('enemy-hp').innerText = Math.ceil(e.hp);
@@ -936,13 +941,13 @@
     async function spawnMonster() {
         let avail = monsterTemplates.filter(m => p.lv >= m.minLv);
         let data = avail[Math.floor(Math.random() * avail.length)];
-   
+  
         const hpFactor = 0.8 + Math.random() * 0.4; // 0.8 to 1.2
         const dmgFactor = 0.7 + Math.random() * 0.4; // 0.7 to 1.1
         let finalHp = Math.round(p.maxHp * hpFactor);
         let finalStr = Math.round(p.str * dmgFactor);
         if (finalHp < 5) finalHp = 5; // mínimo razoável
-   
+  
         e = { ...data, hp: finalHp, maxHp: finalHp, str: finalStr, blinded: false, burning: false };
         document.getElementById('enemy-img').src = e.img;
         updateUI();
@@ -957,7 +962,7 @@
         if (stat === 'vit') p.maxHp += 8;
         if (stat === 'int') p.maxMana += 6;
         p.pendingPoints--;
-     
+    
         if (p.pendingPoints === 0) {
             p.lv++;
             p.xp = 0;
@@ -980,7 +985,7 @@
         p.xp += xpGanha;
         p.gold += goldGanho;
         await typeLog(`VITÓRIA! +${xpGanha} XP | +${goldGanho} Gold`, "#2ecc71");
-   
+  
         if(p.bleeding && Math.random() > 0.4) {
             p.bleeding = false;
             await typeLog("As feridas pararam de sangrar.", "#2ed573");
@@ -1004,11 +1009,11 @@
         p.furia = 0;
         p.bleeding = false;
         p.buffs = { boots: 0, shield: 0, coin: 0 };
-   
+  
         closeAllModals();
         document.getElementById('game-log').innerHTML = "";
         typeLog("Você desperta em uma taverna, sem ouro, mas com a experiência de sua vida passada...", "#ffa502");
-   
+  
         updateUI();
         spawnMonster();
         autoSave();
@@ -1092,12 +1097,12 @@
         toggleButtons(true);
         let ganho = getRandom(Math.floor(p.int * 0.8), Math.ceil(p.int * 1.4));
         p.mana = Math.min(p.maxMana, p.mana + ganho);
-   
+  
         if(p.bleeding) {
             p.bleeding = false;
             typeLog("Você cuidou das feridas enquanto descansava.", "#2ed573");
         }
-   
+  
         updateUI(); typeLog(`Descansou: +${ganho} Mana`).then(() => enemyTurn());
     }
     function useUltimate() {
