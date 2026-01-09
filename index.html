@@ -1083,13 +1083,13 @@
     function playerHeal() {
         if (p.mana < 5) return;
         playSound('heal');
-        toggleButtons(true); p.mana -= 8;
+        toggleButtons(true); p.mana -= 5;
         let cura = Math.floor(p.int * 1.8);
         p.hp = Math.min(p.maxHp, p.hp + cura);
         updateUI(); typeLog(`Você curou: +${cura} de vida`).then(() => enemyTurn());
     }
     function playerDefend() {
-        playSound('atk');
+        playSound('heal');
         toggleButtons(true); isDefending = true; typeLog("Defendendo...").then(() => enemyTurn());
     }
     function playerRest() {
