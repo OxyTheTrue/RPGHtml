@@ -497,7 +497,7 @@
         </div>
         <div class="log" id="game-log"></div>
         <div class="actions" id="action-buttons">
-            </div>
+        </div>
         <div id="inventory-container">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <small><i class="fa-solid fa-suitcase"></i> INVENTÁRIO</small>
@@ -516,6 +516,7 @@
         </div>
     </main>
 </div>
+
 <script>
     let p, e, isTyping = false;
     let isDefending = false;
@@ -523,9 +524,11 @@
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const tooltip = document.getElementById('stat-tooltip');
     let tooltipTimeout;
-    
+
     const monsterTemplates = [
         { name: "Ratazana", minLv: 1, img: "ratazana gigante.png" },
+        { name: "Goblin", minLv: 2, img: "goblin.png" },
+        { name: "Aranha Gigante", minLv: 3, img: "aranha.png" },
         { name: "Esqueleto", minLv: 4, img: "esqueleto.png" },
         { name: "Lobo", minLv: 6, img: "lobo.png" },
         { name: "Ogro", minLv: 8, img: "ogro.png" },
@@ -538,6 +541,8 @@
 
     const monsterStats = {
         "Ratazana": { baseHp: 5, baseDmg: 2 },
+        "Goblin": { baseHp: 12, baseDmg: 6 },
+        "Aranha Gigante": { baseHp: 8, baseDmg: 8 },
         "Esqueleto": { baseHp: 9, baseDmg: 5 },
         "Lobo": { baseHp: 15, baseDmg: 9 },
         "Ogro": { baseHp: 23, baseDmg: 14 },
@@ -681,6 +686,7 @@
     }
 
     function openShop() { if(p.hp <= 0) return; document.getElementById('overlay').style.display = 'block'; document.getElementById('shop-modal').style.display = 'block'; }
+
     function openSkillTree() {
         if(p.hp <= 0) return;
         document.getElementById('overlay').style.display = 'block';
@@ -726,6 +732,7 @@
     }
 
     function closeDetailModal() { document.getElementById('skill-detail-modal').style.display = 'none'; }
+
     function learnSkill(skillData, reqLv) {
         if(p.skillPoints > 0 && p.lv >= reqLv) {
             playSound('gold'); p.skillPoints--;
@@ -762,16 +769,15 @@
         if(isTyping || !p.inventory[index] || p.hp <= 0) return;
         const item = p.inventory[index];
         playSound('heal');
-        
+       
         if(item.type === "key") {
             await typeLog("Isso é uma chave. Procure algo para abrir!", "#ffa502");
             return;
         }
-
         if(item.heal) p.hp = Math.min(p.maxHp, p.hp + item.heal);
         else if(item.manaGain) p.mana = Math.min(p.maxMana, p.mana + item.manaGain);
         else if(item.type) p.buffs[item.type] = item.dur;
-        
+       
         p.inventory.splice(index, 1);
         updateUI();
         await typeLog(`Usou ${item.name}!`, "#54a0ff");
@@ -816,14 +822,12 @@
         document.getElementById('stat-int').innerText = p.levels.int;
         document.getElementById('stat-luk').innerText = p.levels.luk;
         document.getElementById('stat-vit').innerText = p.levels.vit;
-
         document.querySelectorAll('.item-price').forEach((span, i) => {
             const basePrices = [10, 12, 15, 21, 33];
             span.innerText = Math.floor(basePrices[i] * merchantDiscount);
         });
-
         document.querySelectorAll('.lvl-up-btn').forEach(btn => btn.style.display = p.pendingPoints > 0 ? 'block' : 'none');
-        
+       
         for(let i = 0; i < 3; i++) {
             const slot = document.getElementById(`skill-slot-${i}`);
             if(slot) {
@@ -837,13 +841,13 @@
                 }
             }
         }
-        
+       
         const slots = document.querySelectorAll('.slot');
         slots.forEach((s, i) => { s.innerHTML = p.inventory[i] ? `<i class="fa-solid ${p.inventory[i].icon}" style="color: #ffa502"></i>` : ""; });
-        
+       
         const ult = document.getElementById('ult-btn');
         if(ult) ult.style.display = p.furia >= 100 ? 'flex' : 'none';
-        
+       
         const vAtk = document.getElementById('val-atk');
         if(vAtk) vAtk.innerText = `${Math.floor(p.str * 0.8)}-${Math.ceil(p.str * 1.2)} Dano`;
     }
@@ -880,8 +884,12 @@
 
     async function triggerRandomEvent() {
         const roll = Math.random();
-        if(roll < 0.30) {
+        if(roll < 0.25) {
             await encounterChest();
+            return;
+        }
+        if(roll < 0.35) {
+            await encounterWarrior();
             return;
         }
         const eventRoll = Math.random();
@@ -892,8 +900,36 @@
         else spawnMonster();
     }
 
+    async function encounterWarrior() {
+        e = { 
+            name: "Guerreiro Errante", 
+            hp: "???", 
+            maxHp: "???", 
+            img: "guerreiro.png" 
+        };
+        document.getElementById('enemy-img').src = e.img;
+        updateUI();
+        await typeLog("Um guerreiro experiente aparece à sua frente...", "#ffa502");
+        const container = document.getElementById('action-buttons');
+        container.innerHTML = `
+            <button class="action-btn btn-heal" onclick="warriorChoice(true)">CONVERSAR</button>
+            <button class="action-btn btn-atk" onclick="warriorChoice(false)">PASSAR DIRETO</button>
+        `;
+    }
+
+    async function warriorChoice(talk) {
+        if (talk) {
+            await typeLog("Guerreiro: 'Cuidado com as aranhas... elas envenenam rápido. Boa sorte, irmão de armas.'", "#2ed573");
+            p.hp = Math.min(p.maxHp, p.hp + 8);
+            await typeLog("Você ganhou +8 HP de ânimo!", "#54a0ff");
+        } else {
+            await typeLog("Você acena e segue viagem.");
+        }
+        spawnMonster();
+    }
+
     async function encounterChest() {
-        e = { name: "Baú Misterioso", hp: "???", maxHp: "???", img: "https://cdn-icons-png.flaticon.com/512/3504/3504362.png" };
+        e = { name: "Baú Misterioso", hp: "???", maxHp: "???", img: "bau.png" };
         document.getElementById('enemy-img').src = e.img;
         updateUI();
         await typeLog("Você encontrou um baú trancado!", "#ffa502");
@@ -908,10 +944,8 @@
             await typeLog("Você não tem uma CHAVE no inventário!", "#ff4757");
             return;
         }
-
         p.inventory.splice(keyIndex, 1);
         updateUI();
-
         const mimicRoll = Math.random();
         if(mimicRoll < 0.40) {
             await typeLog("AO ABRIR, O BAÚ SE TRANSFORMOU EM UM MÍMICO!", "#ff4757");
@@ -930,7 +964,7 @@
         const stats = monsterStats["Mímico"];
         const finalHp = Math.round(stats.baseHp * (1 + p.lv * 0.1));
         const finalDmg = Math.round(stats.baseDmg * (1 + p.lv * 0.08));
-        e = { name: "Mímico", hp: finalHp, maxHp: finalHp, str: finalDmg, img: "https://cdn-icons-png.flaticon.com/512/6241/6241198.png" };
+        e = { name: "Mímico", hp: finalHp, maxHp: finalHp, str: finalDmg, img: "bau_mimico.png" };
         document.getElementById('enemy-img').src = e.img;
         renderCombatButtons();
         updateUI();
@@ -938,7 +972,7 @@
     }
 
     async function encounterHealer() {
-        e = { name: "Curandeira Viajante", hp: "???", maxHp: "???", img: "https://cdn-icons-png.flaticon.com/512/2618/2618583.png" };
+        e = { name: "Curandeira Viajante", hp: "???", maxHp: "???", img: "curandeira.png" };
         document.getElementById('enemy-img').src = e.img;
         updateUI();
         await typeLog("Curandeira: 'Por 5 gold, posso curar você.'", "#2ed573");
@@ -955,7 +989,7 @@
 
     async function encounterMerchant() {
         merchantDiscount = 0.5;
-        e = { name: "Mercador Itinerante", hp: "", maxHp: "", img: "https://cdn-icons-png.flaticon.com/512/4149/4149883.png" };
+        e = { name: "Mercador Itinerante", hp: "", maxHp: "", img: "vendedor.png" };
         document.getElementById('enemy-img').src = e.img;
         updateUI();
         await typeLog("Mercador: 'Tudo pela metade do preço enquanto eu estiver aqui!'", "#ffa502");
@@ -968,7 +1002,7 @@
         const lossPercent = (Math.random() * 0.3 + 0.2);
         const loss = Math.floor(p.gold * lossPercent);
         p.gold -= loss;
-        e = { name: "Ladrão de Estradas", hp: " ", maxHp: " ", img: "https://cdn-icons-png.flaticon.com/512/1162/1162382.png" };
+        e = { name: "Ladrão de Estradas", hp: " ", maxHp: " ", img: "ladrao.png" };
         document.getElementById('enemy-img').src = e.img;
         updateUI();
         playSound('dmg');
@@ -1014,16 +1048,15 @@
         let goldGanho = Math.floor(Math.random() * 5) + 3;
         p.xp += xpGanha; p.gold += goldGanho;
         await typeLog(`Venceu! +${xpGanha} XP | +${goldGanho} Gold`, "#2ecc71");
-        
+       
         if(Math.random() < 0.30) {
             if(p.inventory.length < 5) {
-                p.inventory.push({ name: "Chave Misteriosa", icon: "fa-key", type: "key" });
+                p.inventory.push({ name: "Chave Misteriosa", icon: "fa-key", type: "key", img: "chave.png" });
                 await typeLog("O inimigo derrubou uma CHAVE!", "#ffa502");
             } else {
                 await typeLog("O monstro tinha uma CHAVE, mas sua bolsa está cheia!", "#ff4757");
             }
         }
-
         if(p.xp >= p.nextXp) {
             p.pendingPoints += 3;
             await typeLog("LEVEL UP! Melhore seus atributos.", "#ffa502");
@@ -1067,6 +1100,7 @@
     }
 
     function playerDefend() { playSound('heal'); toggleButtons(true); isDefending = true; typeLog("Defendendo...").then(() => enemyTurn()); }
+
     function playerRest() {
         playSound('heal'); toggleButtons(true);
         let ganho = Math.floor(p.int * 1.2); p.mana = Math.min(p.maxMana, p.mana + ganho);
@@ -1084,12 +1118,14 @@
         const img = document.getElementById('enemy-img');
         if(img) { img.classList.add('take-damage'); setTimeout(() => img.classList.remove('take-damage'), 400); }
     }
-    
+
     function restartAfterDeath() {
         p.hp = p.maxHp; p.mana = p.maxMana; p.xp = 0; p.gold = 0; p.inventory = [];
         closeAllModals(); updateUI(); spawnMonster();
     }
+
     function exitToMenu() { location.reload(); }
+
     function saveAndExit() { autoSave(); location.reload(); }
 </script>
 </body>
