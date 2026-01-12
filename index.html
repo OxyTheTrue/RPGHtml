@@ -545,7 +545,8 @@
         "Vampiro": { baseHp: 51, baseDmg: 24 },
         "Urso": { baseHp: 67, baseDmg: 30 },
         "Demônio": { baseHp: 73, baseDmg: 38 },
-        "Dragão": { baseHp: 120, baseDmg: 55 }
+        "Dragão": { baseHp: 120, baseDmg: 55 },
+        "Mímico": { baseHp: 50, baseDmg: 20 }
     };
 
     function showStatValue(stat) {
@@ -745,7 +746,8 @@
             mana_potion: { cost: 12, name: "Poção Mana", manaGain: 20, icon: "fa-flask-vial" },
             boots: { cost: 15, name: "Bota Agilidade", type: "boots", dur: 5, icon: "fa-boot" },
             shield: { cost: 21, name: "Escudo Prata", type: "shield", dur: 2, icon: "fa-shield-halved" },
-            coin: { cost: 33, name: "Moeda Sorte", type: "coin", dur: 3, icon: "fa-coins" }
+            coin: { cost: 33, name: "Moeda Sorte", type: "coin", dur: 3, icon: "fa-coins" },
+            key: { cost: 0, name: "Chave Misteriosa", icon: "fa-key", type: "key" }
         };
         const item = items[type];
         const finalCost = Math.floor(item.cost * merchantDiscount);
@@ -764,6 +766,12 @@
         if(item.heal) p.hp = Math.min(p.maxHp, p.hp + item.heal);
         else if(item.manaGain) p.mana = Math.min(p.maxMana, p.mana + item.manaGain);
         else if(item.type) p.buffs[item.type] = item.dur;
+        
+        if(item.type === "key") {
+            await typeLog("Você usa a chave, mas não há nada para abrir agora!", "#ffa502");
+            return;
+        }
+        
         p.inventory.splice(index, 1);
         updateUI();
         await typeLog(`Usou ${item.name}!`, "#54a0ff");
@@ -872,11 +880,57 @@
 
     async function triggerRandomEvent() {
         const roll = Math.random();
-        if(roll < 0.15) await encounterHealer();
-        else if(roll < 0.25) await encounterMerchant();
-        else if(roll < 0.35) await encounterThief();
-        else if(roll < 0.45) await encounterArcher();
+        
+        // Chance de 30% de surgir um baú (conforme pedido)
+        if(roll < 0.30) {
+            await encounterChest();
+            return;
+        }
+
+        // Outros eventos (divididos no resto da porcentagem)
+        const eventRoll = Math.random();
+        if(eventRoll < 0.15) await encounterHealer();
+        else if(eventRoll < 0.25) await encounterMerchant();
+        else if(eventRoll < 0.35) await encounterThief();
+        else if(eventRoll < 0.45) await encounterArcher();
         else spawnMonster();
+    }
+
+    async function encounterChest() {
+        e = { name: "Baú Misterioso", hp: "???", maxHp: "???", img: "https://cdn-icons-png.flaticon.com/512/3504/3504362.png" };
+        document.getElementById('enemy-img').src = e.img;
+        updateUI();
+        await typeLog("Você encontrou um baú no caminho!", "#ffa502");
+        const container = document.getElementById('action-buttons');
+        container.innerHTML = `<button class="action-btn btn-heal" style="grid-column: span 2" onclick="openChestChoice()">ABRIR BAÚ</button>
+                               <button class="action-btn btn-atk" style="grid-column: span 2" onclick="spawnMonster()">IGNORAR</button>`;
+    }
+
+    async function openChestChoice() {
+        const mimicRoll = Math.random();
+        // 50% de chance de ser mímico
+        if(mimicRoll < 0.50) {
+            await typeLog("O BAÚ ERA UM MÍMICO!", "#ff4757");
+            spawnMimic();
+        } else {
+            playSound('gold');
+            let lootGold = 20 + (p.lv * 5);
+            p.gold += lootGold;
+            await typeLog(`O baú continha ${lootGold} moedas de ouro!`, "#2ed573");
+            updateUI();
+            setTimeout(spawnMonster, 1500);
+        }
+    }
+
+    function spawnMimic() {
+        const stats = monsterStats["Mímico"];
+        const finalHp = Math.round(stats.baseHp * (1 + p.lv * 0.1));
+        const finalDmg = Math.round(stats.baseDmg * (1 + p.lv * 0.08));
+        e = { name: "Mímico", hp: finalHp, maxHp: finalHp, str: finalDmg, img: "https://cdn-icons-png.flaticon.com/512/6241/6241198.png" };
+        document.getElementById('enemy-img').src = e.img;
+        renderCombatButtons();
+        updateUI();
+        toggleButtons(false);
     }
 
     async function encounterHealer() {
@@ -956,6 +1010,17 @@
         let goldGanho = Math.floor(Math.random() * 8) + 3;
         p.xp += xpGanha; p.gold += goldGanho;
         await typeLog(`Venceu! +${xpGanha} XP | +${goldGanho} Gold`, "#2ecc71");
+        
+        // Chance de 30% de dropar chave (conforme pedido)
+        if(Math.random() < 0.30) {
+            if(p.inventory.length < 5) {
+                p.inventory.push({ name: "Chave Misteriosa", icon: "fa-key", type: "key" });
+                await typeLog("O monstro deixou cair uma CHAVE!", "#ffa502");
+            } else {
+                await typeLog("O monstro deixou uma chave, mas sua bolsa está cheia!", "#ff4757");
+            }
+        }
+
         if(p.xp >= p.nextXp) {
             p.pendingPoints += 3;
             await typeLog("LEVEL UP! Melhore seus atributos.", "#ffa502");
