@@ -405,19 +405,19 @@
     <h3 style="color: var(--accent); margin-top: 0;">LOJA DO ALQUIMISTA</h3>
     <div class="shop-grid">
         <button class="action-btn btn-heal shop-item-btn" onclick="buyItem('potion', this)">
-            <i class="fa-solid fa-flask"></i> POÇÃO HP (10G)<div class="skill-info">+15 HP</div>
+            <i class="fa-solid fa-flask"></i> POÇÃO HP (<span class="item-price">10</span>G)<div class="skill-info">+15 HP</div>
         </button>
         <button class="action-btn btn-mag agua shop-item-btn" onclick="buyItem('mana_potion', this)">
-            <i class="fa-solid fa-flask-vial"></i> POÇÃO MP (12G)<div class="skill-info">+20 MANA</div>
+            <i class="fa-solid fa-flask-vial"></i> POÇÃO MP (<span class="item-price">12</span>G)<div class="skill-info">+20 MANA</div>
         </button>
         <button class="action-btn btn-mag fogo shop-item-btn" onclick="buyItem('boots', this)">
-            <i class="fa-solid fa-boot"></i> BOTAS (15G)<div class="skill-info">+SPD (Ativo)</div>
+            <i class="fa-solid fa-boot"></i> BOTAS (<span class="item-price">15</span>G)<div class="skill-info">+SPD (Ativo)</div>
         </button>
         <button class="action-btn btn-def shop-item-btn" onclick="buyItem('shield', this)">
-            <i class="fa-solid fa-shield-halved"></i> ESCUDO (21G)<div class="skill-info">-Dano (Ativo)</div>
+            <i class="fa-solid fa-shield-halved"></i> ESCUDO (<span class="item-price">21</span>G)<div class="skill-info">-Dano (Ativo)</div>
         </button>
         <button class="action-btn btn-ult shop-item-btn" onclick="buyItem('coin', this)" style="grid-column: span 2;">
-            <i class="fa-solid fa-coins"></i> MOEDA DA SORTE (33G)<div class="skill-info">+Sorte (Ativo)</div>
+            <i class="fa-solid fa-coins"></i> MOEDA DA SORTE (<span class="item-price">33</span>G)<div class="skill-info">+Sorte (Ativo)</div>
         </button>
     </div>
     <button class="action-btn btn-def" style="width: 100%; margin-top: 15px;" onclick="closeAllModals()">FECHAR</button>
@@ -519,11 +519,11 @@
 <script>
     let p, e, isTyping = false;
     let isDefending = false;
+    let merchantDiscount = 1;
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const tooltip = document.getElementById('stat-tooltip');
     let tooltipTimeout;
     
-    // Configuração separada e fácil de editar dos inimigos
     const monsterTemplates = [
         { name: "Ratazana", minLv: 1, img: "ratazana gigante.png" },
         { name: "Esqueleto", minLv: 4, img: "esqueleto.png" },
@@ -605,7 +605,6 @@
         if(localStorage.getItem('rpg_save')) {
             document.getElementById('continue-btn').style.display = 'flex';
         }
-        // Inicializa botões vazios se necessário
         renderCombatButtons();
     };
 
@@ -749,8 +748,9 @@
             coin: { cost: 33, name: "Moeda Sorte", type: "coin", dur: 3, icon: "fa-coins" }
         };
         const item = items[type];
-        if(p.gold >= item.cost && p.inventory.length < 5) {
-            playSound('gold'); p.gold -= item.cost; p.inventory.push({...item}); updateUI();
+        const finalCost = Math.floor(item.cost * merchantDiscount);
+        if(p.gold >= finalCost && p.inventory.length < 5) {
+            playSound('gold'); p.gold -= finalCost; p.inventory.push({...item}); updateUI();
         } else if(btn) {
             btn.classList.add('error-blink');
             setTimeout(() => btn.classList.remove('error-blink'), 400);
@@ -794,7 +794,7 @@
         if(e) {
             document.getElementById('enemy-bar').style.width = (e.hp/e.maxHp*100) + "%";
             document.getElementById('enemy-name').innerText = e.name;
-            document.getElementById('enemy-hp').innerText = Math.ceil(e.hp);
+            document.getElementById('enemy-hp').innerText = typeof e.hp === 'number' ? Math.ceil(e.hp) : e.hp;
             document.getElementById('enemy-max-hp').innerText = e.maxHp;
         }
         document.getElementById('p-lv').innerText = p.lv;
@@ -808,10 +808,14 @@
         document.getElementById('stat-int').innerText = p.levels.int;
         document.getElementById('stat-luk').innerText = p.levels.luk;
         document.getElementById('stat-vit').innerText = p.levels.vit;
-        
+
+        document.querySelectorAll('.item-price').forEach((span, i) => {
+            const basePrices = [10, 12, 15, 21, 33];
+            span.innerText = Math.floor(basePrices[i] * merchantDiscount);
+        });
+
         document.querySelectorAll('.lvl-up-btn').forEach(btn => btn.style.display = p.pendingPoints > 0 ? 'block' : 'none');
         
-        // Atualiza botões de skill se estiverem presentes
         for(let i = 0; i < 3; i++) {
             const slot = document.getElementById(`skill-slot-${i}`);
             if(slot) {
@@ -852,6 +856,7 @@
     }
 
     async function spawnMonster() {
+        merchantDiscount = 1;
         renderCombatButtons();
         let avail = monsterTemplates.filter(m => p.lv >= m.minLv);
         const data = avail[Math.floor(Math.random() * avail.length)];
@@ -865,61 +870,71 @@
         toggleButtons(false);
     }
 
-    // --- NOVA MECÂNICA: EVENTOS ALEATÓRIOS ---
     async function triggerRandomEvent() {
         const roll = Math.random();
-        if(roll < 0.3) { // 30% de chance de encontrar a curandeira
-            await encounterHealer();
-        } else {
-            spawnMonster();
-        }
+        if(roll < 0.15) await encounterHealer();
+        else if(roll < 0.25) await encounterMerchant();
+        else if(roll < 0.35) await encounterThief();
+        else if(roll < 0.45) await encounterArcher();
+        else spawnMonster();
     }
 
     async function encounterHealer() {
-        // Altera o visual do inimigo para a curandeira
-        document.getElementById('enemy-name').innerText = "Curandeira Viajante";
-        document.getElementById('enemy-img').src = "https://cdn-icons-png.flaticon.com/512/2618/2618583.png"; // Placeholder icon
-        document.getElementById('enemy-hp').innerText = "???";
-        document.getElementById('enemy-max-hp').innerText = "???";
-        document.getElementById('enemy-bar').style.width = "100%";
-        
-        await typeLog("Você avista uma figura encapuzada na estrada...", "#2ed573");
-        await typeLog("Curandeira: 'Olá, viajante. Parece cansado. Por 5 gold, posso restaurar suas energias.'", "#fff");
-        
-        // Muda os botões para opções de diálogo
+        e = { name: "Curandeira Viajante", hp: "???", maxHp: "???", img: "https://cdn-icons-png.flaticon.com/512/2618/2618583.png" };
+        document.getElementById('enemy-img').src = e.img;
+        updateUI();
+        await typeLog("Curandeira: 'Por 5 gold, posso curar você.'", "#2ed573");
         const container = document.getElementById('action-buttons');
-        container.innerHTML = `
-            <button class="action-btn btn-heal" style="grid-column: span 1;" onclick="healerChoice(true)">
-                <i class="fa-solid fa-check"></i> ACEITAR (5G)
-            </button>
-            <button class="action-btn btn-atk" style="grid-column: span 1; background: #444;" onclick="healerChoice(false)">
-                <i class="fa-solid fa-xmark"></i> NEGAR
-            </button>
-        `;
+        container.innerHTML = `<button class="action-btn btn-heal" onclick="healerChoice(true)">ACEITAR (5G)</button>
+                               <button class="action-btn btn-atk" onclick="healerChoice(false)">NEGAR</button>`;
     }
 
-    async function healerChoice(accepted) {
-        if(isTyping) return;
-        
-        if(accepted) {
-            if(p.gold >= 5) {
-                p.gold -= 5;
-                p.hp = p.maxHp;
-                playSound('heal');
-                updateUI();
-                await typeLog("Curandeira: 'Que a luz guie seus passos.' Suas feridas foram totalmente curadas!", "#2ed573");
-            } else {
-                playSound('dmg');
-                await typeLog("Curandeira: 'Vejo que não tem moedas suficientes... Sinto muito.'", "#ff4757");
-            }
-        } else {
-            await typeLog("Você agradece e segue viagem com cautela.", "#ccc");
-        }
-        
-        await typeLog("Ela desaparece entre as árvores enquanto novos perigos surgem...");
+    async function healerChoice(acc) {
+        if(acc && p.gold >= 5) { p.gold -= 5; p.hp = p.maxHp; playSound('heal'); await typeLog("Curado!", "#2ed573"); }
+        else await typeLog("Você segue adiante.");
         spawnMonster();
     }
-    // --- FIM DA NOVA MECÂNICA ---
+
+    async function encounterMerchant() {
+        merchantDiscount = 0.5;
+        e = { name: "Mercador Itinerante", hp: "SOLDO", maxHp: "SOLDO", img: "https://cdn-icons-png.flaticon.com/512/4149/4149883.png" };
+        document.getElementById('enemy-img').src = e.img;
+        updateUI();
+        await typeLog("Mercador: 'Tudo pela metade do preço enquanto eu estiver aqui!'", "#ffa502");
+        const container = document.getElementById('action-buttons');
+        container.innerHTML = `<button class="action-btn btn-heal" onclick="openShop()">ABRIR LOJA</button>
+                               <button class="action-btn btn-atk" onclick="spawnMonster()">CONTINUAR VIAGEM</button>`;
+    }
+
+    async function encounterThief() {
+        const lossPercent = (Math.random() * 0.3 + 0.2);
+        const loss = Math.floor(p.gold * lossPercent);
+        p.gold -= loss;
+        e = { name: "Ladrão de Estradas", hp: "FUGIU", maxHp: "FUGIU", img: "https://cdn-icons-png.flaticon.com/512/1162/1162382.png" };
+        document.getElementById('enemy-img').src = e.img;
+        updateUI();
+        playSound('dmg');
+        await typeLog(`Um ladrão te emboscou e roubou ${loss} moedas de ouro!`, "#ff4757");
+        const container = document.getElementById('action-buttons');
+        container.innerHTML = `<button class="action-btn btn-atk" style="grid-column: span 2" onclick="spawnMonster()">PERSEGUIR PERIGOS</button>`;
+    }
+
+    async function encounterArcher() {
+        const tips = [
+            "Dica: Vitalidade aumenta sua vida máxima consideravelmente.",
+            "Dica: A inteligência faz você recuperar mais mana ao descansar.",
+            "Dica: O Golpe Supremo carrega 20% cada vez que você apanha.",
+            "Dica: Sorte pode ser útil em futuras atualizações e itens raros.",
+            "Dica: Não esqueça de gastar seus pontos de skill na árvore!"
+        ];
+        const tip = tips[Math.floor(Math.random() * tips.length)];
+        e = { name: "Arqueira Guia", hp: "DICA", maxHp: "DICA", img: "https://cdn-icons-png.flaticon.com/512/2303/2303901.png" };
+        document.getElementById('enemy-img').src = e.img;
+        updateUI();
+        await typeLog(`Arqueira: '${tip}'`, "#54a0ff");
+        const container = document.getElementById('action-buttons');
+        container.innerHTML = `<button class="action-btn btn-atk" style="grid-column: span 2" onclick="spawnMonster()">AGRADECER E IR</button>`;
+    }
 
     function spendPoint(stat) {
         if (p.pendingPoints <= 0) return;
@@ -930,7 +945,7 @@
         if (p.pendingPoints === 0) {
             p.lv++; p.xp = 0; p.nextXp = Math.floor(p.nextXp * 1.35); p.skillPoints++;
             p.hp = p.maxHp; p.mana = p.maxMana;
-            updateUI(); triggerRandomEvent(); // Inicia novo ciclo
+            updateUI(); triggerRandomEvent();
         } else { updateUI(); }
         autoSave();
     }
@@ -941,13 +956,12 @@
         let goldGanho = Math.floor(Math.random() * 8) + 3;
         p.xp += xpGanha; p.gold += goldGanho;
         await typeLog(`Venceu! +${xpGanha} XP | +${goldGanho} Gold`, "#2ecc71");
-        
         if(p.xp >= p.nextXp) {
             p.pendingPoints += 3;
             await typeLog("LEVEL UP! Melhore seus atributos.", "#ffa502");
             updateUI();
         } else {
-            triggerRandomEvent(); // CHANCE DE EVENTO ALEATÓRIO AQUI
+            triggerRandomEvent();
         }
         autoSave();
     }
@@ -1000,8 +1014,7 @@
 
     function applyDamageEffect() {
         const img = document.getElementById('enemy-img');
-        img.classList.add('take-damage');
-        setTimeout(() => img.classList.remove('take-damage'), 400);
+        if(img) { img.classList.add('take-damage'); setTimeout(() => img.classList.remove('take-damage'), 400); }
     }
     
     function restartAfterDeath() {
