@@ -537,16 +537,16 @@
     ];
 
     const monsterStats = {
-        "Ratazana": { baseHp: 8, baseDmg: 3 },
-        "Esqueleto": { baseHp: 12, baseDmg: 5 },
-        "Lobo": { baseHp: 20, baseDmg: 9 },
-        "Ogro": { baseHp: 32, baseDmg: 14 },
-        "Cavaleiro": { baseHp: 44, baseDmg: 18 },
-        "Vampiro": { baseHp: 51, baseDmg: 24 },
-        "Urso": { baseHp: 67, baseDmg: 30 },
-        "Demônio": { baseHp: 73, baseDmg: 38 },
-        "Dragão": { baseHp: 120, baseDmg: 55 },
-        "Mímico": { baseHp: 50, baseDmg: 20 }
+        "Ratazana": { baseHp: 5, baseDmg: 2 },
+        "Esqueleto": { baseHp: 9, baseDmg: 5 },
+        "Lobo": { baseHp: 15, baseDmg: 9 },
+        "Ogro": { baseHp: 23, baseDmg: 14 },
+        "Cavaleiro": { baseHp: 31, baseDmg: 18 },
+        "Vampiro": { baseHp: 44, baseDmg: 24 },
+        "Urso": { baseHp: 56, baseDmg: 30 },
+        "Demônio": { baseHp: 60, baseDmg: 38 },
+        "Dragão": { baseHp: 78, baseDmg: 55 },
+        "Mímico": { baseHp: 10, baseDmg: 20 }
     };
 
     function showStatValue(stat) {
@@ -955,7 +955,7 @@
 
     async function encounterMerchant() {
         merchantDiscount = 0.5;
-        e = { name: "Mercador Itinerante", hp: "SOLDO", maxHp: "SOLDO", img: "https://cdn-icons-png.flaticon.com/512/4149/4149883.png" };
+        e = { name: "Mercador Itinerante", hp: "", maxHp: "", img: "https://cdn-icons-png.flaticon.com/512/4149/4149883.png" };
         document.getElementById('enemy-img').src = e.img;
         updateUI();
         await typeLog("Mercador: 'Tudo pela metade do preço enquanto eu estiver aqui!'", "#ffa502");
@@ -968,7 +968,7 @@
         const lossPercent = (Math.random() * 0.3 + 0.2);
         const loss = Math.floor(p.gold * lossPercent);
         p.gold -= loss;
-        e = { name: "Ladrão de Estradas", hp: "FUGIU", maxHp: "FUGIU", img: "https://cdn-icons-png.flaticon.com/512/1162/1162382.png" };
+        e = { name: "Ladrão de Estradas", hp: " ", maxHp: " ", img: "https://cdn-icons-png.flaticon.com/512/1162/1162382.png" };
         document.getElementById('enemy-img').src = e.img;
         updateUI();
         playSound('dmg');
@@ -1010,8 +1010,8 @@
 
     async function win() {
         playSound('gold');
-        let xpGanha = 10 + (p.lv * 1.5);
-        let goldGanho = Math.floor(Math.random() * 8) + 3;
+        let xpGanha = 15 + (p.lv * 1.5);
+        let goldGanho = Math.floor(Math.random() * 5) + 3;
         p.xp += xpGanha; p.gold += goldGanho;
         await typeLog(`Venceu! +${xpGanha} XP | +${goldGanho} Gold`, "#2ecc71");
         
