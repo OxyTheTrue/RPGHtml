@@ -930,7 +930,7 @@
         const stats = monsterStats["Mímico"];
         const finalHp = Math.round(stats.baseHp * (1 + p.lv * 0.1));
         const finalDmg = Math.round(stats.baseDmg * (1 + p.lv * 0.08));
-        e = { name: "Mímico", hp: finalHp, maxHp: finalHp, str: finalDmg, img: "https://cdn-icons-png.flaticon.com/512/6241/6241198.png" };
+        e = { name: "Mímico", hp: finalHp, maxHp: finalHp, str: finalDmg, img: "bau mimico.png" };
         document.getElementById('enemy-img').src = e.img;
         renderCombatButtons();
         updateUI();
@@ -938,7 +938,7 @@
     }
 
     async function encounterHealer() {
-        e = { name: "Curandeira Viajante", hp: "???", maxHp: "???", img: "https://cdn-icons-png.flaticon.com/512/2618/2618583.png" };
+        e = { name: "Curandeira Viajante", hp: "???", maxHp: "???", img: "curandeira.png" };
         document.getElementById('enemy-img').src = e.img;
         updateUI();
         await typeLog("Curandeira: 'Por 5 gold, posso curar você.'", "#2ed573");
