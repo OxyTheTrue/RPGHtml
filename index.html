@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RPG Visual Mastery Pro - Bleeding & Sound Edition</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="stat-tooltip">
+    <i id="tooltip-icon"></i>
+    <div class="stat-name" id="tooltip-name"></div>
+    <div class="stat-detail">Nível: <span id="tooltip-level"></span></div>
+    <div class="stat-detail">Valor atual: <span class="stat-value" id="tooltip-value"></span></div>
+</div>
+<div id="start-menu">
+    <div class="game-title">MASTERY RPG</div>
+    <input type="text" id="player-name-input" class="name-input" placeholder="Digite seu nome..." maxlength="12">
+    <button class="action-btn btn-atk btn-menu" data-action="start-new">
+        <i class="fa-solid fa-play"></i> NOVO JOGO
+    </button>
+    <button id="continue-btn" class="action-btn btn-heal btn-menu" style="display: none;">
+        <i class="fa-solid fa-forward"></i> CONTINUAR
+    </button>
+</div>
+<div class="overlay" id="overlay"></div>
+<div id="skill-detail-modal">
+    <div id="skill-detail-content"></div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+        <button id="learn-confirm-btn" class="action-btn btn-heal">APRENDER</button>
+        <button class="action-btn btn-atk">VOLTAR</button>
+    </div>
+</div>
+<div id="skill-modal">
+    <h3 style="color: var(--mana); margin-top: 0; letter-spacing: 2px;">ÁRVORE DE HABILIDADES</h3>
+    <div style="background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 20px; display: inline-block; margin-bottom: 10px;">
+        <small>PONTOS DISPONÍVEIS: <span id="p-skill-points" style="color:var(--accent); font-weight: bold;">0</span></small>
+    </div>
+    <div class="skill-tree-grid" id="skill-tree-content"></div>
+    <button class="action-btn btn-def" style="width: 100%; margin-top: 20px;">SAIR</button>
+</div>
+<div id="shop-modal">
+    <h3 style="color: var(--accent); margin-top: 0;">LOJA DO ALQUIMISTA</h3>
+    <div class="shop-grid">
+        <button class="action-btn btn-heal shop-item-btn" data-item-type="potion">
+            <i class="fa-solid fa-flask"></i> POÇÃO HP (<span class="item-price">28</span>G)<div class="skill-info">+18 HP</div>
+        </button>
+        <button class="action-btn btn-mag agua shop-item-btn" data-item-type="mana_potion">
+            <i class="fa-solid fa-flask-vial"></i> POÇÃO MP (<span class="item-price">32</span>G)<div class="skill-info">+22 MANA</div>
+        </button>
+        <button class="action-btn btn-mag fogo shop-item-btn" data-item-type="boots">
+            <i class="fa-solid fa-boot"></i> BOTAS (<span class="item-price">58</span>G)<div class="skill-info">+SPD (Ativo)</div>
+        </button>
+        <button class="action-btn btn-def shop-item-btn" data-item-type="shield">
+            <i class="fa-solid fa-shield-halved"></i> ESCUDO (<span class="item-price">78</span>G)<div class="skill-info">-Dano (Ativo)</div>
+        </button>
+        <button class="action-btn btn-ult shop-item-btn" data-item-type="coin" style="grid-column: span 2;">
+            <i class="fa-solid fa-coins"></i> MOEDA DA SORTE (<span class="item-price">125</span>G)<div class="skill-info">+Sorte (Ativo)</div>
+        </button>
+    </div>
+    <button class="action-btn btn-def" id="close-shop-btn" data-action="close-shop" style="width: 100%; margin-top: 15px;">FECHAR</button>
+</div>
+<div id="settings-modal">
+    <h3 style="color: var(--accent); margin-top: 0;">CONFIGURAÇÕES</h3>
+    <div style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
+        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+            <input type="checkbox" id="settings-mute" data-setting="mute">
+            <span><i class="fa-solid fa-volume-high"></i> Mudo (desmarque para som)</span>
+        </label>
+        <button class="action-btn btn-heal" data-action="manual-save" style="width: 100%;">
+            <i class="fa-solid fa-floppy-disk"></i> SALVAR PROGRESSO
+        </button>
+    </div>
+    <button class="action-btn btn-def" data-action="close-settings" style="width: 100%; margin-top: 15px;">FECHAR</button>
+</div>
+<div id="death-modal">
+    <h2 style="color: var(--primary); margin-top: 0;">Você conheceu a DERROTA!</h2>
+    <p style="font-size: 0.9rem; opacity: 0.8; line-height: 1.4;">
+        Seu conhecimento e atributos foram preservados,<br>mas seu <b>ouro, xp e itens</b> se perderam.
+    </p>
+    <button class="action-btn btn-heal" style="width: 100%; margin-bottom: 10px;" data-action="restart-after-death">
+        <i class="fa-solid fa-rotate-left"></i> TENTAR NOVAMENTE
+    </button>
+    <button class="action-btn btn-atk" style="width: 100%; background: #441111;" data-action="exit-to-menu">
+        <i class="fa-solid fa-door-open"></i> DESISTIR
+    </button>
+</div>
+<div class="main-wrapper" id="game-ui">
+    <button class="action-btn btn-def" id="btn-settings" data-action="open-settings" style="position: absolute; top: 20px; left: 25px; padding: 8px 12px; min-height: auto;">
+        <i class="fa-solid fa-gear"></i>
+    </button>
+    <aside id="hero-sidebar">
+        <div class="hero-header">
+            <small>NÍVEL <span id="p-lv">1</span></small>
+            <h2 id="p-display-name">GUERREIRO</h2>
+        </div>
+        <div class="attribute-card">
+            <div class="attr-info" data-stat="str"><i class="fa-solid fa-hand-fist"></i> FORÇA NÍVEL <span class="attr-value" id="stat-str">1</span></div>
+            <button class="lvl-up-btn" data-stat="str">+</button>
+        </div>
+        <div class="attribute-card">
+            <div class="attr-info" data-stat="spd"><i class="fa-solid fa-bolt"></i> VELOCIDADE NÍVEL <span class="attr-value" id="stat-spd">1</span></div>
+            <button class="lvl-up-btn" data-stat="spd">+</button>
+        </div>
+        <div class="attribute-card">
+            <div class="attr-info" data-stat="int"><i class="fa-solid fa-brain"></i> INTELIGÊNCIA NÍVEL <span class="attr-value" id="stat-int">1</span></div>
+            <button class="lvl-up-btn" data-stat="int">+</button>
+        </div>
+        <div class="attribute-card">
+            <div class="attr-info" data-stat="luk"><i class="fa-solid fa-clover"></i> SORTE NÍVEL <span class="attr-value" id="stat-luk">1</span></div>
+            <button class="lvl-up-btn" data-stat="luk">+</button>
+        </div>
+        <div class="attribute-card">
+            <div class="attr-info" data-stat="vit"><i class="fa-solid fa-heart-pulse"></i> VITALIDADE NÍVEL <span class="attr-value" id="stat-vit">1</span></div>
+            <button class="lvl-up-btn" data-stat="vit">+</button>
+        </div>
+        <button class="action-btn btn-open-tree" data-action="open-skill-tree">
+            <i class="fa-solid fa-diagram-project"></i> ÁRVORE DE SKILLS
+        </button>
+        <div style="margin-top: 20px;">
+            <small><i class="fa-solid fa-star"></i> EXPERIÊNCIA</small>
+            <div class="status-bar"><div id="p-xp-bar" class="bar-fill xp-fill"></div></div>
+        </div>
+    </aside>
+    <main id="game-container">
+        <button class="action-btn btn-atk btn-exit" data-action="save-exit">
+            <i class="fa-solid fa-door-open"></i> SAIR
+        </button>
+        <div class="enemy-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 id="enemy-name" style="margin:0">BUSCANDO...</h3>
+                <div id="enemy-badges"></div>
+            </div>
+            <div class="enemy-sprite-container"><img id="enemy-img" src="" alt="" class="enemy-sprite"></div>
+            <div class="status-bar"><div id="enemy-bar" class="bar-fill hp-fill"></div></div>
+            <small><span id="enemy-hp">0</span> / <span id="enemy-max-hp">0</span> HP</small>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div>
+                <small><i class="fa-solid fa-heart"></i> VIDA: <span id="p-hp">0</span>/<span id="p-max-hp">0</span> <span id="p-status-icons"></span></small>
+                <div class="status-bar"><div id="p-hp-bar" class="bar-fill hp-fill"></div></div>
+            </div>
+            <div>
+                <small><i class="fa-solid fa-wand-sparkles"></i> MANA: <span id="p-mana">0</span></small>
+                <div class="status-bar"><div id="p-mana-bar" class="bar-fill mana-fill"></div></div>
+            </div>
+            <div style="grid-column: span 2;">
+                <small><i class="fa-solid fa-fire-glow"></i> FÚRIA ESPECIAL</small>
+                <div class="status-bar" style="height: 6px;"><div id="p-furia-bar" class="bar-fill furia-fill"></div></div>
+            </div>
+        </div>
+        <div class="log" id="game-log"></div>
+        <div class="actions" id="action-buttons">
+            </div>
+        <div id="inventory-container">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <small><i class="fa-solid fa-suitcase"></i> INVENTÁRIO</small>
+                <div class="gold-container">
+                    <i class="fa-solid fa-coins" style="color:var(--accent)"></i>
+                    <span id="p-gold" style="font-weight: bold; color: var(--accent);">0</span>
+                </div>
+            </div>
+            <div class="inventory-slots" id="p-slots">
+                <div class="slot"></div>
+                <div class="slot"></div>
+                <div class="slot"></div>
+                <div class="slot"></div>
+                <div class="slot"></div>
+            </div>
+        </div>
+    </main>
+</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
