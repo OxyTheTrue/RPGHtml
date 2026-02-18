@@ -1,0 +1,29 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="speedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4169e1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e90ff;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Bota esquerda -->
+  <rect x="18" y="30" width="10" height="20" fill="url(#speedGrad)" rx="2" />
+  <rect x="16" y="28" width="14" height="6" fill="url(#speedGrad)" rx="2" />
+  <!-- Bota direita -->
+  <rect x="36" y="30" width="10" height="20" fill="url(#speedGrad)" rx="2" />
+  <rect x="34" y="28" width="14" height="6" fill="url(#speedGrad)" rx="2" />
+  <!-- Solas das botas -->
+  <rect x="16" y="48" width="14" height="2" fill="#2c3e50" />
+  <rect x="34" y="48" width="14" height="2" fill="#2c3e50" />
+  <!-- Linhas de velocidade -->
+  <g stroke="#ffffff" stroke-width="2" opacity="0.8">
+    <line x1="12" y1="25" x2="8" y2="25" />
+    <line x1="12" y1="30" x2="6" y2="30" />
+    <line x1="12" y1="35" x2="4" y2="35" />
+    <line x1="52" y1="25" x2="56" y2="25" />
+    <line x1="52" y1="30" x2="58" y2="30" />
+    <line x1="52" y1="35" x2="60" y2="35" />
+  </g>
+  <!-- Símbolo de velocidade -->
+  <text x="32" y="55" font-family="Arial" font-size="8" font-weight="bold" 
+        text-anchor="middle" fill="#ffffff">SPD</text>
+</svg>
