@@ -1,0 +1,206 @@
+/* Admin Panel (Shift+D) - Debug / Editor. Nunca exibido ao player comum. */
+
+.admin-panel {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(92vw, 720px);
+    max-height: 88vh;
+    overflow: auto;
+    background: rgba(15, 15, 25, 0.98);
+    border: 2px solid #ffa502;
+    border-radius: 20px;
+    box-shadow: 0 0 60px rgba(255, 165, 2, 0.3);
+    z-index: 10000;
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
+    padding: 20px;
+}
+
+.admin-panel.visible { display: block; }
+
+.admin-panel h2 {
+    margin: 0 0 16px 0;
+    color: #ffa502;
+    font-size: 1.25rem;
+    letter-spacing: 1px;
+}
+
+.admin-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.admin-tabs button {
+    padding: 10px 18px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    color: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+}
+
+.admin-tabs button.active {
+    background: #ffa502;
+    color: #000;
+    border-color: #ffa502;
+}
+
+.admin-tab {
+    display: none;
+}
+
+.admin-tab.visible { display: block; }
+
+.admin-section {
+    margin-bottom: 20px;
+    padding: 12px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    border-left: 4px solid #ffa502;
+}
+
+.admin-section h3 {
+    margin: 0 0 12px 0;
+    font-size: 0.95rem;
+    color: #ffa502;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.admin-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.admin-row label {
+    min-width: 160px;
+    font-size: 0.85rem;
+    color: #ccc;
+}
+
+.admin-row input[type="number"],
+.admin-row input[type="text"] {
+    width: 100px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    color: #fff;
+    font-family: inherit;
+}
+
+.admin-row textarea {
+    width: 100%;
+    min-height: 60px;
+    padding: 10px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.9rem;
+    resize: vertical;
+}
+
+.admin-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+.admin-actions button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.admin-btn-preview {
+    background: #1e90ff;
+    color: #fff;
+}
+
+.admin-btn-reset {
+    background: #666;
+    color: #fff;
+}
+
+.admin-btn-max {
+    background: #2ed573;
+    color: #000;
+}
+
+.admin-btn-force {
+    background: #ffa502;
+    color: #000;
+}
+
+.admin-preview-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.admin-preview-row select {
+    flex: 1;
+    padding: 10px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    color: #fff;
+    font-family: inherit;
+}
+
+.admin-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-close:hover {
+    background: rgba(255,71,87,0.3);
+    border-color: #ff4757;
+}
+
+.admin-dialogue-item {
+    margin-bottom: 14px;
+}
+
+.admin-dialogue-item label {
+    display: block;
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 4px;
+}
+
+.admin-dialogue-item textarea {
+    min-height: 48px;
+}
