@@ -1,0 +1,25 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="strengthGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b0000;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#dc143c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Luva esquerda -->
+  <rect x="18" y="25" width="8" height="20" fill="url(#strengthGrad)" rx="2" />
+  <rect x="16" y="20" width="12" height="8" fill="url(#strengthGrad)" rx="2" />
+  <!-- Luva direita -->
+  <rect x="38" y="25" width="8" height="20" fill="url(#strengthGrad)" rx="2" />
+  <rect x="36" y="20" width="12" height="8" fill="url(#strengthGrad)" rx="2" />
+  <!-- Detalhes das luvas -->
+  <rect x="20" y="28" width="4" height="4" fill="#ffd700" opacity="0.8" />
+  <rect x="40" y="28" width="4" height="4" fill="#ffd700" opacity="0.8" />
+  <!-- Nós dos dedos -->
+  <line x1="20" y1="38" x2="24" y2="38" stroke="#8b0000" stroke-width="1" />
+  <line x1="20" y1="42" x2="24" y2="42" stroke="#8b0000" stroke-width="1" />
+  <line x1="40" y1="38" x2="44" y2="38" stroke="#8b0000" stroke-width="1" />
+  <line x1="40" y1="42" x2="44" y2="42" stroke="#8b0000" stroke-width="1" />
+  <!-- Símbolo de força -->
+  <text x="32" y="55" font-family="Arial" font-size="8" font-weight="bold" 
+        text-anchor="middle" fill="#ffd700">STR</text>
+</svg>

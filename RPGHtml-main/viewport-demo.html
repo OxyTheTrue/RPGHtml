@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>RPG Viewport System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Container principal que ocupa toda a tela -->
+    <div id="viewport-container" class="viewport-container">
+        <!-- Palco do jogo com aspect-ratio fixo -->
+        <div id="game-stage" class="game-stage">
+            <!-- Área segura para evitar notch/barras do sistema -->
+            <div class="safe-area">
+                <!-- Placeholder para o conteúdo do jogo -->
+                <div class="game-content">
+                    <!-- Exemplo de elementos que seriam integrados -->
+                    <div class="placeholder-enemy">
+                        <div class="placeholder-sprite enemy-sprite"></div>
+                        <div class="placeholder-health-bar"></div>
+                    </div>
+                    
+                    <div class="placeholder-player">
+                        <div class="placeholder-sprite player-sprite"></div>
+                        <div class="placeholder-health-bar"></div>
+                    </div>
+                    
+                    <!-- Moldura RPG para ações -->
+                    <div class="action-frame">
+                        <div class="placeholder-actions"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Overlay para transições (dado do destino) -->
+        <div id="transition-overlay" class="transition-overlay hidden">
+            <div class="transition-content">
+                <div class="dice-placeholder"></div>
+                <div class="transition-text">Rolando o destino...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="screen.js"></script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+/**
+ * Arquivo principal de inicialização do SceneManager
+ * Configura e inicia o sistema de scenes
+ */
+
+import { SceneManager } from './js/SceneManager.js';
+import { CombatScene } from './js/CombatScene.js';
+import { ShopScene } from './js/ShopScene.js';
+
+/**
+ * Classe principal do jogo
+ */
+class RPGGame {
+    constructor() {
+        this.sceneManager = null;
+        this.gameState = {
+            player: {
+                name: 'GUERREIRO',
+                lv: 1,
+                hp: 100,
+                maxHp: 100,
+                mana: 50,
+                maxMana: 50,
+                gold: 100,
+                xp: 0,
+                nextXp: 100,
+                attack: 10,
+                defense: 5,
+                inventory: []
+            },
+            enemy: {
+                name: 'GOBLIN',
+                lv: 1,
+                hp: 50,
+                maxHp: 50,
+                attack: 8,
+                defense: 2
+            },
+            settings: {
+                soundEnabled: true,
+                musicEnabled: true,
+                difficulty: 'normal'
+            }
+        };
+        
+        this.init();
+    }
+
+    async init() {
+        console.log('🎮 Inicializando RPG Game...');
+        
+        // Inicializar SceneManager
+        this.sceneManager = window.sceneManager;
+        
+        // Carregar estado salvo
+        await this.loadGameState();
+        
+        // Registrar scenes
+        this.registerScenes();
+        
+        // Iniciar scene inicial
+        await this.startGame();
+        
+        console.log('✅ RPG Game inicializado com sucesso!');
+    }
+
+    registerScenes() {
+        // Registrar scene de combate
+        this.sceneManager.registerScene('combat', {
+            element: null, // Será criado dinamicamente
+            onEnter: async (options) => {
+                console.log('⚔️ Entrando na scene de combate');
+            },
+            onExit: async (options) => {
+                console.log('🚪 Saindo da scene de combate');
+                await this.saveGameState();
+            },
+            onUpdate: () => {
+                // Update loop da scene de combate
+            },
+            canTransition: (targetScene) => {
+                return true; // Pode transicionar para qualquer scene
+            }
+        });
+
+        // Registrar scene de loja
+        this.sceneManager.registerScene('shop', {
+            element: null, // Será criado dinamicamente
+            onEnter: async (options) => {
+                console.log('🛒 Entrando na scene de loja');
+            },
+            onExit: async (options) => {
+                console.log('🚪 Saindo da scene de loja');
+                await this.saveGameState();
+            },
+            onUpdate: () => {
+                // Update loop da scene de loja
+            },
+            canTransition: (targetScene) => {
+                return targetScene === 'combat'; // Só pode voltar para combate
+            }
+        });
+
+        console.log('📋 Scenes registradas: combat, shop');
+    }
+
+    async startGame() {
+        // Iniciar na scene de combate
+        await this.sceneManager.changeScene('combat', {
+            gameState: this.gameState
+        });
+    }
+
+    async loadGameState() {
+        try {
+            const savedState = localStorage.getItem('rpg_game_state');
+            if (savedState) {
+                this.gameState = JSON.parse(savedState);
+                console.log('💾 Estado do jogo carregado');
+            } else {
+                console.log('🆕 Iniciando novo jogo');
+            }
+        } catch (error) {
+            console.error('❌ Erro ao carregar estado do jogo:', error);
+        }
+    }
+
+    async saveGameState() {
+        try {
+            localStorage.setItem('rpg_game_state', JSON.stringify(this.gameState));
+            console.log('💾 Estado do jogo salvo');
+        } catch (error) {
+            console.error('❌ Erro ao salvar estado do jogo:', error);
+        }
+    }
+
+    /**
+     * Métodos para controle do jogo
+     */
+    async openShop() {
+        await this.sceneManager.changeScene('shop', {
+            gameState: this.gameState
+        });
+    }
+
+    async returnToCombat() {
+        await this.sceneManager.changeScene('combat', {
+            gameState: this.gameState
+        });
+    }
+
+    updatePlayerStats(stats) {
+        Object.assign(this.gameState.player, stats);
+        console.log('📊 Stats do jogador atualizados:', stats);
+    }
+
+    updateEnemyStats(stats) {
+        Object.assign(this.gameState.enemy, stats);
+        console.log('👹 Stats do inimigo atualizados:', stats);
+    }
+
+    getCurrentScene() {
+        return this.sceneManager.getCurrentScene();
+    }
+
+    /**
+     * Métodos de debug
+     */
+    debugShowAllScenes() {
+        console.log('🎬 Scenes disponíveis:');
+        console.log('- combat: Tela principal de combate');
+        console.log('- shop: Tela da loja');
+        console.log('Scene atual:', this.getCurrentScene()?.name);
+    }
+
+    debugToggleLegacyElements() {
+        const container = document.getElementById('scene-container');
+        if (container.style.display === 'none') {
+            container.style.display = '';
+            this.sceneManager.showLegacyElements();
+            console.log('👁️ Mostrando elementos legados');
+        } else {
+            container.style.display = 'none';
+            this.sceneManager.hideLegacyElements();
+            console.log('🙈 Escondendo elementos legados');
+        }
+    }
+}
+
+/**
+ * Inicialização quando o DOM estiver pronto
+ */
+document.addEventListener('DOMContentLoaded', async () => {
+    // Aguardar um pouco para garantir que todos os scripts foram carregados
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Inicializar o jogo
+    window.rpgGame = new RPGGame();
+    
+    // Expor comandos globais para debug
+    window.gameDebug = {
+        showScenes: () => window.rpgGame.debugShowAllScenes(),
+        toggleLegacy: () => window.rpgGame.debugToggleLegacyElements(),
+        openShop: () => window.rpgGame.openShop(),
+        returnToCombat: () => window.rpgGame.returnToCombat(),
+        saveGame: () => window.rpgGame.saveGameState(),
+        loadGame: () => window.rpgGame.loadGameState()
+    };
+    
+    console.log('🎮 RPG Game inicializado!');
+    console.log('🛠️ Comandos de debug disponíveis em window.gameDebug');
+    console.log('- gameDebug.showScenes() - Mostrar todas as scenes');
+    console.log('- gameDebug.toggleLegacy() - Alternar elementos legados');
+    console.log('- gameDebug.openShop() - Abrir loja');
+    console.log('- gameDebug.returnToCombat() - Voltar ao combate');
+    console.log('- gameDebug.saveGame() - Salvar jogo');
+    console.log('- gameDebug.loadGame() - Carregar jogo');
+});
+
+/**
+ * Tratamento de erros globais
+ */
+window.addEventListener('error', (event) => {
+    console.error('❌ Erro global:', event.error);
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    console.error('❌ Promise rejeitada:', event.reason);
+});
